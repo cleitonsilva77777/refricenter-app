@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refricenter • Orçamento</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+:root{
+--azul:#0056b3;
+--verde:#28a745;
+--cinza:#f4f6f8;
+}
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:var(--cinza);
+}
+.container{
+max-width:420px;
+margin:auto;
+background:#fff;
+min-height:100vh;
+padding:15px;
+border-radius:20px;
+}
+h2{text-align:center;color:var(--azul);}
+label{font-weight:bold;margin-top:10px;display:block;}
+select,input,button{
+width:100%;
+padding:12px;
+margin-top:5px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:16px;
+}
+button{
+background:var(--azul);
+color:#fff;
+border:none;
+font-weight:bold;
+margin-top:15px;
+}
+.hidden{display:none;}
+.card{
+background:#eef2f7;
+padding:10px;
+border-radius:10px;
+margin-top:8px;
+}
+.total{
+border:2px dashed var(--verde);
+border-radius:12px;
+padding:15px;
+text-align:center;
+margin-top:15px;
+color:var(--verde);
+}
+.menu{
+font-size:26px;
+cursor:pointer;
+}
+#sidebar{
+position:fixed;
+left:-260px;
+top:0;
+width:240px;
+height:100%;
+background:#fff;
+box-shadow:2px 0 10px rgba(0,0,0,.2);
+padding:20px;
+transition:.3s;
+z-index:10;
+}
+#overlay{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.4);
+z-index:9;
+}
+</style>
+</head>
+
+<body>
+
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<div id="sidebar">
+<h3>Refricenter</h3>
+<p>Especialistas em climatização.</p>
+<a href="https://instagram.com" target="_blank">Instagram</a><br><br>
+<a href="https://facebook.com" target="_blank">Facebook</a><br><br>
+<a href="#" onclick="alert('Vídeo institucional')">🎥 Vídeo</a><br><br>
+<textarea id="fb" placeholder="Feedback"></textarea>
+<button onclick="enviarFeedback()">Enviar Feedback</button>
+</div>
+
+<div class="container">
+
+<div class="menu" onclick="toggleMenu()">⋮</div>
+
+<!-- CADASTRO -->
+<div id="cadastro">
+<h2>Cadastro do Cliente</h2>
+<label>Nome</label>
+<input id="nome">
+<label>WhatsApp</label>
+<input id="telefone">
+<button onclick="salvarCliente()">Cadastrar e continuar</button>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+<h2>Orçamento</h2>
+
+<label>Serviço</label>
+<select id="servico">
+<option value="200">Limpeza Completa</option>
+<option value="350">Instalação</option>
+<option value="250">Carga de Gás</option>
+</select>
+
+<label>BTUs</label>
+<select id="btu">
+<option value="0">9 a 12 mil</option>
+<option value="50">18 mil ou mais</option>
+</select>
+
+<button onclick="adicionar()">Adicionar aparelho</button>
+
+<div id="lista"></div>
+
+<label>Local</label>
+<select id="local">
+<option value="0">Plácido de Castro</option>
+<option value="50">Acrelândia</option>
+<option value="50">Campinas</option>
+<option value="50">Zona rural</option>
+</select>
+
+<div id="final" class="total hidden">
+<h3 id="valor">R$ 0,00</h3>
+<button onclick="enviar()">Solicitar via WhatsApp</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const cliente = JSON.parse(localStorage.getItem('cliente'));
+const pedidos = [];
+
+if(cliente){
+document.getElementById('cadastro').classList.add('hidden');
+document.getElementById('app').classList.remove('hidden');
+}
+
+function salvarCliente(){
+const nome=document.getElementById('nome').value;
+const tel=document.getElementById('telefone').value;
+if(!nome||!tel) return alert('Preencha os dados');
+localStorage.setItem('cliente',JSON.stringify({nome,tel}));
+location.reload();
+}
+
+function adicionar(){
+const s=Number(servico.value);
+const b=Number(btu.value);
+pedidos.push(s+b);
+render();
+}
+
+function render(){
+lista.innerHTML='';
+pedidos.forEach(v=>{
+lista.innerHTML+=`<div class="card">R$ ${v.toFixed(2)}</div>`;
+});
+calcular();
+}
+
+function calcular(){
+let total=pedidos.reduce((a,b)=>a+b,0)+Number(local.value);
+let desconto= pedidos.length>=2?0.10:0.05;
+total*=1-desconto;
+valor.innerText=total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+final.classList.remove('hidden');
+}
+
+function enviar(){
+const c=JSON.parse(localStorage.getItem('cliente'));
+let msg=`Olá!%0ACliente: ${c.nome}%0ATel: ${c.tel}%0ATotal: ${valor.innerText}`;
+window.open(`https://wa.me/5568992447004?text=${msg}`);
+}
+
+function toggleMenu(){
+sidebar.style.left=sidebar.style.left==='0px'?'-260px':'0px';
+overlay.style.display=overlay.style.display==='block'?'none':'block';
+}
+
+function enviarFeedback(){
+window.open(`https://wa.me/5568992447004?text=Feedback:%0A${fb.value}`);
+}
+</script>
+</body>
+</html>
