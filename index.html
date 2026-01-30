@@ -1,223 +1,212 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refricenter • Orçamento</title>
 
-  <title>Refricenter | Orçamento Rápido</title>
+<link rel="manifest" href="manifest.json">
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0056b3">
-
-  <!-- ÍCONE -->
-  <link rel="icon" href="icon-192.png">
-
-  <style>
-    :root {
-      --azul:#0056b3;
-      --verde:#28a745;
-      --cinza:#f1f3f5;
-    }
-
-    body {
-      margin:0;
-      font-family: Arial, Helvetica, sans-serif;
-      background:#e9ecef;
-    }
-
-    .app {
-      max-width:480px;
-      margin:auto;
-      background:#fff;
-      min-height:100vh;
-      box-shadow:0 0 20px rgba(0,0,0,.15);
-    }
-
-    header img {
-      width:100%;
-      display:block;
-    }
-
-    .p20 { padding:20px; }
-
-    h1 {
-      text-align:center;
-      font-size:1.2rem;
-      color:var(--azul);
-      margin-bottom:15px;
-    }
-
-    label {
-      font-weight:bold;
-      display:block;
-      margin-top:15px;
-    }
-
-    select {
-      width:100%;
-      padding:14px;
-      border-radius:12px;
-      border:1px solid #ccc;
-      font-size:1rem;
-      margin-top:5px;
-    }
-
-    .descontos {
-      display:flex;
-      gap:10px;
-      margin-bottom:20px;
-    }
-
-    .desc {
-      flex:1;
-      border:2px solid #ccc;
-      border-radius:15px;
-      padding:12px;
-      text-align:center;
-      cursor:pointer;
-      font-weight:bold;
-    }
-
-    .desc.active {
-      border-color:var(--verde);
-      background:#e9f7ef;
-    }
-
-    .resultado {
-      background:#f0f7ff;
-      border:2px solid var(--azul);
-      border-radius:20px;
-      padding:20px;
-      margin-top:25px;
-      text-align:center;
-    }
-
-    .valor {
-      font-size:2.6rem;
-      color:var(--verde);
-      font-weight:bold;
-    }
-
-    .zap {
-      display:block;
-      background:#25d366;
-      color:#fff;
-      text-align:center;
-      padding:18px;
-      border-radius:15px;
-      text-decoration:none;
-      font-weight:bold;
-      margin-top:20px;
-      font-size:1.1rem;
-    }
-  </style>
+<style>
+:root{
+--azul:#0056b3;
+--verde:#28a745;
+--cinza:#f4f6f8;
+}
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:var(--cinza);
+}
+.container{
+max-width:420px;
+margin:auto;
+background:#fff;
+min-height:100vh;
+padding:15px;
+border-radius:20px;
+}
+h2{text-align:center;color:var(--azul);}
+label{font-weight:bold;margin-top:10px;display:block;}
+select,input,button{
+width:100%;
+padding:12px;
+margin-top:5px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:16px;
+}
+button{
+background:var(--azul);
+color:#fff;
+border:none;
+font-weight:bold;
+margin-top:15px;
+}
+.hidden{display:none;}
+.card{
+background:#eef2f7;
+padding:10px;
+border-radius:10px;
+margin-top:8px;
+}
+.total{
+border:2px dashed var(--verde);
+border-radius:12px;
+padding:15px;
+text-align:center;
+margin-top:15px;
+color:var(--verde);
+}
+.menu{
+font-size:26px;
+cursor:pointer;
+}
+#sidebar{
+position:fixed;
+left:-260px;
+top:0;
+width:240px;
+height:100%;
+background:#fff;
+box-shadow:2px 0 10px rgba(0,0,0,.2);
+padding:20px;
+transition:.3s;
+z-index:10;
+}
+#overlay{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.4);
+z-index:9;
+}
+</style>
 </head>
 
 <body>
-<div class="app">
 
-  <!-- CABEÇALHO -->
-  <header>
-    <img src="icon-512.png" alt="Refricenter">
-  </header>
+<div id="overlay" onclick="toggleMenu()"></div>
 
-  <div class="p20">
+<div id="sidebar">
+<h3>Refricenter</h3>
+<p>Especialistas em climatização.</p>
+<a href="https://instagram.com" target="_blank">Instagram</a><br><br>
+<a href="https://facebook.com" target="_blank">Facebook</a><br><br>
+<a href="#" onclick="alert('Vídeo institucional')">🎥 Vídeo</a><br><br>
+<textarea id="fb" placeholder="Feedback"></textarea>
+<button onclick="enviarFeedback()">Enviar Feedback</button>
+</div>
 
-    <h1>Orçamento Rápido</h1>
+<div class="container">
 
-    <!-- DESCONTOS -->
-    <div class="descontos">
-      <div class="desc" id="d5" onclick="desconto(0.95,'d5')">5% OFF<br>1 aparelho</div>
-      <div class="desc" id="d10" onclick="desconto(0.90,'d10')">10% OFF<br>2 ou mais</div>
-    </div>
+<div class="menu" onclick="toggleMenu()">⋮</div>
 
-    <label>Quantidade</label>
-    <select id="qtd" onchange="calcular()">
-      <option value="1">1 Aparelho</option>
-      <option value="2">2 ou mais</option>
-    </select>
+<!-- CADASTRO -->
+<div id="cadastro">
+<h2>Cadastro do Cliente</h2>
+<label>Nome</label>
+<input id="nome">
+<label>WhatsApp</label>
+<input id="telefone">
+<button onclick="salvarCliente()">Cadastrar e continuar</button>
+</div>
 
-    <label>Serviço</label>
-    <select id="serv" onchange="mudarServico()">
-      <option value="inst">Instalação</option>
-      <option value="limp">Limpeza</option>
-      <option value="gas">Gás</option>
-    </select>
+<!-- APP -->
+<div id="app" class="hidden">
 
-    <div id="boxMat">
-      <label>Tipo</label>
-      <select id="mat" onchange="calcular()">
-        <option value="com">Com material</option>
-        <option value="sem">Sem material</option>
-      </select>
-    </div>
+<h2>Orçamento</h2>
 
-    <label>Capacidade</label>
-    <select id="tipo" onchange="calcular()"></select>
+<label>Serviço</label>
+<select id="servico">
+<option value="200">Limpeza Completa</option>
+<option value="350">Instalação</option>
+<option value="250">Carga de Gás</option>
+</select>
 
-    <label>Local</label>
-    <select id="loc" onchange="calcular()">
-      <option value="c">Cidade</option>
-      <option value="f">Zona Rural</option>
-    </select>
+<label>BTUs</label>
+<select id="btu">
+<option value="0">9 a 12 mil</option>
+<option value="50">18 mil ou mais</option>
+</select>
 
-    <div class="resultado">
-      <div class="valor" id="total">R$ 0,00</div>
-    </div>
+<button onclick="adicionar()">Adicionar aparelho</button>
 
-    <a id="zap" class="zap" href="#">Solicitar no WhatsApp</a>
+<div id="lista"></div>
 
-  </div>
+<label>Local</label>
+<select id="local">
+<option value="0">Plácido de Castro</option>
+<option value="50">Acrelândia</option>
+<option value="50">Campinas</option>
+<option value="50">Zona rural</option>
+</select>
+
+<div id="final" class="total hidden">
+<h3 id="valor">R$ 0,00</h3>
+<button onclick="enviar()">Solicitar via WhatsApp</button>
+</div>
+
+</div>
 </div>
 
 <script>
-let desc = 1;
+const cliente = JSON.parse(localStorage.getItem('cliente'));
+const pedidos = [];
 
-const tabela = {
-  inst:{
-    com:{ "9-12k":{c:600,f:700},"18k":{c:850,f:950} },
-    sem:{ "9-12k":{c:200,f:300},"18k":{c:350,f:450} }
-  },
-  limp:{ "9-12k":{c:200,f:280},"18k":{c:250,f:330} },
-  gas:{ r22:{c:400,f:500}, r410:{c:450,f:550} }
-};
-
-function desconto(v,id){
-  desc=v;
-  document.querySelectorAll('.desc').forEach(b=>b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  calcular();
+if(cliente){
+document.getElementById('cadastro').classList.add('hidden');
+document.getElementById('app').classList.remove('hidden');
 }
 
-function mudarServico(){
-  const s=serv.value;
-  boxMat.style.display=(s==='inst')?'block':'none';
+function salvarCliente(){
+const nome=document.getElementById('nome').value;
+const tel=document.getElementById('telefone').value;
+if(!nome||!tel) return alert('Preencha os dados');
+localStorage.setItem('cliente',JSON.stringify({nome,tel}));
+location.reload();
+}
 
-  tipo.innerHTML = s==='gas'
-    ? '<option value="r22">R22</option><option value="r410">R410</option>'
-    : '<option value="9-12k">9–12k</option><option value="18k">18k</option>';
+function adicionar(){
+const s=Number(servico.value);
+const b=Number(btu.value);
+pedidos.push(s+b);
+render();
+}
 
-  calcular();
+function render(){
+lista.innerHTML='';
+pedidos.forEach(v=>{
+lista.innerHTML+=`<div class="card">R$ ${v.toFixed(2)}</div>`;
+});
+calcular();
 }
 
 function calcular(){
-  const s=serv.value,q=qtd.value,l=loc.value,t=tipo.value,m=mat.value;
-  let v = s==='inst' ? tabela.inst[m][t][l] : tabela[s][t][l];
-  let total=(v*q)*desc;
-
-  totalEl= document.getElementById('total');
-  totalEl.innerText = 'R$ '+total.toFixed(2).replace('.',',');
-
-  zap.href=`https://wa.me/5599999999999?text=Olá! Meu orçamento deu R$ ${total.toFixed(2)}`;
+let total=pedidos.reduce((a,b)=>a+b,0)+Number(local.value);
+let desconto= pedidos.length>=2?0.10:0.05;
+total*=1-desconto;
+valor.innerText=total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+final.classList.remove('hidden');
 }
 
-mudarServico();
+function enviar(){
+const c=JSON.parse(localStorage.getItem('cliente'));
+let msg=`Olá!%0ACliente: ${c.nome}%0ATel: ${c.tel}%0ATotal: ${valor.innerText}`;
+window.open(`https://wa.me/5568992447004?text=${msg}`);
+}
 
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js');
+function toggleMenu(){
+sidebar.style.left=sidebar.style.left==='0px'?'-260px':'0px';
+overlay.style.display=overlay.style.display==='block'?'none':'block';
+}
+
+function enviarFeedback(){
+window.open(`https://wa.me/5568992447004?text=Feedback:%0A${fb.value}`);
 }
 </script>
-
 </body>
 </html>
