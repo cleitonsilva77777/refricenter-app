@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Refricenter | Orçamento Rápido</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0056b3">
+
+  <!-- ÍCONE -->
+  <link rel="icon" href="icon-192.png">
+
+  <style>
+    :root {
+      --azul:#0056b3;
+      --verde:#28a745;
+      --cinza:#f1f3f5;
+    }
+
+    body {
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:#e9ecef;
+    }
+
+    .app {
+      max-width:480px;
+      margin:auto;
+      background:#fff;
+      min-height:100vh;
+      box-shadow:0 0 20px rgba(0,0,0,.15);
+    }
+
+    header img {
+      width:100%;
+      display:block;
+    }
+
+    .p20 { padding:20px; }
+
+    h1 {
+      text-align:center;
+      font-size:1.2rem;
+      color:var(--azul);
+      margin-bottom:15px;
+    }
+
+    label {
+      font-weight:bold;
+      display:block;
+      margin-top:15px;
+    }
+
+    select {
+      width:100%;
+      padding:14px;
+      border-radius:12px;
+      border:1px solid #ccc;
+      font-size:1rem;
+      margin-top:5px;
+    }
+
+    .descontos {
+      display:flex;
+      gap:10px;
+      margin-bottom:20px;
+    }
+
+    .desc {
+      flex:1;
+      border:2px solid #ccc;
+      border-radius:15px;
+      padding:12px;
+      text-align:center;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .desc.active {
+      border-color:var(--verde);
+      background:#e9f7ef;
+    }
+
+    .resultado {
+      background:#f0f7ff;
+      border:2px solid var(--azul);
+      border-radius:20px;
+      padding:20px;
+      margin-top:25px;
+      text-align:center;
+    }
+
+    .valor {
+      font-size:2.6rem;
+      color:var(--verde);
+      font-weight:bold;
+    }
+
+    .zap {
+      display:block;
+      background:#25d366;
+      color:#fff;
+      text-align:center;
+      padding:18px;
+      border-radius:15px;
+      text-decoration:none;
+      font-weight:bold;
+      margin-top:20px;
+      font-size:1.1rem;
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- CABEÇALHO -->
+  <header>
+    <img src="icon-512.png" alt="Refricenter">
+  </header>
+
+  <div class="p20">
+
+    <h1>Orçamento Rápido</h1>
+
+    <!-- DESCONTOS -->
+    <div class="descontos">
+      <div class="desc" id="d5" onclick="desconto(0.95,'d5')">5% OFF<br>1 aparelho</div>
+      <div class="desc" id="d10" onclick="desconto(0.90,'d10')">10% OFF<br>2 ou mais</div>
+    </div>
+
+    <label>Quantidade</label>
+    <select id="qtd" onchange="calcular()">
+      <option value="1">1 Aparelho</option>
+      <option value="2">2 ou mais</option>
+    </select>
+
+    <label>Serviço</label>
+    <select id="serv" onchange="mudarServico()">
+      <option value="inst">Instalação</option>
+      <option value="limp">Limpeza</option>
+      <option value="gas">Gás</option>
+    </select>
+
+    <div id="boxMat">
+      <label>Tipo</label>
+      <select id="mat" onchange="calcular()">
+        <option value="com">Com material</option>
+        <option value="sem">Sem material</option>
+      </select>
+    </div>
+
+    <label>Capacidade</label>
+    <select id="tipo" onchange="calcular()"></select>
+
+    <label>Local</label>
+    <select id="loc" onchange="calcular()">
+      <option value="c">Cidade</option>
+      <option value="f">Zona Rural</option>
+    </select>
+
+    <div class="resultado">
+      <div class="valor" id="total">R$ 0,00</div>
+    </div>
+
+    <a id="zap" class="zap" href="#">Solicitar no WhatsApp</a>
+
+  </div>
+</div>
+
+<script>
+let desc = 1;
+
+const tabela = {
+  inst:{
+    com:{ "9-12k":{c:600,f:700},"18k":{c:850,f:950} },
+    sem:{ "9-12k":{c:200,f:300},"18k":{c:350,f:450} }
+  },
+  limp:{ "9-12k":{c:200,f:280},"18k":{c:250,f:330} },
+  gas:{ r22:{c:400,f:500}, r410:{c:450,f:550} }
+};
+
+function desconto(v,id){
+  desc=v;
+  document.querySelectorAll('.desc').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  calcular();
+}
+
+function mudarServico(){
+  const s=serv.value;
+  boxMat.style.display=(s==='inst')?'block':'none';
+
+  tipo.innerHTML = s==='gas'
+    ? '<option value="r22">R22</option><option value="r410">R410</option>'
+    : '<option value="9-12k">9–12k</option><option value="18k">18k</option>';
+
+  calcular();
+}
+
+function calcular(){
+  const s=serv.value,q=qtd.value,l=loc.value,t=tipo.value,m=mat.value;
+  let v = s==='inst' ? tabela.inst[m][t][l] : tabela[s][t][l];
+  let total=(v*q)*desc;
+
+  totalEl= document.getElementById('total');
+  totalEl.innerText = 'R$ '+total.toFixed(2).replace('.',',');
+
+  zap.href=`https://wa.me/5599999999999?text=Olá! Meu orçamento deu R$ ${total.toFixed(2)}`;
+}
+
+mudarServico();
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+
+</body>
+</html>
