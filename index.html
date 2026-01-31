@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refricenter Pro - Sistema Integrado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { --primary: #007bff; --success: #25d366; --admin-color: #343a40; --bg: #f8f9fa; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; background: var(--bg); color: #333; }
+        
+        .container { max-width: 500px; margin: auto; background: #fff; min-height: 100vh; padding: 20px; position: relative; }
+        header { text-align: center; margin-bottom: 30px; }
+        header img { width: 100%; max-width: 200px; }
+
+        /* Telas (Escondidas por padrão) */
+        .page { display: none; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Estilo Login/Cadastro */
+        .login-box { text-align: center; padding: 20px; border-radius: 15px; background: #fdfdfd; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        input, select { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; outline: none; }
+        
+        /* Seleção Profissional (Grid) */
+        .grid-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0; }
+        .card-opt { background: #fff; border: 2px solid #eee; padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .card-opt.active { border-color: var(--primary); background: #eef6ff; color: var(--primary); }
+        .card-opt img { width: 40px; display: block; margin: 0 auto 10px; }
+
+        /* Botões */
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; margin-top: 15px; }
+        .btn-outline { background: none; border: 2px solid #ddd; color: #666; margin-top: 10px; }
+
+        /* Tabela Admin */
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        .admin-table th { background: var(--admin-color); color: white; padding: 10px; text-align: left; }
+        .admin-table td { padding: 10px; border-bottom: 1px solid #eee; }
+        .stat-card { background: var(--admin-color); color: white; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+
+        .menu-dots { position: absolute; top: 20px; right: 20px; font-size: 22px; cursor: pointer; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="menu-dots" id="main-menu-icon" onclick="toggleInfo()" style="display:none;"><i class="fas fa-ellipsis-v"></i></div>
+    <header><img src="banner.png" alt="Refricenter"></header>
+
+    <div id="page-auth" class="page" style="display:block;">
+        <div class="login-box">
+            <h2>Bem-vindo</h2>
+            <p style="color:#888; font-size: 14px;">Identifique-se para acessar o sistema</p>
+            <input id="auth-input" type="text" placeholder="Nome ou Código de Acesso">
+            <div id="client-fields" style="display:none;">
+                <input id="auth-tel" type="tel" placeholder="WhatsApp">
+                <input id="auth-end" type="text" placeholder="Endereço">
+            </div>
+            <button class="btn btn-primary" onclick="processarAcesso()">Acessar Sistema</button>
+        </div>
+    </div>
+
+    <div id="page-client" class="page">
+        <h2>O que você precisa hoje?</h2>
+        <div class="grid-options" id="grid-servicos">
+            <div class="card-opt" onclick="selectServ('Limpeza', 'limpeza.png', this)"><img src="images/limpeza.png">Limpeza</div>
+            <div class="card-opt" onclick="selectServ('Instalação', 'instalacao.png', this)"><img src="images/instalacao.png">Instalação</div>
+            <div class="card-opt" onclick="selectServ('Carga Gás', 'gas.png', this)"><img src="images/gas.png">Carga Gás</div>
+            <div class="card-opt" onclick="selectServ('Reparo', 'reparo.png', this)"><img src="images/reparo.png">Conserto</div>
+        </div>
+
+        <div id="step-btu" style="display:none;">
+            <h2>Escolha a Potência:</h2>
+            <div class="grid-options">
+                <div class="card-opt" onclick="selectBtu('9.000', 200, this)">9k BTU</div>
+                <div class="card-opt" onclick="selectBtu('12.000', 220, this)">12k BTU</div>
+                <div class="card-opt" onclick="selectBtu('18.000', 300, this)">18k BTU</div>
+                <div class="card-opt" onclick="selectBtu('22.000', 350, this)">22k BTU</div>
+            </div>
+            <button class="btn btn-primary" onclick="adicionarAoCarrinho()">+ Adicionar Serviço</button>
+        </div>
+
+        <div id="carrinho-lista" style="margin-top:20px;"></div>
+        
+        <div id="client-actions" style="display:none;">
+            <button class="btn btn-outline" onclick="resetSelecao()">Escolher mais um</button>
+            <button class="btn btn-success" onclick="finalizarWhatsApp()"><i class="fab fa-whatsapp"></i> Enviar Orçamento</button>
+        </div>
+    </div>
+
+    <div id="page-admin" class="page">
+        <div class="stat-card">
+            <span>Faturamento Acumulado</span>
+            <h1 id="total-geral">R$ 0,00</h1>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>Histórico de Clientes</h3>
+            <button class="btn" style="width:auto; padding:5px 15px; font-size:12px;" onclick="irParaServicos()">Abrir Modo Cliente</button>
+        </div>
+        
+        <table class="admin-table">
+            <thead>
+                <tr><th>Data</th><th>Cliente</th><th>Valor</th></tr>
+            </thead>
+            <tbody id="admin-rows"></tbody>
+        </table>
+        <button class="btn btn-outline" style="margin-top:30px;" onclick="logout()">Sair do Sistema</button>
+    </div>
+</div>
+
+<script>
+    const ADMIN_CODE = "9988";
+    let currentUser = JSON.parse(localStorage.getItem('user_refricenter'));
+    let db = JSON.parse(localStorage.getItem('db_refricenter')) || [];
+    let cart = [];
+    let selS = null; let selB = null;
+
+    // Inicialização
+    window.onload = () => {
+        if(currentUser) {
+            if(currentUser.isAdmin) showPage('page-admin');
+            else showPage('page-client');
+            document.getElementById('main-menu-icon').style.display = 'block';
+        }
+    };
+
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+    }
+
+    function processarAcesso() {
+        const input = document.getElementById('auth-input').value;
+        if(!input) return alert("Digite seu nome ou código!");
+
+        if(input === ADMIN_CODE) {
+            currentUser = { isAdmin: true };
+            localStorage.setItem('user_refricenter', JSON.stringify(currentUser));
+            showPage('page-admin');
+            renderAdmin();
+        } else {
+            const fields = document.getElementById('client-fields');
+            if(fields.style.display === 'none') {
+                fields.style.display = 'block';
+                alert("Olá " + input + "! Complete seu cadastro para promoções.");
+                return;
+            }
+            currentUser = { 
+                nome: input, 
+                tel: document.getElementById('auth-tel').value, 
+                end: document.getElementById('auth-end').value,
+                isAdmin: false 
+            };
+            localStorage.setItem('user_refricenter', JSON.stringify(currentUser));
+            showPage('page-client');
+        }
+        document.getElementById('main-menu-icon').style.display = 'block';
+    }
+
+    // Lógica Cliente
+    function selectServ(n, img, el) {
+        selS = { n, img };
+        document.querySelectorAll('#grid-servicos .card-opt').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('step-btu').style.display = 'block';
+    }
+
+    function selectBtu(b, p, el) {
+        selB = { b, p };
+        el.parentNode.querySelectorAll('.card-opt').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function adicionarAoCarrinho() {
+        if(!selS || !selB) return alert("Selecione o serviço e os BTUs!");
+        cart.push({ nome: `${selS.n} (${selB.b} BTUs)`, preco: selB.p, img: selS.img });
+        renderCart();
+        document.getElementById('client-actions').style.display = 'block';
+        document.getElementById('step-btu').style.display = 'none';
+        selS = null; selB = null;
+    }
+
+    function renderCart() {
+        const div = document.getElementById('carrinho-lista');
+        div.innerHTML = "";
+        cart.forEach(i => div.innerHTML += `<div style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #eee;"><img src="images/${i.img}" width="30"><strong>${i.nome}</strong></div>`);
+    }
+
+    function finalizarWhatsApp() {
+        const total = cart.reduce((a,b) => a + b.preco, 0);
+        const pedido = { data: new Date().toLocaleDateString(), cliente: currentUser.nome, servicos: cart.map(c => c.nome).join(", "), valor: total };
+        db.unshift(pedido);
+        localStorage.setItem('db_refricenter', JSON.stringify(db));
+        
+        let msg = `*REFRI CENTER*%0A*Cliente:* ${currentUser.nome}%0A*Serviços:* ${pedido.servicos}%0A*Total:* R$ ${total}`;
+        window.open(`https://wa.me/5599999999999?text=${msg}`, "_blank");
+    }
+
+    // Lógica Admin
+    function renderAdmin() {
+        const tbody = document.getElementById('admin-rows');
+        let total = 0;
+        tbody.innerHTML = "";
+        db.forEach(p => {
+            total += p.valor;
+            tbody.innerHTML += `<tr><td>${p.data}</td><td>${p.cliente}</td><td>R$ ${p.valor}</td></tr>`;
+        });
+        document.getElementById('total-geral').innerText = `R$ ${total.toFixed(2)}`;
+    }
+
+    function irParaServicos() { showPage('page-client'); }
+    function logout() { localStorage.clear(); location.reload(); }
+    function toggleInfo() { alert("Dica: Manutenção em dia economiza até 30% de luz!"); }
+</script>
+</body>
+</html>
