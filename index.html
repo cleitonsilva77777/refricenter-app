@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refricenter Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { --blue: #007bff; --green: #25d366; --dark: #333; --light: #f4f7f6; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--light); color: var(--dark); }
+        
+        /* CORREÇÃO DO LAYOUT: Removido o flex que causou o erro na imagem */
+        .container { max-width: 500px; margin: 0 auto; background: #fff; min-height: 100vh; padding: 15px; position: relative; }
+        
+        header { text-align: center; margin-bottom: 20px; }
+        header img { width: 100%; border-radius: 12px; max-width: 350px; }
+        .menu-dots { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #555; z-index: 100; }
+
+        .view { display: none; width: 100%; }
+        
+        .card { width: 100%; border-radius: 15px; border: 2px solid #eee; margin-bottom: 15px; overflow: hidden; cursor: pointer; background: #fff; }
+        .card img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        .card-txt { padding: 15px; text-align: center; font-weight: bold; text-transform: uppercase; }
+
+        .btn { width: 100%; padding: 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; display: block; text-align: center; font-size: 16px; text-decoration: none; }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        
+        input, select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; display: block; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+        .opt { padding: 15px 5px; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; background: #fff; }
+        .opt.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; position: relative; }
+        
+        .resumo-box { background: #f0f7ff; padding: 20px; border-radius: 15px; border: 1px solid #cce5ff; margin-top: 20px; }
+        .social-footer { text-align: center; padding: 25px 0; border-top: 1px solid #eee; margin-top: 30px; }
+        .social-icons a { font-size: 32px; margin: 0 15px; text-decoration: none; display: inline-block; }
+        
+        label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="menu-dots" onclick="openModal()"><i class="fas fa-ellipsis-v"></i></div>
+    
+    <header>
+        <img src="images/banner.png" onerror="this.src='banner.png'">
+    </header>
+
+    <div id="view-cadastro" class="view">
+        <h3 style="text-align:center">Seja bem-vindo!</h3>
+        <label>Nome Completo</label>
+        <input id="nome" type="text" placeholder="Digite seu nome">
+        <label>Endereço</label>
+        <input id="end" type="text" placeholder="Rua, Número, Bairro">
+        <label>Cidade / Localidade</label>
+        <select id="cidade-select">
+            <option value="sede">Plácido de Castro (Sede)</option>
+            <option value="fora">Campinas</option>
+            <option value="fora">Acrelândia</option>
+            <option value="fora">Zona Rural</option>
+        </select>
+        <button class="btn btn-blue" onclick="salvarCadastro()">Acessar Serviços</button>
+    </div>
+
+    <div id="view-app" class="view">
+        <h4 id="boas-vindas" style="text-align:center; color: var(--blue)"></h4>
+        
+        <div id="lista-servicos">
+            <div class="card" onclick="selS('Limpeza',this)"><img src="images/limpeza.png"><div class="card-txt">Limpeza Completa</div></div>
+            <div class="card" onclick="selS('Instalação',this)"><img src="images/instalacao.png"><div class="card-txt">Instalação</div></div>
+            <div class="card" onclick="selS('Desinstalação',this)"><img src="images/desinstalacao.png"><div class="card-txt">Desinstalação</div></div>
+            <div class="card" onclick="selS('Carga Gás',this)"><img src="images/gas.png"><div class="card-txt">Carga de Gás</div></div>
+            <div class="card" onclick="selS('Reparo',this)"><img src="images/reparo.png"><div class="card-txt">Reparo (Avaliação no Local)</div></div>
+        </div>
+
+        <div id="opcoes-box" style="display:none; background:#f4f4f4; padding:20px; border-radius:15px; border: 2px solid var(--blue); margin-bottom: 20px;">
+            <label>Tecnologia:</label>
+            <div class="grid">
+                <div class="opt opt-tec" onclick="selTec('Convencional',this)">Convencional</div>
+                <div class="opt opt-tec active" onclick="selTec('Inverter',this)">Inverter</div>
+            </div>
+            <label>Potência (BTUs):</label>
+            <div class="grid">
+                <div class="opt opt-btu" onclick="selB('9.000',this)">9k</div><div class="opt opt-btu" onclick="selB('12.000',this)">12k</div>
+                <div class="opt opt-btu" onclick="selB('18.000',this)">18k</div><div class="opt opt-btu" onclick="selB('22.000',this)">22k</div>
+                <div class="opt opt-btu" onclick="selB('24.000',this)">24k</div><div class="opt opt-btu" onclick="selB('30.000',this)">30k</div>
+                <div class="opt opt-btu" onclick="selB('36.000',this)">36k</div>
+            </div>
+            <div id="tipo-serv-box" style="display:none">
+                <label>Tipo de Serviço:</label>
+                <div class="opt opt-mat active" style="margin-bottom:8px" onclick="selM('mo',this)">Só Mão de Obra</div>
+                <div class="opt opt-mat" onclick="selM('cp',this)">Completa (Com Material)</div>
+            </div>
+            <button class="btn btn-blue" onclick="confirmarServico()">Confirmar Serviço</button>
+        </div>
+
+        <div id="carrinho-render" class="resumo-box" style="display:none"></div>
+        <button id="btn-whats" class="btn btn-green" style="display:none; margin-top: 15px;" onclick="enviarPedido()">
+            <i class="fab fa-whatsapp"></i> Finalizar no WhatsApp
+        </button>
+
+        <footer class="social-footer">
+            <div class="social-icons">
+                <a href="#" style="color:#E1306C"><i class="fab fa-instagram"></i></a>
+                <a href="#" style="color:#4267B2"><i class="fab fa-facebook"></i></a>
+            </div>
+            <p style="font-size:12px; color:#999; margin-top:10px">Refricenter - Climatização</p>
+        </footer>
+    </div>
+
+    <div id="view-admin" class="view">
+        <div style="background:var(--dark); color:#fff; padding:25px; border-radius:20px; text-align:center">
+            <span>Faturamento</span>
+            <h2 id="fat-total">R$ 0,00</h2>
+            <button onclick="zerarMes()" style="background:none; border:1px solid #fff; color:#fff; border-radius:10px; padding:5px 10px; cursor:pointer">Zerar</button>
+        </div>
+        <div id="hist-admin" style="margin-top:20px"></div>
+        <button class="btn btn-blue" onclick="sairAdmin()">Sair</button>
+    </div>
+</div>
+
+<div id="menuModal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Refricenter Menu</h3>
+        <p onclick="alert('Especialistas em Climatização.')" style="padding:10px 0; border-bottom:1px solid #eee; cursor:pointer">Sobre Nós</p>
+        <br>
+        <input type="password" id="p-admin" placeholder="Senha Admin">
+        <button class="btn btn-blue" onclick="acessarAdmin()">Entrar Admin</button>
+    </div>
+</div>
+
+<script>
+    const tabela = {
+        "9.000":{mo:200,cp:600}, "12.000":{mo:200,cp:600}, "18.000":{mo:350,cp:850},
+        "22.000":{mo:400,cp:900}, "24.000":{mo:450,cp:950}, "30.000":{mo:650,cp:1150}, "36.000":{mo:750,cp:1250}
+    };
+
+    let s=null, b=null, m='mo', t='Inverter', carrinho=[], usuario=null;
+
+    window.onload = () => {
+        usuario = JSON.parse(localStorage.getItem('ref_usuario'));
+        const status = localStorage.getItem('ref_status');
+        if(status === 'admin') { show('view-admin'); resAdmin(); }
+        else if(usuario) { show('view-app'); msgBoasVindas(); }
+        else { show('view-cadastro'); }
+    };
+
+    function show(id) { 
+        document.querySelectorAll('.view').forEach(v=>v.style.display='none'); 
+        document.getElementById(id).style.display='block'; 
+    }
+
+    function msgBoasVindas() { document.getElementById('boas-vindas').innerText = `Olá, ${usuario.n}!`; }
+
+    function salvarCadastro() {
+        const n=document.getElementById('nome').value, e=document.getElementById('end').value, c=document.getElementById('cidade-select').value;
+        if(!n || !e) return alert("Preencha os campos!");
+        usuario = { n, e, c };
+        localStorage.setItem('ref_usuario', JSON.stringify(usuario));
+        msgBoasVindas(); show('view-app');
+    }
+
+    function selS(nome,el) {
+        s=nome; 
+        document.querySelectorAll('.card').forEach(c=>c.style.borderColor='#eee'); 
+        el.style.borderColor='#007bff';
+        if(nome==='Reparo') { 
+            carrinho.push({n:'Reparo', d:'Avaliação Local', v:0}); 
+            document.getElementById('opcoes-box').style.display='none';
+            renderCarrinho();
+        } else {
+            document.getElementById('opcoes-box').style.display='block';
+            document.getElementById('tipo-serv-box').style.display=(nome==='Instalação')?'block':'none';
+        }
+    }
+
+    function selB(btu,el) { b=btu; document.querySelectorAll('.opt-btu').forEach(o=>o.classList.remove('active')); el.classList.add('active'); }
+    function selTec(tec,el) { t=tec; document.querySelectorAll('.opt-tec').forEach(o=>o.classList.remove('active')); el.classList.add('active'); }
+    function selM(tipo,el) { m=tipo; document.querySelectorAll('.opt-mat').forEach(o=>o.classList.remove('active')); el.classList.add('active'); }
+
+    function confirmarServico() {
+        if(!b) return alert("Escolha os BTUs!");
+        carrinho.push({n: s, d: `${b} | ${t} | ${m==='mo'?'Mão de Obra':'Material'}`, v: tabela[b][m]});
+        document.getElementById('opcoes-box').style.display='none';
+        renderCarrinho();
+    }
+
+    function renderCarrinho() {
+        const div = document.getElementById('carrinho-render'); div.style.display='block';
+        let bruto = 0; carrinho.forEach(i=> bruto += i.v);
+        let perc = (bruto>=1000)?0.12:(bruto>=600)?0.08:(bruto>=300)?0.03:0;
+        let vDesc = bruto * perc, taxa = (usuario.c === 'fora')?100:0, total = (bruto-vDesc)+taxa;
+        div.innerHTML = "<strong>Resumo:</strong><br>";
+        carrinho.forEach(i=> div.innerHTML += `• ${i.n} - R$ ${i.v}<br>`);
+        div.innerHTML += `<hr>Total: R$ ${total.toFixed(2)}`;
+        document.getElementById('btn-whats').style.display='block';
+        window.vTotal = total;
+    }
+
+    function enviarPedido() {
+        let msg = `*REFRI CENTER*%0A*Cliente:* ${usuario.n}%0A*Local:* ${usuario.c}%0A*Total:* R$ ${window.vTotal.toFixed(2)}`;
+        const db = JSON.parse(localStorage.getItem('ref_db')||'[]');
+        db.push({c: usuario.n, t: window.vTotal});
+        localStorage.setItem('ref_db', JSON.stringify(db));
+        window.open(`https://wa.me/5599999999999?text=${msg}`);
+    }
+
+    function acessarAdmin() {
+        if(document.getElementById('p-admin').value==='9988') { 
+            localStorage.setItem('ref_status','admin'); location.reload(); 
+        }
+    }
+    function sairAdmin() { localStorage.removeItem('ref_status'); location.reload(); }
+    function resAdmin() {
+        const db=JSON.parse(localStorage.getItem('ref_db')||'[]'); let tot=0;
+        db.forEach(p=> tot+=p.t); document.getElementById('fat-total').innerText = `R$ ${tot.toFixed(2)}`;
+    }
+    function zerarMes() { localStorage.setItem('ref_db','[]'); resAdmin(); }
+    function openModal() { document.getElementById('menuModal').style.display='flex'; }
+    function closeModal() { document.getElementById('menuModal').style.display='none'; }
+</script>
+</body>
+</html>
