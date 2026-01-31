@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refricenter - Orçamento</title>
+
+<!-- Ícones -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f4f6f8;
+  color: #333;
+}
+
+/* TOPO */
+header img {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 480px;
+  margin: auto;
+  padding: 15px;
+}
+
+/* FORM */
+h2 {
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0 14px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+}
+
+/* BOTÕES */
+.btn-add {
+  background: #007bff;
+  color: #fff;
+}
+
+.btn-whats {
+  background: #25d366;
+  color: #fff;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+/* LISTA SERVIÇOS */
+.servicos {
+  margin-top: 10px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  background: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+/* TOTAL */
+.total {
+  margin-top: 15px;
+  padding: 15px;
+  border: 2px dashed #2ecc71;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 22px;
+  color: #2ecc71;
+  background: #fff;
+}
+
+/* REDES */
+.redes {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 25px 0 10px 0;
+}
+
+.redes a {
+  font-size: 28px;
+  color: #555;
+}
+
+.redes a:hover {
+  color: #007bff;
+}
+
+/* RODAPÉ */
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <img src="banner.png" alt="Refricenter">
+</header>
+
+<div class="container">
+
+  <h2>Solicitar Orçamento</h2>
+
+  <label>Nome do cliente</label>
+  <input id="nome" placeholder="Ex: João Silva">
+
+  <label>Endereço</label>
+  <input id="endereco" placeholder="Rua, bairro">
+
+  <label>Serviço</label>
+  <select id="servico">
+    <option value="">Selecione</option>
+    <option value="Limpeza Completa|200">Limpeza Completa - R$ 200</option>
+    <option value="Carga de Gás|200">Carga de Gás - R$ 200</option>
+    <option value="Instalação 9.000 BTUs|200">Instalação 9.000 BTUs - R$ 200</option>
+    <option value="Instalação 12.000 BTUs|200">Instalação 12.000 BTUs - R$ 200</option>
+    <option value="Instalação 18.000 BTUs|300">Instalação 18.000 BTUs - R$ 300</option>
+    <option value="Instalação 22.000 BTUs|350">Instalação 22.000 BTUs - R$ 350</option>
+    <option value="Instalação 24.000 BTUs|400">Instalação 24.000 BTUs - R$ 400</option>
+  </select>
+
+  <button class="btn-add" onclick="addServico()">Adicionar serviço</button>
+
+  <div class="servicos" id="lista"></div>
+
+  <div class="total" id="total">R$ 0,00</div>
+
+  <button class="btn-whats" onclick="enviarWhats()">
+    <i class="fab fa-whatsapp"></i> Enviar para WhatsApp
+  </button>
+
+  <div class="redes">
+    <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+    <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+  </div>
+
+  <footer>
+    Refricenter • Instalação e Manutenção de Ar-Condicionado
+  </footer>
+
+</div>
+
+<script>
+let total = 0;
+let servicos = [];
+
+function addServico() {
+  const valor = document.getElementById("servico").value;
+  if (!valor) return;
+
+  const [nome, preco] = valor.split("|");
+  servicos.push({ nome, preco: Number(preco) });
+
+  total += Number(preco);
+  atualizar();
+}
+
+function atualizar() {
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  servicos.forEach(s => {
+    lista.innerHTML += `
+      <div class="item">
+        <span>${s.nome}</span>
+        <strong>R$ ${s.preco}</strong>
+      </div>
+    `;
+  });
+
+  document.getElementById("total").innerText =
+    `R$ ${total.toFixed(2).replace(".", ",")}`;
+}
+
+function enviarWhats() {
+  const nome = document.getElementById("nome").value;
+  const endereco = document.getElementById("endereco").value;
+
+  let texto = `*ORÇAMENTO REFRICENTER*%0A%0A`;
+  texto += `Cliente: ${nome}%0A`;
+  texto += `Endereço: ${endereco}%0A%0A`;
+  texto += `*Serviços:*%0A`;
+
+  servicos.forEach(s => {
+    texto += `- ${s.nome} (R$ ${s.preco})%0A`;
+  });
+
+  texto += `%0ATotal: R$ ${total}%0A%0A`;
+  texto += `Aguardando confirmação ou agendamento.`;
+
+  window.open(`https://wa.me/5599999999999?text=${texto}`, "_blank");
+}
+</script>
+
+</body>
+</html>
