@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Pro - Oficial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { --blue: #007bff; --green: #25d366; --red: #ff4d4d; --dark: #1a1a1a; --light: #f8f9fa; --gold: #ffc107; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--light); overflow-x: hidden; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; min-height: 100vh; padding: 15px; position: relative; display: flex; flex-direction: column; }
+        
+        header img { width: 100%; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-menu { position: absolute; top: 25px; right: 25px; font-size: 28px; color: var(--blue); cursor: pointer; z-index: 100; }
+
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .btn { width: 100%; padding: 18px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; text-align: center; font-size: 16px; margin-bottom: 10px; display: block; text-decoration: none; }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-gold { background: var(--gold); color: #333; }
+        
+        input, select { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; }
+
+        /* Floating Emergency Button */
+        .btn-emer { position: fixed; bottom: 20px; right: 20px; width: 65px; height: 65px; background: var(--red); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 25px; box-shadow: 0 4px 15px rgba(255,0,0,0.4); z-index: 999; border: 3px solid #fff; cursor: pointer; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* Modal Checklist */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; }
+
+        /* Game & Ranking */
+        #game-area { width: 100%; height: 350px; background: #000; position: relative; overflow: hidden; border-radius: 15px; border: 2px solid var(--gold); }
+        #player { width: 45px; height: 45px; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 35px; z-index: 5; }
+        .obs { position: absolute; font-size: 25px; top: -40px; }
+        #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.9); color: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 20; }
+        .game-controls { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-ctrl { flex: 1; padding: 20px; background: #eee; border-radius: 15px; font-size: 25px; border: none; cursor: pointer; }
+
+        /* Side Menu */
+        .side-menu { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; display: none; justify-content: flex-end; }
+        .side-content { width: 85%; background: #fff; height: 100%; padding: 30px 20px; display: flex; flex-direction: column; }
+        .menu-item { padding: 18px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; font-weight: 600; cursor: pointer; }
+
+        /* Calculadora Steps */
+        .calc-step { display: none; text-align: center; }
+        .calc-step.active { display: block; }
+        .grid-btu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .opt-btu { padding: 12px; border: 2px solid #eee; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; }
+        .opt-btu.active { border-color: var(--blue); background: var(--blue); color: #fff; }
+        .card { width: 100%; border-radius: 20px; border: 1px solid #eee; margin-bottom: 15px; background: #fff; cursor: pointer; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card img { width: 100%; height: 150px; object-fit: cover; }
+        .card-txt { padding: 12px; text-align: center; font-weight: 700; color: var(--blue); text-transform: uppercase; }
+
+        .banner-desconto { background: var(--gold); color: #000; padding: 10px; border-radius: 10px; font-weight: bold; margin-bottom: 10px; font-size: 14px; text-align: center; animation: pulse 2s infinite; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="btn-menu" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
+    <header><img src="images/banner.png" onerror="this.src='banner.png'"></header>
+
+    <div id="view-cadastro" class="view">
+        <h2 style="text-align:center">Inicie seu Orçamento</h2>
+        <input id="nome" type="text" placeholder="Nome Completo">
+        <input id="end" type="text" placeholder="Endereço">
+        <select id="cidade">
+            <option value="sede">Plácido de Castro (Sede)</option>
+            <option value="interior">Interior / Rural (+R$ 100 Taxa)</option>
+        </select>
+        <button class="btn btn-blue" onclick="salvarUsuario()">Entrar no App</button>
+    </div>
+
+    <div id="view-app" class="view">
+        <h3 id="boas-vindas"></h3>
+        <div id="lista-servicos">
+            <div class="card" onclick="openServico('Limpeza')"><img src="images/limpeza.png"><div class="card-txt">Limpeza</div></div>
+            <div class="card" onclick="openServico('Instalação')"><img src="images/instalacao.png"><div class="card-txt">Instalação</div></div>
+            <div class="card" onclick="openServico('Desinstalação')"><img src="images/desinstalacao.png"><div class="card-txt">Desinstalação</div></div>
+            <div class="card" onclick="openServico('Carga Gás')"><img src="images/gas.png"><div class="card-txt">Carga de Gás</div></div>
+        </div>
+
+        <div id="painel-opcoes" style="display:none; padding:15px; border:2px solid var(--blue); border-radius:20px;">
+            <h4 id="serv-titulo" style="color:var(--blue); margin-top:0"></h4>
+            <select id="tec-ar"><option value="Convencional">Convencional</option><option value="Inverter">Inverter</option></select>
+            <div id="box-material" style="display:none"><select id="sel-mat"><option value="nao">Sem Material</option><option value="sim">Com Material</option></select></div>
+            <div id="box-gas" style="display:none"><select id="sel-gas"><option value="R22">Gás R22</option><option value="R410a">Gás R410a</option><option value="R32">Gás R32</option></select></div>
+            <div class="grid-btu" id="btu-grid"></div>
+            <button class="btn btn-blue" onclick="adicionarAoCarrinho()">Adicionar ao Pedido</button>
+            <button class="btn" onclick="fecharOpcoes()" style="background:#eee">Voltar</button>
+        </div>
+
+        <div id="area-carrinho" style="background:#f0f7ff; padding:15px; border-radius:15px; margin-top:20px; display:none; border:1px solid #cce5ff"></div>
+        <button id="btn-whats" class="btn btn-green" style="display:none" onclick="enviarWhats()"><i class="fab fa-whatsapp"></i> Finalizar Orçamento</button>
+    </div>
+
+    <div id="view-calc" class="view">
+        <h3 style="text-align:center">Calculadora Profissional</h3>
+        <div id="step-1" class="calc-step active">
+            <p>1. Qual a <b>Altura</b> do teto? (metros)</p>
+            <input type="number" id="c-alt" placeholder="Ex: 2.80">
+            <button class="btn btn-blue" onclick="nextStep(2)">Continuar</button>
+        </div>
+        <div id="step-2" class="calc-step">
+            <p>2. Qual a <b>Largura</b> do ambiente?</p>
+            <input type="number" id="c-larg" placeholder="Ex: 4.00">
+            <button class="btn btn-blue" onclick="nextStep(3)">Continuar</button>
+        </div>
+        <div id="step-3" class="calc-step">
+            <p>3. Qual o <b>Comprimento</b> do ambiente?</p>
+            <input type="number" id="c-comp" placeholder="Ex: 5.00">
+            <button class="btn btn-blue" onclick="nextStep(4)">Continuar</button>
+        </div>
+        <div id="step-4" class="calc-step">
+            <p>4. <b>Pessoas</b> e <b>Aparelhos</b>?</p>
+            <input type="number" id="c-pess" placeholder="Nº Pessoas">
+            <input type="number" id="c-apar" placeholder="Nº Eletrônicos">
+            <select id="c-sol"><option value="600">Sombra</option><option value="800">Muito Sol</option></select>
+            <button class="btn btn-blue" onclick="finalizarCalculo()">Ver Resultado</button>
+        </div>
+        <div id="step-res" class="calc-step">
+            <div id="res-calc" style="font-size:24px; font-weight:bold; color:var(--blue); margin:20px 0"></div>
+            <button class="btn btn-blue" onclick="restartCalc()">Recomeçar</button>
+            <button class="btn" onclick="toggleMenu()" style="background:#eee">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <div id="view-game" class="view">
+        <h3 style="text-align:center">Refri-Game ❄️</h3>
+        
+        <div class="banner-desconto">
+            <i class="fas fa-gift"></i> JOGUE E GANHE ATÉ 3% DE DESCONTO EXTRA!
+        </div>
+
+        <div id="game-area">
+            <div id="game-stats" style="position:absolute; color:#fff; padding:10px; font-weight:bold; z-index:10">Pontos: 0 | Nível: 1</div>
+            <div id="player">👨‍🔧</div>
+            <div id="game-over">
+                <h2 style="color:var(--gold)">FIM DE JOGO!</h2>
+                <p id="game-res-txt"></p>
+                <div id="ranking-box" style="width:100%; font-size:13px; color:#fff; margin-bottom:15px"></div>
+                <button class="btn btn-blue" onclick="startGame()">Jogar Novamente</button>
+                <button class="btn" onclick="toggleMenu()" style="background:#eee; color:#333">Ir para Orçamento</button>
+            </div>
+        </div>
+        <div class="game-controls">
+            <button class="btn-ctrl" onclick="movePlayer(-40)"><i class="fas fa-arrow-left"></i></button>
+            <button class="btn-ctrl" onclick="movePlayer(40)"><i class="fas fa-arrow-right"></i></button>
+        </div>
+        <button class="btn btn-gold" id="btn-start" onclick="startGame()" style="margin-top:10px">Começar a Ganhar Desconto</button>
+        
+        <p style="text-align:center; font-size:12px; color:#666; margin-top:10px">
+            100 pts = 1% | 200 pts = 2% | 300 pts = 3%
+        </p>
+    </div>
+
+    <div class="btn-emer" onclick="openEmergency()"><i class="fas fa-exclamation-triangle"></i></div>
+
+    <div id="modal-emer" class="modal">
+        <div class="modal-content">
+            <h3 style="color:var(--red)">🚨 Checklist de Emergência</h3>
+            <p style="font-size:14px; text-align:left">Verifique primeiro:<br>
+            ✅ O disjuntor está ligado?<br>
+            ✅ As pilhas do controle estão boas?<br>
+            ✅ O aparelho está na tomada?</p>
+            <p style="font-weight:bold; color:var(--red)">⚠️ Taxa de Deslocamento: R$ 150,00</p>
+            <button class="btn btn-red" style="background:var(--red); color:#fff" onclick="chamarEmergencia()">Chamar agora mesmo!</button>
+            <button class="btn" onclick="closeEmergency()" style="background:#eee">Vou verificar primeiro</button>
+        </div>
+    </div>
+
+    <div id="view-info" class="view">
+        <div id="info-conteudo" style="padding:15px; text-align:justify"></div>
+        <button class="btn btn-blue" onclick="toggleMenu()">Voltar ao Menu</button>
+    </div>
+
+    <footer style="text-align:center; padding:20px; margin-top:auto">
+        <div style="font-size:35px">
+            <a href="https://www.facebook.com/share/1HUFYxUVHE/" target="_blank" style="margin:0 15px; color:#1877F2"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/refricenter_arcondicionado?igsh=NDMyd215NXJ2MGNm" target="_blank" style="margin:0 15px; color:#E4405F"><i class="fab fa-instagram"></i></a>
+        </div>
+    </footer>
+</div>
+
+<div id="sideMenu" class="side-menu" onclick="toggleMenu()">
+    <div class="side-content" onclick="event.stopPropagation()">
+        <div class="menu-item" onclick="location.reload()" style="background:var(--blue); color:#fff; border-radius:10px">
+            <i class="fas fa-home"></i> VOLTAR À PÁGINA INICIAL
+        </div>
+        <hr>
+        <div class="menu-item" onclick="abrirDica('economia')"><i class="fas fa-leaf"></i> Economia (Dica 23°C)</div>
+        <div class="menu-item" onclick="abrirDica('saude')"><i class="fas fa-medkit"></i> Saúde e Higiene</div>
+        <div class="menu-item" onclick="show('view-calc'); restartCalc(); toggleMenu();"><i class="fas fa-calculator"></i> Calculadora BTUs</div>
+        <div class="menu-item" onclick="abrirDica('bio')"><i class="fas fa-info-circle"></i> Nossa História</div>
+        <div class="menu-item" onclick="show('view-game'); toggleMenu();"><i class="fas fa-gamepad"></i> Refri-Game (Bônus %)</div>
+    </div>
+</div>
+
+<script>
+    // TABELA INTEGRAL
+    const tabela = {
+        "Instalação": {
+            "Convencional": { "nao": { "9k":200, "12k":200, "18k":300, "22k":350, "24k":400 }, "sim": { "9k":550, "12k":600, "18k":800, "22k":850, "24k":900 } },
+            "Inverter": { "nao": { "9k":250, "12k":250, "18k":350, "22k":400, "24k":450 }, "sim": { "9k":600, "12k":650, "18k":850, "22k":900, "24k":950 } }
+        },
+        "Desinstalação": { "Convencional": { "9k":100, "12k":100, "18k":150, "22k":200, "24k":200 }, "Inverter": { "9k":150, "12k":150, "18k":200, "22k":250, "24k":250 } },
+        "Limpeza": { "Convencional": { "9k":150, "12k":150, "18k":200, "22k":250, "24k":300 }, "Inverter": { "9k":200, "12k":200, "18k":250, "22k":300, "24k":350 } },
+        "Carga Gás": {
+            "R22": { "9k":450, "12k":450, "18k":600, "22k":700, "24k":750, "30k":900, "36k":1100 },
+            "R410a": { "9k":500, "12k":500, "18k":600, "22k":800, "24k":850, "30k":1000, "36k":1200 },
+            "R32": { "9k":550, "12k":600, "18k":750, "22k":900, "24k":1000, "30k":1200, "36k":1350 }
+        }
+    };
+
+    let user = null, carrinho = [], servAtual = null, btuAtual = null, gameBonus = 0;
+
+    window.onload = () => {
+        user = JSON.parse(localStorage.getItem('ref_u'));
+        if(user) { show('view-app'); document.getElementById('boas-vindas').innerText = `Olá, ${user.n}!`; }
+        else show('view-cadastro');
+    };
+
+    function show(id) { document.querySelectorAll('.view').forEach(v=>v.style.display='none'); document.getElementById(id).style.display='block'; }
+    function toggleMenu() { const m = document.getElementById('sideMenu'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; gameActive = false; }
+
+    function salvarUsuario() {
+        const n=document.getElementById('nome').value, e=document.getElementById('end').value;
+        if(!n || !e) return alert("Preencha seu nome e endereço!");
+        user = { n, e, c: document.getElementById('cidade').value };
+        localStorage.setItem('ref_u', JSON.stringify(user));
+        location.reload();
+    }
+
+    // EMERGÊNCIA
+    function openEmergency() { document.getElementById('modal-emer').style.display='flex'; }
+    function closeEmergency() { document.getElementById('modal-emer').style.display='none'; }
+    function chamarEmergencia() { window.open(`https://wa.me/5568992447004?text=EMERGÊNCIA 24H: Fiz o checklist. Ciente da taxa de R$ 150,00 de deslocamento. Nome: ${user.n}`); }
+
+    // ORÇAMENTO
+    function openServico(s) {
+        servAtual = s; btuAtual = null;
+        document.getElementById('lista-servicos').style.display='none';
+        document.getElementById('painel-opcoes').style.display='block';
+        document.getElementById('serv-titulo').innerText = s;
+        document.getElementById('box-material').style.display = (s==='Instalação') ? 'block' : 'none';
+        document.getElementById('box-gas').style.display = (s==='Carga Gás') ? 'block' : 'none';
+        let bts = (s==='Carga Gás')?["9k","12k","18k","22k","24k","30k","36k"]:["9k","12k","18k","22k","24k"];
+        const grid = document.getElementById('btu-grid'); grid.innerHTML = "";
+        bts.forEach(b => grid.innerHTML += `<div class="opt-btu" onclick="setBTU('${b}', this)">${b.replace('k','000')} BTUs</div>`);
+    }
+
+    function setBTU(b, el) { btuAtual = b; document.querySelectorAll('.opt-btu').forEach(x=>x.classList.remove('active')); el.classList.add('active'); }
+
+    function adicionarAoCarrinho() {
+        if(!btuAtual) return alert("Selecione os BTUs!");
+        const tec = document.getElementById('tec-ar').value;
+        const mat = document.getElementById('sel-mat').value;
+        const gas = document.getElementById('sel-gas').value;
+        let p = (servAtual==='Instalação')?tabela[servAtual][tec][mat][btuAtual]:(servAtual==='Carga Gás')?tabela[servAtual][gas][btuAtual]:tabela[servAtual][tec][btuAtual];
+        carrinho.push({s: servAtual, b: btuAtual, v: p});
+        fecharOpcoes(); renderCarrinho();
+    }
+
+    function renderCarrinho() {
+        const area = document.getElementById('area-carrinho'); area.style.display='block';
+        let sub = 0; area.innerHTML = "<b>Itens Adicionados:</b><br>";
+        carrinho.forEach(it => { sub += it.v; area.innerHTML += `${it.s} ${it.b.replace('k','000')} BTUs - R$ ${it.v}<br>`; });
+        
+        let descBase = (sub>=1000)?0.12 : (sub>=600)?0.08 : (sub>=300)?0.03 : 0;
+        let totalDesc = descBase + gameBonus;
+        let total = (sub * (1-totalDesc)) + (user.c==='interior'?100:0);
+        
+        area.innerHTML += `<hr>Subtotal: R$ ${sub.toFixed(2)}<br>Desconto Total: ${(totalDesc*100).toFixed(0)}% <small>(Base: ${descBase*100}% + Game: ${gameBonus*100}%)</small><br><b>Total: R$ ${total.toFixed(2)}</b>`;
+        document.getElementById('btn-whats').style.display='block'; window.vFinal = total; window.vDescTotal = totalDesc;
+    }
+
+    function fecharOpcoes() { document.getElementById('lista-servicos').style.display='block'; document.getElementById('painel-opcoes').style.display='none'; }
+    function enviarWhats() { window.open(`https://wa.me/5568992447004?text=Olá Refricenter! Sou ${user.n}. Orçamento total com ${(window.vDescTotal*100).toFixed(0)}% de desconto: R$ ${window.vFinal.toFixed(2)}`); }
+
+    // CALCULADORA
+    function nextStep(step) {
+        document.querySelectorAll('.calc-step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + (step === 'res' ? 'res' : step)).classList.add('active');
+    }
+    function finalizarCalculo() {
+        let l = parseFloat(document.getElementById('c-larg').value), c = parseFloat(document.getElementById('c-comp').value), a = parseFloat(document.getElementById('c-alt').value);
+        let p = parseInt(document.getElementById('c-pess').value)||0, ap = parseInt(document.getElementById('c-apar').value)||0, sol = parseInt(document.getElementById('c-sol').value);
+        let res = (l * c * sol) + (a > 2.7 ? (a-2.7)*600 : 0) + (p * 600) + (ap * 600);
+        document.getElementById('res-calc').innerHTML = `Sugerido: ${res.toFixed(0)} BTUs`;
+        nextStep('res');
+    }
+    function restartCalc() { document.querySelectorAll('.calc-step input').forEach(i => i.value = ""); nextStep(1); }
+
+    // GAME
+    let gameActive = false, score = 0, level = 1, speed = 6, playerX = 50;
+    function startGame() {
+        gameActive = true; score = 0; level = 1; speed = 6; playerX = 50;
+        document.getElementById('game-over').style.display = 'none';
+        document.getElementById('btn-start').style.display = 'none';
+        document.querySelectorAll('.obs').forEach(o => o.remove());
+        gameLoop();
+    }
+    function movePlayer(dir) { playerX += dir/4; if(playerX<5) playerX=5; if(playerX>95) playerX=95; document.getElementById('player').style.left = playerX + '%'; }
+    function gameLoop() {
+        if(!gameActive) return;
+        if(Math.random() < (0.05 + level*0.01)) createItem();
+        level = Math.floor(score/30) + 1;
+        speed = 6 + (level * 0.7);
+        document.getElementById('game-stats').innerText = `Pontos: ${score} | Nível: ${level}`;
+        setTimeout(gameLoop, 50);
+    }
+    function createItem() {
+        const isFire = Math.random() > 0.25;
+        const item = document.createElement('div');
+        item.className = 'obs';
+        item.innerHTML = isFire ? '🔥' : '❄️';
+        item.style.left = Math.random() * 90 + '%';
+        document.getElementById('game-area').appendChild(item);
+        let p = 0;
+        let anim = setInterval(() => {
+            if(!gameActive) { clearInterval(anim); item.remove(); return; }
+            p += speed; item.style.top = p + 'px';
+            let pr = document.getElementById('player').getBoundingClientRect();
+            let ir = item.getBoundingClientRect();
+            if(ir.bottom > pr.top && ir.top < pr.bottom && ir.left < pr.right && ir.right > pr.left) {
+                if(isFire) { gameActive = false; showGameOver(); }
+                else { score += 15; item.remove(); clearInterval(anim); }
+            }
+            if(p > 350) { score++; item.remove(); clearInterval(anim); }
+        }, 30);
+    }
+    function showGameOver() {
+        document.getElementById('game-over').style.display = 'flex';
+        gameBonus = (score >= 300) ? 0.03 : (score >= 200) ? 0.02 : (score >= 100) ? 0.01 : 0;
+        document.getElementById('game-res-txt').innerHTML = `Pontos: ${score}<br><b style="color:var(--gold)">VOCÊ GARANTIU +${(gameBonus*100).toFixed(0)}% DE DESCONTO!</b>`;
+        
+        let r = JSON.parse(localStorage.getItem('ref_rank') || '[]');
+        r.push({n: user.n, p: score}); r.sort((a,b)=>b.p-a.p);
+        localStorage.setItem('ref_rank', JSON.stringify(r.slice(0,5)));
+        let h = "<b>🏆 RANKING:</b><table style='width:100%'>";
+        r.slice(0,5).forEach((x,i)=> h += `<tr><td>${i+1}º ${x.n}</td><td>${x.p}</td></tr>`);
+        document.getElementById('ranking-box').innerHTML = h + "</table>";
+        renderCarrinho();
+    }
+
+    // DICAS
+    function abrirDica(t) {
+        toggleMenu(); show('view-info');
+        const box = document.getElementById('info-conteudo');
+        if(t==='economia') box.innerHTML = "<h3>Dica de Economia</h3><p>Use seu ar em 23°C. Em Plácido de Castro, colocar em 17°C não gela mais rápido, apenas força o motor sem parar.</p>";
+        else if(t==='saude') box.innerHTML = "<h3>Saúde</h3><p>A limpeza previne ácaros e fungos. Evite doenças respiratórias com manutenção em dia.</p>";
+        else box.innerHTML = "<h3>História</h3><p>A Refricenter é focada em técnica e honestidade no Acre.</p>";
+    }
+</script>
+</body>
+</html>
