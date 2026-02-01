@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Pro - Edição Elite GitHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { 
+            --blue: #002244; --accent: #007bff; --green: #218838; 
+            --gold: #d4af37; --bg: #f8f9fa; --white: #ffffff; --red: #c82333;
+        }
+        
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* BLOQUEIO DE SCROLL NO JOGO */
+        .no-scroll { overflow: hidden; position: fixed; width: 100%; }
+
+        body { margin: 0; background: #000; color: #333; }
+        .app-wrapper { max-width: 500px; margin: 0 auto; background: var(--bg); min-height: 100vh; position: relative; display: flex; flex-direction: column; }
+
+        /* BANNER DO GITHUB */
+        header { width: 100%; height: 210px; background: var(--blue); position: relative; overflow: hidden; border-bottom: 4px solid var(--gold); }
+        .banner-img { width: 100%; height: 100%; object-fit: cover; }
+        .menu-btn { position: absolute; top: 15px; right: 15px; font-size: 26px; color: #fff; z-index: 1000; background: var(--accent); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        /* VIEWS */
+        .view { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CARDS GITHUB STYLE */
+        .card { background: var(--white); border-radius: 20px; overflow: hidden; margin-bottom: 25px; border: 1px solid #ddd; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .card-img { width: 100%; height: 170px; background: #eee; }
+        .card-img img { width: 100%; height: 100%; object-fit: cover; }
+        .card-info { padding: 18px; border-top: 5px solid var(--accent); }
+        .price-tag { color: var(--green); font-weight: 800; font-size: 22px; display: block; margin-top: 8px; }
+
+        /* CHECKOUT LUXO */
+        .checkout-area { background: var(--white); padding: 20px; border-radius: 20px; border: 2px solid var(--accent); margin-top: 10px; }
+        .total-row { display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; color: var(--blue); border-top: 2px solid #eee; padding-top: 15px; }
+
+        /* REFRI-GAME (TELA FIXA & MULTI-TOUCH) */
+        #game-box { 
+            width: 100%; height: 420px; background: #000; border-radius: 20px; 
+            position: relative; overflow: hidden; border: 4px solid var(--gold); 
+            touch-action: none; /* Impede gestos do navegador durante o jogo */
+        }
+        #player { position: absolute; bottom: 20px; font-size: 50px; z-index: 100; left: 50%; transform: translateX(-50%); }
+        .falling { position: absolute; font-size: 35px; z-index: 50; }
+        
+        .game-controls { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .move-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-game { 
+            padding: 22px; border-radius: 15px; border: none; color: #fff; 
+            font-size: 28px; cursor: pointer; user-select: none;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.3);
+        }
+
+        /* MENU HAMBÚRGUER COMPLETO */
+        .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; backdrop-filter: blur(5px); }
+        .drawer { width: 300px; background: #fff; height: 100%; position: absolute; right: 0; padding: 40px 20px; display: flex; flex-direction: column; }
+        .nav-link { padding: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 15px; text-decoration: none; color: var(--blue); font-weight: 700; }
+        .nav-link i { color: var(--accent); font-size: 20px; width: 25px; }
+
+        /* DICAS AO CLIENTE */
+        .tip-box { background: #e7f3ff; border-left: 5px solid var(--accent); padding: 15px; margin: 15px 0; border-radius: 0 10px 10px 0; font-size: 14px; }
+
+        input, select { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #ccc; font-size: 16px; }
+        .btn-elite { width: 100%; padding: 20px; border-radius: 15px; border: none; font-weight: bold; background: var(--accent); color: #fff; cursor: pointer; font-size: 17px; }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <div class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
+    
+    <header>
+        <img src="https://raw.githubusercontent.com/Refricenter-Cleiton/app-refricenter/main/banner-topo.jpg" class="banner-img" onerror="this.src='https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600'">
+    </header>
+
+    <div id="view-cad" class="view">
+        <h2 style="text-align:center; color: var(--blue)">Sistema Refricenter Elite</h2>
+        <div class="tip-box">💡 <b>Dica:</b> Cadastre seu WhatsApp corretamente para receber o lembrete de manutenção automática.</div>
+        <input type="text" id="reg-nome" placeholder="Nome Completo">
+        <input type="tel" id="reg-tel" placeholder="WhatsApp (68) 9XXXX-XXXX">
+        <input type="text" id="reg-end" placeholder="Endereço de Atendimento">
+        <button class="btn-elite" onclick="salvarCadastro()">ATIVAR MEU ACESSO</button>
+    </div>
+
+    <div id="view-home" class="view">
+        <h3 id="welcome-text"></h3>
+        <div class="card" onclick="addServ('Limpeza Higienizante', 150)">
+            <div class="card-img"><img src="https://raw.githubusercontent.com/Refricenter-Cleiton/app-refricenter/main/serv-limpeza.jpg" onerror="this.src='https://images.unsplash.com/photo-1558223142-205164f9103e?q=80&w=400'"></div>
+            <div class="card-info">
+                <h4>Limpeza Higienizante Pro</h4>
+                <p style="font-size:12px; color:#666">Elimina 99.9% de fungos e bactérias do seu aparelho.</p>
+                <span class="price-tag">R$ 150,00</span>
+            </div>
+        </div>
+        
+        <div class="card" onclick="addServ('Instalação Premium', 250)">
+            <div class="card-img"><img src="https://raw.githubusercontent.com/Refricenter-Cleiton/app-refricenter/main/serv-instalacao.jpg" onerror="this.src='https://images.unsplash.com/photo-1631545724391-9e7ec788448b?q=80&w=400'"></div>
+            <div class="card-info">
+                <h4>Instalação Premium</h4>
+                <p style="font-size:12px; color:#666">Cálculo de carga térmica e vácuo com bomba profissional.</p>
+                <span class="price-tag">R$ 250,00</span>
+            </div>
+        </div>
+
+        <div id="checkout" class="checkout-area" style="display:none">
+            <h4>Solicitações Ativas:</h4>
+            <div id="cart-items"></div>
+            <div style="margin: 15px 0;">
+                <input type="text" id="coupon" placeholder="Cupom de Desconto" style="width:65%; margin:0">
+                <button onclick="validaCupom()" style="width:30%; padding:15px; background:var(--blue); color:#fff; border-radius:10px; border:none">Ok</button>
+            </div>
+            <div class="total-row"><span>Total:</span><span id="txt-total">R$ 0,00</span></div>
+            <button class="btn-elite" style="background:var(--green); margin-top:20px" onclick="pedirWp()"><i class="fab fa-whatsapp"></i> FINALIZAR COM TÉCNICO</button>
+        </div>
+    </div>
+
+    <div id="view-calc" class="view">
+        <h2>Calculadora de BTUs Profissional</h2>
+        <div class="tip-box">💡 <b>Dica:</b> Um ar subdimensionado consome 40% mais energia. Calcule a carga exata aqui.</div>
+        <label>Área em Metros Quadrados (m²)</label>
+        <input type="number" id="calc-m2" placeholder="Ex: 15">
+        <label>Pessoas no Ambiente</label>
+        <input type="number" id="calc-p" value="2">
+        <label>Aparelhos Eletrônicos</label>
+        <input type="number" id="calc-e" value="1">
+        <button class="btn-elite" onclick="execCalc()">CALCULAR PRECISÃO</button>
+        <div id="res-calc" style="display:none; margin-top:20px; background:var(--blue); color:var(--gold); padding:25px; border-radius:20px; text-align:center">
+            <h2 id="btu-final"></h2>
+            <p style="color:#fff; font-size:12px">Recomendação técnica Refricenter</p>
+        </div>
+    </div>
+
+    <div id="view-erros" class="view">
+        <h2>Diagnóstico de Erros Inverter</h2>
+        <select id="sel-marca" onchange="verErros()">
+            <option value="">Selecione a Marca</option>
+            <option value="samsung">Samsung</option>
+            <option value="lg">LG Inverter</option>
+            <option value="midea">Midea / Carrier</option>
+        </select>
+        <div id="lista-erros" style="margin-top:20px"></div>
+    </div>
+
+    <div id="view-game" class="view">
+        <div id="game-box">
+            <div id="game-ui" class="game-overlay" style="position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; text-align:center; padding:20px">
+                <h2 style="color:var(--gold)">REFRI-GAME PRO</h2>
+                <p>Colete ❄️ (Gelo) e 🛠️ (Chaves)<br>Evite o 🔥 (Curto-Circuito)</p>
+                <button class="btn-elite" onclick="start() ">INICIAR DESAFIO</button>
+            </div>
+            <div id="player">👨‍🔧</div>
+            <div style="position:absolute; top:15px; left:15px; color:#fff; font-weight:900; z-index:500">SCORE: <span id="score">0</span></div>
+        </div>
+        
+        <div class="game-controls">
+            <button class="btn-game" style="background:var(--green)" id="btn-shoot">LANÇAR CHAVE 🛠️</button>
+            <div class="move-row">
+                <button class="btn-game" style="background:var(--accent)" id="btn-left"><i class="fas fa-arrow-left"></i></button>
+                <button class="btn-game" style="background:var(--accent)" id="btn-right"><i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="nav-mask" class="nav-overlay" onclick="toggleMenu()">
+    <div class="drawer" onclick="event.stopPropagation()">
+        <h2 style="color:var(--blue)">Refricenter Pro</h2>
+        <a class="nav-link" onclick="go('view-home')"><i class="fas fa-tools"></i> Solicitar Serviços</a>
+        <a class="nav-link" onclick="go('view-calc')"><i class="fas fa-calculator"></i> Calculadora BTUs</a>
+        <a class="nav-link" onclick="go('view-erros')"><i class="fas fa-microchip"></i> Diagnóstico de Erros</a>
+        <a class="nav-link" onclick="go('view-game')"><i class="fas fa-gamepad"></i> Refri-Game (Bônus)</a>
+        <div class="nav-link" onclick="window.open('https://instagram.com/refricenter')"><i class="fab fa-instagram"></i> Siga no Instagram</div>
+        <hr style="width:100%; border:0; border-top:1px solid #eee; margin:15px 0">
+        <a class="nav-link" style="color:var(--red)" onclick="window.open('tel:68992447004')"><i class="fas fa-phone-alt"></i> EMERGÊNCIA 24H</a>
+        <a class="nav-link" style="margin-top:auto" onclick="toggleMenu()"><i class="fas fa-times"></i> FECHAR MENU</a>
+    </div>
+</div>
+
+<script>
+    let u = null; let cart = []; let t = 0; let d = 0; let playing = false; let pX = 50;
+    const keys = { left: false, right: false }; // Para multi-touch
+
+    function toggleMenu() { 
+        const m = document.getElementById('nav-mask');
+        m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function go(id) {
+        document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        // Gerenciar scroll no jogo
+        if(id === 'view-game') document.body.classList.add('no-scroll');
+        else document.body.classList.remove('no-scroll');
+        toggleMenu();
+    }
+
+    function salvarCadastro() {
+        const n = document.getElementById('reg-nome').value;
+        if(!n) return alert("Preencha seu nome");
+        u = { nome: n, tel: document.getElementById('reg-tel').value };
+        localStorage.setItem('refri_gold_v5', JSON.stringify(u));
+        document.getElementById('welcome-text').innerText = "Olá, " + n + "!";
+        go('view-home');
+    }
+
+    function addServ(s, p) {
+        cart.push({s, p});
+        document.getElementById('checkout').style.display = 'block';
+        t = cart.reduce((acc, val) => acc + val.p, 0);
+        document.getElementById('cart-items').innerHTML = cart.map(i => `<div style="padding:8px; border-bottom:1px solid #eee">✅ ${i.s}</div>`).join('');
+        renderTotal();
+    }
+
+    function validaCupom() {
+        if(document.getElementById('coupon').value.toUpperCase() === "REFRI10") { d = 0.1; alert("Desconto de 10%!"); }
+        else { d = 0; alert("Cupom inválido"); }
+        renderTotal();
+    }
+
+    function renderTotal() {
+        document.getElementById('txt-total').innerText = "R$ " + (t * (1 - d)).toFixed(2);
+    }
+
+    function pedirWp() {
+        let m = `*PEDIDO REFRICENTER*%0ACliente: ${u.nome}%0A%0A`;
+        cart.forEach(c => m += `• ${c.s}%0A`);
+        m += `%0A*TOTAL COM DESCONTO:* R$ ${(t * (1-d)).toFixed(2)}`;
+        window.open(`https://wa.me/5568992447004?text=${m}`);
+    }
+
+    function execCalc() {
+        const res = (document.getElementById('calc-m2').value * 600) + (document.getElementById('calc-p').value * 600) + (document.getElementById('calc-e').value * 600);
+        document.getElementById('res-calc').style.display = 'block';
+        document.getElementById('btu-final').innerText = res.toLocaleString() + " BTUs";
+    }
+
+    // GAME ENGINE PRO (MULTI-TOUCH)
+    let sI, mI;
+    function start() {
+        playing = true; score = 0; pX = 50;
+        document.getElementById('game-ui').style.display = 'none';
+        document.querySelectorAll('.falling').forEach(f => f.remove());
+        sI = setInterval(spawn, 1000);
+        mI = setInterval(loop, 40);
+    }
+
+    function spawn() {
+        if(!playing) return;
+        const e = document.createElement('div'); e.className = 'falling';
+        const r = Math.random();
+        if(r < 0.6) { e.innerHTML = "❄️"; e.dataset.t = "p"; }
+        else if(r < 0.85) { e.innerHTML = "🔥"; e.dataset.t = "d"; }
+        else { e.innerHTML = "📟"; e.dataset.t = "ac"; }
+        e.style.left = Math.random() * 85 + "%"; e.style.top = "-50px";
+        document.getElementById('game-box').appendChild(e);
+    }
+
+    function loop() {
+        if(keys.left) pX = Math.max(5, pX - 2.5);
+        if(keys.right) pX = Math.min(85, pX + 2.5);
+        document.getElementById('player').style.left = pX + "%";
+
+        const pR = document.getElementById('player').getBoundingClientRect();
+        document.querySelectorAll('.falling').forEach(f => {
+            let top = parseInt(f.style.top) + 8; f.style.top = top + "px";
+            let fR = f.getBoundingClientRect();
+            if(fR.bottom > pR.top && fR.left < pR.right && fR.right > pR.left) {
+                if(f.dataset.t === "p") { score += 10; f.remove(); }
+                else if(f.dataset.t === "fixed") { score += 50; f.remove(); }
+                else if(f.dataset.t === "d") over();
+            }
+            if(top > 420) f.remove();
+        });
+        document.getElementById('score').innerText = score;
+    }
+
+    // CONTROLES MULTI-TOUCH
+    const bL = document.getElementById('btn-left');
+    const bR = document.getElementById('btn-right');
+    const bS = document.getElementById('btn-shoot');
+
+    bL.ontouchstart = (e) => { e.preventDefault(); keys.left = true; };
+    bL.ontouchend = () => keys.left = false;
+    bR.ontouchstart = (e) => { e.preventDefault(); keys.right = true; };
+    bR.ontouchend = () => keys.right = false;
+    bS.ontouchstart = (e) => { e.preventDefault(); shoot(); };
+
+    function shoot() {
+        if(!playing) return;
+        const k = document.createElement('div'); k.className = 'falling'; k.innerHTML = "🛠️";
+        k.style.left = pX + "%"; k.style.bottom = "80px";
+        document.getElementById('game-box').appendChild(k);
+        let kI = setInterval(() => {
+            let b = parseInt(k.style.bottom) || 80; b += 15; k.style.bottom = b + "px";
+            document.querySelectorAll('.falling[data-t="ac"]').forEach(ac => {
+                let kr = k.getBoundingClientRect(); let ar = ac.getBoundingClientRect();
+                if(kr.top < ar.bottom && kr.left < ar.right && kr.right > ar.left) {
+                    ac.innerHTML = "✅"; ac.dataset.t = "fixed"; k.remove(); clearInterval(kI);
+                }
+            });
+            if(b > 420) { k.remove(); clearInterval(kI); }
+        }, 30);
+    }
+
+    function over() {
+        playing = false; clearInterval(sI); clearInterval(mI);
+        document.getElementById('game-ui').style.display = 'flex';
+        document.getElementById('game-ui').innerHTML = `<h2>GAME OVER</h2><p>Pontos: ${score}</p><button class="btn-elite" onclick="start()">TENTAR DE NOVO</button>`;
+    }
+
+    // ERROS DB
+    const errs = {
+        samsung: "<b>E101:</b> Erro de Comunicação<br><b>E464:</b> Sobrecarga Compressor",
+        lg: "<b>CH05:</b> Falha Comunicação<br><b>CH61:</b> Alta Temperatura Condensadora",
+        midea: "<b>E1:</b> Erro de Sinal<br><b>EC:</b> Vazamento de Gás"
+    };
+    function verErros() {
+        const m = document.getElementById('sel-marca').value;
+        document.getElementById('lista-erros').innerHTML = m ? `<div class='tip-box' style='background:#fff'>${errs[m]}</div>` : "";
+    }
+
+    const s = localStorage.getItem('refri_gold_v5');
+    if(s) { u = JSON.parse(s); document.getElementById('welcome-text').innerText = "Olá, " + u.nome; go('view-home'); }
+    else go('view-cad');
+</script>
+</body>
+</html>
