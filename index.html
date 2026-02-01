@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refricenter Pro - Oficial</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { --blue: #007bff; --green: #25d366; --red: #ff4d4d; --dark: #333; --light: #f4f7f6; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--light); color: var(--dark); }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; min-height: 100vh; padding: 15px; position: relative; display: flex; flex-direction: column; }
+        header { text-align: center; margin-bottom: 20px; }
+        header img { width: 100%; border-radius: 12px; max-width: 320px; }
+        .menu-dots { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #555; z-index: 100; }
+        .view { display: none; width: 100%; }
+        .card { width: 100%; border-radius: 15px; border: 2px solid #eee; margin-bottom: 15px; overflow: hidden; cursor: pointer; background: #fff; }
+        .card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+        .card-txt { padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; }
+        .btn { width: 100%; padding: 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; display: block; text-align: center; font-size: 16px; text-decoration: none; }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-excluir { background: var(--red); color: #fff; padding: 4px 8px; font-size: 11px; border-radius: 5px; border: none; }
+        input, select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; background: #fff; }
+        .grid-btu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+        .opt { padding: 15px 5px; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; background: #fff; }
+        .opt.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .resumo-box { background: #f0f7ff; padding: 18px; border-radius: 15px; border: 1px solid #cce5ff; margin-top: 20px; }
+        .social-footer { text-align: center; padding: 20px 0; border-top: 1px solid #eee; margin-top: auto; }
+        .social-icons a { font-size: 28px; margin: 0 15px; text-decoration: none; display: inline-block; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; position: relative; max-height: 90vh; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="menu-dots" onclick="openModal()"><i class="fas fa-ellipsis-v"></i></div>
+    <header><img src="images/banner.png" onerror="this.src='banner.png'"></header>
+
+    <div id="view-cadastro" class="view">
+        <h3 style="text-align:center">Inicie seu Orçamento</h3>
+        <input id="nome" type="text" placeholder="Nome Completo">
+        <input id="end" type="text" placeholder="Endereço">
+        <select id="cidade">
+            <option value="sede">Plácido de Castro (Sede)</option>
+            <option value="interior">Outras Cidades / Rural (+ R$100)</option>
+        </select>
+        <button class="btn btn-blue" onclick="salvarCadastro()">Ver Tabela de Serviços</button>
+    </div>
+
+    <div id="view-app" class="view">
+        <h4 id="user-txt" style="text-align:center; color: var(--blue); margin-top:0"></h4>
+        
+        <div id="lista-servicos">
+            <div class="card" onclick="focarServico('Limpeza')"><img src="images/limpeza.png"><div class="card-txt">Limpeza e Higienização</div></div>
+            <div class="card" onclick="focarServico('Instalação')"><img src="images/instalacao.png"><div class="card-txt">Instalação</div></div>
+            <div class="card" onclick="focarServico('Desinstalação')"><img src="images/desinstalacao.png"><div class="card-txt">Desinstalação</div></div>
+            <div class="card" onclick="focarServico('Carga Gás')"><img src="images/gas.png"><div class="card-txt">Carga de Gás</div></div>
+            <div class="card" onclick="focarServico('Reparo')"><img src="images/reparo.png"><div class="card-txt">Reparo (Avaliação Local)</div></div>
+        </div>
+
+        <div id="painel-detalhes" style="display:none; background:#f9f9f9; padding:15px; border-radius:15px; border:2px solid var(--blue)">
+            <h4 id="txt-serv-sel" style="margin-top:0; color:var(--blue)"></h4>
+            
+            <label>Tecnologia do Ar:</label>
+            <select id="tec-ar" onchange="resetBTU()">
+                <option value="Convencional">Convencional (Split)</option>
+                <option value="Inverter">Inverter</option>
+            </select>
+
+            <div id="box-material" style="display:none">
+                <label>Incluir Material?</label>
+                <select id="com-material">
+                    <option value="nao">Não (Apenas Mão de Obra)</option>
+                    <option value="sim">Sim (Com Material Incluso)</option>
+                </select>
+            </div>
+
+            <div id="box-gas" style="display:none">
+                <label>Tipo de Gás:</label>
+                <select id="tipo-gas">
+                    <option value="R22">Gás R22</option>
+                    <option value="R410a">Gás R410a</option>
+                    <option value="R32">Gás R32</option>
+                </select>
+            </div>
+
+            <label>Potência (BTUs):</label>
+            <div class="grid-btu" id="btu-container">
+                </div>
+
+            <button class="btn btn-blue" onclick="confirmarServico()">Confirmar Item</button>
+            <button class="btn" style="background:#ccc" onclick="voltarLista()">Voltar</button>
+        </div>
+
+        <div id="area-carrinho" class="resumo-box" style="display:none"></div>
+        <button id="btn-whats" class="btn btn-green" style="display:none" onclick="enviarOrçamento()"><i class="fab fa-whatsapp"></i> Finalizar Orçamento</button>
+
+        <footer class="social-footer">
+            <div class="social-icons">
+                <a href="https://www.instagram.com/refricenter_arcondicionado?igsh=NDMyd215NXJ2MGNm" target="_blank" style="color:#E1306C"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/share/1HUFYxUVHE/" target="_blank" style="color:#4267B2"><i class="fab fa-facebook"></i></a>
+            </div>
+            <p style="font-size:11px; color:#aaa">Refricenter Acre © 2026</p>
+        </footer>
+    </div>
+
+    <div id="view-admin" class="view">
+        <h3 style="text-align:center">Histórico de Vendas</h3>
+        <div id="pedidos-lista"></div>
+        <button class="btn btn-blue" onclick="sairAdmin()">Sair</button>
+    </div>
+</div>
+
+<div id="menuModal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Refricenter Menu</h3>
+        <button class="btn" style="background:#eee; color:#333" onclick="alert('DICA: Portas e janelas fechadas economizam 15% de energia!')">💡 Dica de Economia</button>
+        <hr>
+        <input type="password" id="senha-admin" placeholder="Senha Admin">
+        <button class="btn btn-blue" onclick="validarAdmin()">Painel Admin</button>
+    </div>
+</div>
+
+<script>
+    // TABELA DE PREÇOS COMPLETA
+    const precos = {
+        "Instalação": {
+            "Convencional": { "nao": { "9k": 200, "12k": 200, "18k": 300, "22k": 350, "24k": 400 }, "sim": { "9k": 550, "12k": 600, "18k": 800, "22k": 850, "24k": 900 } },
+            "Inverter": { "nao": { "9k": 250, "12k": 250, "18k": 350, "22k": 400, "24k": 450 }, "sim": { "9k": 600, "12k": 650, "18k": 850, "22k": 900, "24k": 950 } }
+        },
+        "Desinstalação": {
+            "Convencional": { "9k": 100, "12k": 100, "18k": 150, "22k": 200, "24k": 200 },
+            "Inverter": { "9k": 150, "12k": 150, "18k": 200, "22k": 250, "24k": 250 }
+        },
+        "Limpeza": {
+            "Convencional": { "9k": 150, "12k": 150, "18k": 200, "22k": 250, "24k": 300 },
+            "Inverter": { "9k": 200, "12k": 200, "18k": 250, "22k": 300, "24k": 350 }
+        },
+        "Carga Gás": {
+            "R22": { "9k": 450, "12k": 450, "18k": 600, "22k": 700, "24k": 750, "30k": 900, "36k": 1100 },
+            "R410a": { "9k": 500, "12k": 500, "18k": 600, "22k": 800, "24k": 850, "30k": 1000, "36k": 1200 },
+            "R32": { "9k": 550, "12k": 600, "18k": 750, "22k": 900, "24k": 1000, "30k": 1200, "36k": 1350 }
+        }
+    };
+
+    let servSel=null, btuSel=null, carrinho=[], usuario=null;
+
+    function renderBTUs(lista) {
+        const container = document.getElementById('btu-container');
+        container.innerHTML = "";
+        lista.forEach(b => {
+            container.innerHTML += `<div class="opt opt-btu" onclick="setBTU('${b}', this)">${b.replace('k','000')} BTUs</div>`;
+        });
+    }
+
+    function focarServico(nome) {
+        servSel = nome;
+        document.getElementById('lista-servicos').style.display='none';
+        document.getElementById('painel-detalhes').style.display='block';
+        document.getElementById('txt-serv-sel').innerText = nome;
+        
+        document.getElementById('box-material').style.display = (nome === 'Instalação') ? 'block' : 'none';
+        document.getElementById('box-gas').style.display = (nome === 'Carga Gás') ? 'block' : 'none';
+        document.getElementById('tec-ar').style.display = (nome === 'Carga Gás') ? 'none' : 'block';
+
+        let btus = ["9k", "12k", "18k", "22k", "24k"];
+        if(nome === 'Carga Gás') btus = ["9k", "12k", "18k", "22k", "24k", "30k", "36k"];
+        renderBTUs(btus);
+    }
+
+    function setBTU(valor, el) {
+        btuSel = valor;
+        document.querySelectorAll('.opt-btu').forEach(o=>o.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function confirmarServico() {
+        if(!btuSel) return alert("Selecione os BTUs!");
+        let precoFinal = 0;
+        const tec = document.getElementById('tec-ar').value;
+        const mat = document.getElementById('com-material').value;
+        const gas = document.getElementById('tipo-gas').value;
+
+        if(servSel === 'Instalação') precoFinal = precos[servSel][tec][mat][btuSel];
+        else if(servSel === 'Carga Gás') precoFinal = precos[servSel][gas][btuSel];
+        else if(servSel === 'Reparo') precoFinal = 0;
+        else precoFinal = precos[servSel][tec][btuSel];
+
+        carrinho.push({
+            serv: servSel, 
+            btu: btuSel.replace('k','000') + " BTUs", 
+            tec: (servSel === 'Carga Gás') ? gas : tec,
+            mat: (servSel === 'Instalação') ? mat : null,
+            v: precoFinal
+        });
+
+        voltarLista(); atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+        const area = document.getElementById('area-carrinho');
+        if(carrinho.length === 0) { area.style.display='none'; document.getElementById('btn-whats').style.display='none'; return; }
+        area.style.display='block';
+        let sub = 0;
+        area.innerHTML = "<strong>Itens Selecionados:</strong><br><br>";
+        carrinho.forEach((i, idx) => {
+            area.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px">
+                <span>${i.serv} ${i.btu} (${i.tec}${i.mat==='sim'?' +Mat':''})</span>
+                <button class="btn-excluir" onclick="apagarItem(${idx})">Remover</button>
+            </div>`;
+            sub += i.v;
+        });
+
+        let perc = (sub>=1000)?0.12 : (sub>=600)?0.08 : (sub>=300)?0.03 : 0;
+        let vDesc = sub * perc;
+        let taxa = (usuario.c === 'interior') ? 100 : 0;
+        let total = (sub - vDesc) + taxa;
+
+        area.innerHTML += `<hr><div style="font-size:13px">
+            Subtotal: R$ ${sub.toFixed(2)}<br>
+            <span style="color:var(--blue)">Desconto (${perc*100}%): - R$ ${vDesc.toFixed(2)}</span><br>
+            Deslocamento: R$ ${taxa.toFixed(2)}<br>
+            <strong style="font-size:16px">Total: R$ ${total.toFixed(2)}</strong>
+        </div>`;
+        window.totalGeral = total;
+        window.descontoGeral = vDesc;
+        document.getElementById('btn-whats').style.display='block';
+    }
+
+    function enviarOrçamento() {
+        let texto = `*ORÇAMENTO REFRI CENTER*%0A%0A*CLIENTE:* ${usuario.n}%0A*END:* ${usuario.end}%0A%0A*SERVIÇOS:*%0A`;
+        carrinho.forEach(i => { texto += `• ${i.serv} ${i.btu} (${i.tec}${i.mat==='sim'?' c/ Material':''})%0A`; });
+        texto += `%0A*DESC:* R$ ${window.descontoGeral.toFixed(2)}%0A*TOTAL FINAL:* R$ ${window.totalGeral.toFixed(2)}`;
+        
+        const db = JSON.parse(localStorage.getItem('ref_db') || '[]');
+        db.push({n: usuario.n, v: window.totalGeral, d: new Date().toLocaleDateString()});
+        localStorage.setItem('ref_db', JSON.stringify(db));
+        window.open(`https://wa.me/5568992447004?text=${texto}`);
+    }
+
+    // FUNÇÕES DE NAVEGAÇÃO E ADMIN (MANTIDAS)
+    function salvarCadastro() {
+        const n=document.getElementById('nome').value, e=document.getElementById('end').value;
+        if(!n || !e) return alert("Preencha os dados!");
+        usuario = { n, e, c: document.getElementById('cidade').value };
+        localStorage.setItem('ref_u', JSON.stringify(usuario));
+        show('view-app'); setBoasVindas();
+    }
+    function setBoasVindas() { document.getElementById('user-txt').innerText = `Olá, ${usuario.n}!`; }
+    function apagarItem(idx) { carrinho.splice(idx, 1); atualizarCarrinho(); }
+    function voltarLista() { document.getElementById('lista-servicos').style.display='block'; document.getElementById('painel-detalhes').style.display='none'; btuSel=null; }
+    function show(id) { document.querySelectorAll('.view').forEach(v=>v.style.display='none'); document.getElementById(id).style.display='block'; }
+    function openModal() { document.getElementById('menuModal').style.display='flex'; }
+    function closeModal() { document.getElementById('menuModal').style.display='none'; }
+    function validarAdmin() { if(document.getElementById('senha-admin').value === '9988') { localStorage.setItem('is_adm','sim'); closeModal(); abrirAdmin(); } }
+    function abrirAdmin() { show('view-admin'); const db=JSON.parse(localStorage.getItem('ref_db')||'[]'); const lista=document.getElementById('pedidos-lista'); lista.innerHTML=""; db.forEach(p=>{ lista.innerHTML+=`<div style='border-bottom:1px solid #eee; padding:10px'>${p.d} - ${p.n}: R$ ${p.v.toFixed(2)}</div>` }); }
+    function sairAdmin() { localStorage.removeItem('is_adm'); location.reload(); }
+    window.onload = () => { usuario=JSON.parse(localStorage.getItem('ref_u')); if(localStorage.getItem('is_adm')==='sim') abrirAdmin(); else if(usuario) { show('view-app'); setBoasVindas(); } else show('view-cadastro'); };
+</script>
+</body>
+</html>
