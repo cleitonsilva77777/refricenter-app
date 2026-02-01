@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Pro - Oficial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { 
+            --blue: #003366; --accent: #007bff; --green: #28a745; 
+            --red: #dc3545; --gold: #ffc107; --bg: #f4f7f6; 
+        }
+        
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: #111; color: #333; }
+
+        .app-container { max-width: 500px; margin: 0 auto; background: var(--bg); min-height: 100vh; position: relative; display: flex; flex-direction: column; }
+
+        /* HEADER E BANNER CORRIGIDOS */
+        header { width: 100%; height: 220px; background: var(--blue); position: relative; overflow: hidden; }
+        .banner-img { width: 100%; height: 100%; object-fit: cover; }
+        .menu-icon { position: absolute; top: 15px; right: 15px; font-size: 28px; color: #fff; cursor: pointer; z-index: 1000; background: var(--accent); padding: 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        /* VIEWS */
+        .view { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CARDS DE SERVIÇOS (FOTOS REAIS DE AR-CONDICIONADO) */
+        .service-grid { display: flex; flex-direction: column; gap: 20px; }
+        .card { background: #fff; border-radius: 20px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 6px 12px rgba(0,0,0,0.05); }
+        .img-container { width: 100%; height: 160px; background: #e0e0e0; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .card-body { padding: 15px; border-top: 4px solid var(--accent); }
+        .card-body h4 { margin: 0; color: var(--blue); font-size: 18px; text-transform: uppercase; }
+        .card-body p { margin: 5px 0 0; font-weight: bold; color: var(--green); font-size: 16px; }
+
+        /* REFRI-GAME (REESTRUTURAÇÃO TOTAL DO LAYOUT) */
+        #game-box { width: 100%; height: 420px; background: linear-gradient(to bottom, #001f3f, #000); border-radius: 20px; position: relative; overflow: hidden; border: 4px solid var(--gold); }
+        
+        .game-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; color: #fff; padding: 25px; }
+        
+        .rank-container { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; width: 100%; margin: 15px 0; border: 1px solid rgba(255,255,255,0.2); }
+        .rank-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 3px; }
+
+        #player { position: absolute; bottom: 15px; font-size: 45px; z-index: 50; transition: left 0.1s; }
+        .falling { position: absolute; font-size: 32px; z-index: 10; }
+        
+        /* BOTÕES LUXUOSOS */
+        .btn-main { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .bg-blue { background: var(--accent); color: #fff; }
+        .bg-green { background: var(--green); color: #fff; }
+        .btn-return { background: #fff; border: 2px solid var(--blue); color: var(--blue); margin-bottom: 20px; }
+
+        /* NAV DRAWER */
+        .nav-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: none; backdrop-filter: blur(4px); }
+        .nav-drawer { width: 85%; background: #fff; height: 100%; position: absolute; right: 0; padding: 50px 25px; display: flex; flex-direction: column; box-shadow: -10px 0 20px rgba(0,0,0,0.2); }
+        .nav-item { padding: 18px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 15px; color: #333; text-decoration: none; font-weight: bold; font-size: 18px; }
+        .nav-item i { color: var(--accent); width: 30px; font-size: 22px; }
+
+        input, select { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; background: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="menu-icon" onclick="openNav()"><i class="fas fa-bars"></i></div>
+    
+    <header>
+        <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600&auto=format&fit=crop" class="banner-img" alt="Técnico Refricenter">
+    </header>
+
+    <div id="view-cad" class="view">
+        <h2 style="text-align:center; color: var(--blue)">Bem-vindo à Refricenter</h2>
+        <p style="text-align:center; color: #666">Sua climatização em boas mãos.</p>
+        <input type="text" id="reg-nome" placeholder="Seu Nome Completo">
+        <input type="tel" id="reg-tel" placeholder="WhatsApp (68) 9XXXX-XXXX">
+        <input type="text" id="reg-end" placeholder="Endereço Completo">
+        <select id="reg-taxa">
+            <option value="0">Plácido de Castro (Urbano)</option>
+            <option value="120">Interior / Outras Cidades (+ R$ 120)</option>
+        </select>
+        <button class="btn-main bg-blue" onclick="save()">ENTRAR NO PAINEL</button>
+    </div>
+
+    <div id="view-home" class="view">
+        <h3 id="welcome-msg" style="color: var(--blue)"></h3>
+        <div class="service-grid">
+            <div class="card" onclick="startOrder('Limpeza Higienizante')">
+                <div class="img-container">
+                    <img src="https://images.unsplash.com/photo-1558223142-205164f9103e?q=80&w=400&auto=format&fit=crop">
+                </div>
+                <div class="card-body"><h4>Limpeza Higienizante</h4><p>R$ 150,00</p></div>
+            </div>
+            <div class="card" onclick="startOrder('Instalação Completa')">
+                <div class="img-container">
+                    <img src="https://images.unsplash.com/photo-1599839619722-397514112634?q=80&w=400&auto=format&fit=crop">
+                </div>
+                <div class="card-body"><h4>Instalação Completa</h4><p>R$ 200,00</p></div>
+            </div>
+            <div class="card" onclick="startOrder('Carga de Gás R410/R22')">
+                <div class="img-container">
+                    <img src="https://images.unsplash.com/photo-1631545724391-9e7ec788448b?q=80&w=400&auto=format&fit=crop">
+                </div>
+                <div class="card-body"><h4>Carga de Gás</h4><p>R$ 450,00</p></div>
+            </div>
+        </div>
+
+        <div id="cart-box" style="margin-top:20px"></div>
+        <button id="btn-whats" class="btn-main bg-green" style="display:none; margin-top:20px" onclick="sendWhatsApp()">
+            <i class="fab fa-whatsapp"></i> ENVIAR ORÇAMENTO VIA WHATSAPP
+        </button>
+    </div>
+
+    <div id="view-game" class="view">
+        <button class="btn-main btn-return" onclick="navigate('view-home')"><i class="fas fa-arrow-left"></i> VOLTAR PARA O INÍCIO</button>
+        <div id="game-box">
+            <div id="game-intro" class="game-overlay">
+                <h2 style="color: var(--gold)">REFRI-GAME</h2>
+                <p>Pegue ❄️ (Gelo) para pontos.<br>Atire 🛠️ no 📟 (Ar Quebrado).<br>Fuja do 🔥 (Fogo)!</p>
+                <button class="btn-main bg-blue" onclick="gameStart()">INICIAR DESAFIO</button>
+            </div>
+            <div id="game-over" class="game-overlay" style="display:none">
+                <h2 style="color: var(--red)">GAME OVER</h2>
+                <p id="final-score" style="font-size: 20px; font-weight: bold"></p>
+                <div class="rank-container" id="rank-list"></div>
+                <button class="btn-main bg-blue" onclick="gameStart()">TENTAR NOVAMENTE</button>
+            </div>
+            <div style="position:absolute; top:15px; left:15px; color:#fff; font-weight:bold; z-index:100; font-size: 18px">SCORE: <span id="scr">0</span></div>
+            <div id="player">👨‍🔧</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:15px">
+            <button class="btn-main bg-blue" style="font-size:28px" id="l-btn"><i class="fas fa-chevron-left"></i></button>
+            <button class="btn-main bg-blue" style="font-size:28px" id="r-btn"><i class="fas fa-chevron-right"></i></button>
+            <button class="btn-main bg-green" style="grid-column: span 2" onclick="shoot()">LANÇAR FERRAMENTA 🛠️</button>
+        </div>
+    </div>
+</div>
+
+<div id="nav-mask" class="nav-mask" onclick="closeNav()">
+    <div class="nav-drawer" onclick="event.stopPropagation()">
+        <h2 style="color: var(--blue)">Refricenter Pro</h2>
+        <div class="nav-item" onclick="navigate('view-home')"><i class="fas fa-tools"></i> Solicitar Serviços</div>
+        <div class="nav-item" onclick="navigate('view-game')"><i class="fas fa-gamepad"></i> Refri-Game (Bônus)</div>
+        <div class="nav-item" onclick="navigate('view-cad')"><i class="fas fa-id-card"></i> Atualizar Meus Dados</div>
+        <hr style="width:100%; border:0; border-top:1px solid #eee; margin: 20px 0">
+        <div class="nav-item" style="color: var(--red)" onclick="window.open('tel:68992447004')"><i class="fas fa-phone-alt"></i> EMERGÊNCIA 24H</div>
+        <div class="nav-item" style="margin-top:auto; color:var(--accent)" onclick="closeNav()"><i class="fas fa-times-circle"></i> FECHAR MENU</div>
+    </div>
+</div>
+
+<script>
+    let user = null; let cart = []; let score = 0; let playing = false; let pX = 50;
+
+    function navigate(id) {
+        document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        closeNav();
+    }
+    function openNav() { document.getElementById('nav-mask').style.display = 'block'; }
+    function closeNav() { document.getElementById('nav-mask').style.display = 'none'; }
+
+    function save() {
+        const n = document.getElementById('reg-nome').value;
+        if(!n) return alert("Por favor, informe seu nome.");
+        user = { nome: n, tel: document.getElementById('reg-tel').value, taxa: parseInt(document.getElementById('reg-taxa').value) };
+        localStorage.setItem('refri_user', JSON.stringify(user));
+        document.getElementById('welcome-msg').innerText = "Olá, " + n + "! O que vamos fazer hoje?";
+        navigate('view-home');
+    }
+
+    function startOrder(s) {
+        cart.push(s);
+        renderCart();
+    }
+
+    function renderCart() {
+        const box = document.getElementById('cart-box');
+        box.innerHTML = cart.map((i) => `<div style="padding:12px; background:#fff; margin-bottom:5px; border-radius:10px; border-left: 5px solid var(--accent)">✅ ${i}</div>`).join('');
+        if(cart.length > 0) document.getElementById('btn-whats').style.display = 'flex';
+    }
+
+    function sendWhatsApp() {
+        let msg = `*REFRICENTER: SOLICITAÇÃO DE SERVIÇO*%0A*Cliente:* ${user.nome}%0A%0A*SERVIÇOS SELECIONADOS:*%0A`;
+        cart.forEach(i => msg += `- ${i}%0A`);
+        window.open(`https://wa.me/5568992447004?text=${msg}`);
+    }
+
+    // GAME ENGINE REVISADO
+    let spawnInt, moveInt;
+    function gameStart() {
+        score = 0; playing = true; pX = 50;
+        document.getElementById('scr').innerText = "0";
+        document.getElementById('game-intro').style.display = 'none';
+        document.getElementById('game-over').style.display = 'none';
+        document.querySelectorAll('.falling').forEach(f => f.remove());
+        spawnInt = setInterval(spawn, 1000);
+        moveInt = setInterval(move, 50);
+    }
+
+    function spawn() {
+        if(!playing) return;
+        const f = document.createElement('div'); f.className = 'falling';
+        const r = Math.random();
+        if(r < 0.6) { f.innerHTML = "❄️"; f.dataset.t = "ice"; }
+        else if(r < 0.85) { f.innerHTML = "🔥"; f.dataset.t = "fire"; }
+        else { f.innerHTML = "📟"; f.dataset.t = "ac"; }
+        f.style.left = Math.random() * 85 + "%"; f.style.top = "-50px";
+        document.getElementById('game-box').appendChild(f);
+    }
+
+    function move() {
+        if(!playing) return;
+        const pR = document.getElementById('player').getBoundingClientRect();
+        document.querySelectorAll('.falling').forEach(f => {
+            let t = parseInt(f.style.top) + 7;
+            f.style.top = t + "px";
+            let fR = f.getBoundingClientRect();
+            if(fR.bottom > pR.top && fR.left < pR.right && fR.right > pR.left) {
+                if(f.dataset.t === "ice") { score += 10; f.remove(); }
+                else if(f.dataset.t === "fixed") { score += 50; f.remove(); }
+                else { gameOver(); }
+            }
+            if(t > 420) f.remove();
+        });
+        document.getElementById('scr').innerText = score;
+    }
+
+    function shoot() {
+        if(!playing) return;
+        const w = document.createElement('div'); w.className = 'falling'; w.innerHTML = "🛠️";
+        w.style.left = (pX + 5) + "%"; w.style.bottom = "70px";
+        document.getElementById('game-box').appendChild(w);
+        let wInt = setInterval(() => {
+            let b = parseInt(w.style.bottom) || 70; b += 18; w.style.bottom = b + "px";
+            document.querySelectorAll('.falling[data-t="ac"]').forEach(ac => {
+                let wr = w.getBoundingClientRect(); let ar = ac.getBoundingClientRect();
+                if(wr.top < ar.bottom && wr.left < ar.right && wr.right > ar.left) {
+                    ac.innerHTML = "✅"; ac.dataset.t = "fixed"; w.remove(); clearInterval(wInt);
+                }
+            });
+            if(b > 420) { w.remove(); clearInterval(wInt); }
+        }, 30);
+    }
+
+    function gameOver() {
+        playing = false; clearInterval(spawnInt); clearInterval(moveInt);
+        document.getElementById('game-over').style.display = 'flex';
+        document.getElementById('final-score').innerText = "Você fez " + score + " pontos!";
+        
+        let r = JSON.parse(localStorage.getItem('refri_rank') || '[]');
+        r.push({n: user.nome, s: score});
+        r.sort((a,b) => b.s - a.s);
+        r = r.slice(0, 5);
+        localStorage.setItem('refri_rank', JSON.stringify(r));
+        
+        document.getElementById('rank-list').innerHTML = "<b>🏆 TOP RANKING:</b><br>" + 
+            r.map((v,i) => `<div class="rank-item"><span>${i+1}º ${v.n}</span> <span>${v.s} pts</span></div>`).join('');
+    }
+
+    document.getElementById('l-btn').onclick = () => { pX = Math.max(0, pX-10); document.getElementById('player').style.left = pX+"%"; };
+    document.getElementById('r-btn').onclick = () => { pX = Math.min(90, pX+10); document.getElementById('player').style.left = pX+"%"; };
+
+    const saved = localStorage.getItem('refri_user');
+    if(saved) { user = JSON.parse(saved); document.getElementById('welcome-msg').innerText = "Olá, " + user.nome + "! O que vamos fazer hoje?"; navigate('view-home'); }
+    else navigate('view-cad');
+</script>
+</body>
+</html>
