@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refricenter Pro</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { --blue: #007bff; --green: #25d366; --red: #ff4d4d; --dark: #333; --light: #f4f7f6; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--light); color: var(--dark); }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; min-height: 100vh; padding: 15px; position: relative; display: flex; flex-direction: column; }
+        header { text-align: center; margin-bottom: 20px; }
+        header img { width: 100%; border-radius: 12px; max-width: 320px; }
+        .menu-dots { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #555; z-index: 100; }
+        .view { display: none; width: 100%; }
+        .card { width: 100%; border-radius: 15px; border: 2px solid #eee; margin-bottom: 15px; overflow: hidden; cursor: pointer; background: #fff; }
+        .card img { width: 100%; height: 180px; object-fit: cover; display: block; }
+        .card-txt { padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14px; }
+        .btn { width: 100%; padding: 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; display: block; text-align: center; font-size: 16px; text-decoration: none; }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-excluir { background: var(--red); color: #fff; padding: 4px 8px; font-size: 11px; border-radius: 5px; border: none; cursor: pointer; }
+        input, select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .grid-btu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+        .opt { padding: 15px 5px; border: 1px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; background: #fff; }
+        .opt.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .resumo-box { background: #f0f7ff; padding: 18px; border-radius: 15px; border: 1px solid #cce5ff; margin-top: 20px; }
+        .social-footer { text-align: center; padding: 20px 0; border-top: 1px solid #eee; margin-top: auto; }
+        .social-icons a { font-size: 28px; margin: 0 15px; text-decoration: none; display: inline-block; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; position: relative; max-height: 80vh; overflow-y: auto; }
+        .modal-btn { background: #f4f4f4; border: 1px solid #ddd; padding: 12px; margin-bottom: 8px; border-radius: 8px; text-align: left; width: 100%; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="menu-dots" onclick="openModal()"><i class="fas fa-ellipsis-v"></i></div>
+    <header><img src="images/banner.png" onerror="this.src='banner.png'"></header>
+
+    <div id="view-cadastro" class="view">
+        <h3 style="text-align:center">Orçamento Refricenter</h3>
+        <input id="nome" type="text" placeholder="Seu Nome Completo">
+        <input id="end" type="text" placeholder="Endereço de Atendimento">
+        <select id="cidade">
+            <option value="sede">Plácido de Castro (Sede)</option>
+            <option value="interior">Outras Cidades / Rural</option>
+        </select>
+        <button class="btn btn-blue" onclick="salvarCadastro()">Entrar</button>
+    </div>
+
+    <div id="view-app" class="view">
+        <h4 id="user-txt" style="text-align:center; color: var(--blue); margin-top:0"></h4>
+        
+        <div id="lista-servicos">
+            <div class="card" onclick="focarServico('Limpeza')"><img src="images/limpeza.png"><div class="card-txt">Limpeza Completa</div></div>
+            <div class="card" onclick="focarServico('Instalação')"><img src="images/instalacao.png"><div class="card-txt">Instalação</div></div>
+            <div class="card" onclick="focarServico('Desinstalação')"><img src="images/desinstalacao.png"><div class="card-txt">Desinstalação</div></div>
+            <div class="card" onclick="focarServico('Carga Gás')"><img src="images/gas.png"><div class="card-txt">Carga de Gás</div></div>
+            <div class="card" onclick="focarServico('Reparo')"><img src="images/reparo.png"><div class="card-txt">Reparo (Avaliação)</div></div>
+        </div>
+
+        <div id="painel-btu" style="display:none; background:#f9f9f9; padding:15px; border-radius:15px; border:2px solid var(--blue)">
+            <h4 id="txt-serv-sel" style="margin-top:0; color:var(--blue)"></h4>
+            <select id="modelo-ar" style="margin-bottom:10px">
+                <option value="Inverter">Tecnologia: Inverter</option>
+                <option value="Convencional">Tecnologia: Convencional</option>
+                <option value="Janela">Tecnologia: Janela</option>
+            </select>
+            <div class="grid-btu">
+                <div class="opt opt-btu" onclick="setBTU('9.000 BTUs', this)">9.000</div>
+                <div class="opt opt-btu" onclick="setBTU('12.000 BTUs', this)">12.000</div>
+                <div class="opt opt-btu" onclick="setBTU('18.000 BTUs', this)">18.000</div>
+                <div class="opt opt-btu" onclick="setBTU('22.000 BTUs', this)">22.000</div>
+                <div class="opt opt-btu" onclick="setBTU('24.000 BTUs', this)">24.000</div>
+                <div class="opt opt-btu" onclick="setBTU('30.000 BTUs', this)">30.000</div>
+                <div class="opt opt-btu" onclick="setBTU('36.000 BTUs', this)">36.000</div>
+            </div>
+            <button class="btn btn-blue" onclick="confirmarServico()">Confirmar BTUs</button>
+            <button class="btn" style="background:#ccc" onclick="voltarLista()">Voltar</button>
+        </div>
+
+        <div id="area-carrinho" class="resumo-box" style="display:none"></div>
+        <button id="btn-whats" class="btn btn-green" style="display:none" onclick="enviarOrçamento()"><i class="fab fa-whatsapp"></i> Enviar Orçamento</button>
+
+        <footer class="social-footer">
+            <div class="social-icons">
+                <a href="https://www.instagram.com/refricenter_arcondicionado?igsh=NDMyd215NXJ2MGNm" target="_blank" style="color:#E1306C"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/share/1HUFYxUVHE/" target="_blank" style="color:#4267B2"><i class="fab fa-facebook"></i></a>
+            </div>
+            <p style="font-size:11px; color:#aaa">Refricenter Acre © 2026</p>
+        </footer>
+    </div>
+
+    <div id="view-admin" class="view">
+        <h3 style="text-align:center">Histórico Admin</h3>
+        <div style="background:var(--dark); color:#fff; padding:20px; border-radius:15px; text-align:center; margin-bottom:15px">
+            <p style="margin:0">Faturamento Acumulado</p>
+            <h2 id="total-admin" style="font-size:30px; margin:10px 0">R$ 0,00</h2>
+            <button onclick="limparBanco()" style="color:red; background:none; border:none; cursor:pointer">Zerar Tudo</button>
+        </div>
+        <div id="pedidos-lista"></div>
+        <button class="btn btn-blue" onclick="sairAdmin()">Voltar</button>
+    </div>
+</div>
+
+<div id="menuModal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Menu Refricenter</h3>
+        <button class="modal-btn" onclick="alert('DICA: Limpar filtros a cada 15 dias reduz conta de luz em 20%!')">💡 Dica Economia</button>
+        <button class="modal-btn" onclick="alert('BIO: Líder em Plácido de Castro, focada em qualidade e honestidade.')">📖 Nossa História</button>
+        <hr>
+        <input type="password" id="senha-admin" placeholder="Senha Admin">
+        <button class="btn btn-blue" onclick="validarAdmin()">Acessar Painel</button>
+    </div>
+</div>
+
+<script>
+    const tabelaPrecos = {"9.000 BTUs":200, "12.000 BTUs":200, "18.000 BTUs":350, "22.000 BTUs":400, "24.000 BTUs":450, "30.000 BTUs":650, "36.000 BTUs":750};
+    let servSel=null, btuSel=null, carrinho=[], usuario=null;
+    let dadosDesconto = { valor: 0, pct: 0 };
+
+    window.onload = () => {
+        usuario = JSON.parse(localStorage.getItem('ref_u'));
+        if(localStorage.getItem('is_adm') === 'sim') { abrirAdmin(); }
+        else if(usuario) { show('view-app'); setBoasVindas(); }
+        else { show('view-cadastro'); }
+    };
+
+    function show(id) { document.querySelectorAll('.view').forEach(v=>v.style.display='none'); document.getElementById(id).style.display='block'; }
+    function setBoasVindas() { document.getElementById('user-txt').innerText = `Bem-vindo, ${usuario.n}!`; }
+
+    function salvarCadastro() {
+        const n=document.getElementById('nome').value, e=document.getElementById('end').value, c=document.getElementById('cidade').value;
+        if(!n || !e) return alert("Preencha Nome e Endereço!");
+        usuario = { n, e, c };
+        localStorage.setItem('ref_u', JSON.stringify(usuario));
+        setBoasVindas(); show('view-app');
+    }
+
+    function focarServico(nome) {
+        servSel = nome;
+        if(nome==='Reparo') { carrinho.push({n:'Reparo', b:'Avaliação Local', m:'-', v:0}); return atualizarCarrinho(); }
+        document.getElementById('lista-servicos').style.display='none';
+        document.getElementById('painel-btu').style.display='block';
+        document.getElementById('txt-serv-sel').innerText = "Serviço: " + nome;
+    }
+
+    function voltarLista() { document.getElementById('lista-servicos').style.display='block'; document.getElementById('painel-btu').style.display='none'; btuSel = null; }
+    function setBTU(valor, el) { btuSel = valor; document.querySelectorAll('.opt-btu').forEach(o=>o.classList.remove('active')); el.classList.add('active'); }
+
+    function confirmarServico() {
+        if(!btuSel) return alert("Escolha os BTUs!");
+        const modelo = document.getElementById('modelo-ar').value;
+        carrinho.push({n: servSel, b: btuSel, m: modelo, v: tabelaPrecos[btuSel]});
+        voltarLista(); atualizarCarrinho();
+    }
+
+    function apagarItem(idx) { carrinho.splice(idx, 1); atualizarCarrinho(); }
+
+    function atualizarCarrinho() {
+        const area = document.getElementById('area-carrinho');
+        if(carrinho.length === 0) { area.style.display='none'; document.getElementById('btn-whats').style.display='none'; return; }
+        area.style.display='block';
+        let sub = 0;
+        area.innerHTML = "<strong>Resumo do Pedido:</strong><br><br>";
+        carrinho.forEach((i, idx) => {
+            area.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:13px">
+                <span>${i.n} - ${i.b}</span>
+                <button class="btn-excluir" onclick="apagarItem(${idx})">X</button>
+            </div>`;
+            sub += i.v;
+        });
+
+        let perc = (sub>=1000)?0.12 : (sub>=600)?0.08 : (sub>=300)?0.03 : 0;
+        let vDesc = sub * perc;
+        dadosDesconto = { valor: vDesc, pct: perc * 100 };
+        
+        let taxa = (usuario.c === 'interior') ? 100 : 0;
+        let total = (sub - vDesc) + taxa;
+
+        area.innerHTML += `<hr style="border:0; border-top:1px solid #ccc">`;
+        area.innerHTML += `<div style="font-size:14px; line-height:1.6">
+            Subtotal: R$ ${sub.toFixed(2)}<br>
+            <span style="color:var(--blue); font-weight:bold">Desconto Especial (${dadosDesconto.pct}%): - R$ ${vDesc.toFixed(2)}</span><br>
+            Deslocamento: R$ ${taxa.toFixed(2)}<br>
+            <strong style="font-size:18px; color:var(--dark)">Total: R$ ${total.toFixed(2)}</strong>
+        </div>`;
+        
+        document.getElementById('btn-whats').style.display='block';
+        window.vTotalFinal = total;
+    }
+
+    function enviarOrçamento() {
+        let texto = `*ORÇAMENTO REFRI CENTER*%0A%0A`;
+        texto += `*CLIENTE:* ${usuario.n}%0A*ENDEREÇO:* ${usuario.end}%0A%0A`;
+        texto += `*SERVIÇOS:*%0A`;
+        carrinho.forEach(i => { texto += `• ${i.n} - ${i.m} - ${i.b}%0A`; });
+        texto += `%0A*DESCONTO APLICADO:* R$ ${dadosDesconto.valor.toFixed(2)} (${dadosDesconto.pct}%)`;
+        texto += `%0A*TOTAL FINAL:* R$ ${window.vTotalFinal.toFixed(2)}`;
+        
+        const db = JSON.parse(localStorage.getItem('ref_db') || '[]');
+        db.push({n: usuario.n, v: window.vTotalFinal, d: new Date().toLocaleDateString(), servs: carrinho.map(c => c.n).join(', ')});
+        localStorage.setItem('ref_db', JSON.stringify(db));
+        
+        window.open(`https://wa.me/5568992447004?text=${texto}`);
+    }
+
+    function validarAdmin() { if(document.getElementById('senha-admin').value === '9988') { localStorage.setItem('is_adm', 'sim'); closeModal(); abrirAdmin(); } else { alert("Senha Errada!"); } }
+    function abrirAdmin() {
+        show('view-admin');
+        const db = JSON.parse(localStorage.getItem('ref_db') || '[]');
+        let total = 0; const lista = document.getElementById('pedidos-lista'); lista.innerHTML = "";
+        db.forEach(p => { total += p.v; lista.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee; font-size:12px"><strong>${p.n}</strong>: R$ ${p.v.toFixed(2)} (${p.d})</div>`; });
+        document.getElementById('total-admin').innerText = "R$ " + total.toFixed(2);
+    }
+    function sairAdmin() { localStorage.removeItem('is_adm'); location.reload(); }
+    function limparBanco() { if(confirm("Limpar tudo?")) { localStorage.setItem('ref_db', '[]'); abrirAdmin(); } }
+    function openModal() { document.getElementById('menuModal').style.display='flex'; }
+    function closeModal() { document.getElementById('menuModal').style.display='none'; }
+</script>
+</body>
+</html>
