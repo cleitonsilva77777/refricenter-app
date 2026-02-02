@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Pro - Master Titanium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --blue-dark: #01579B; --blue-light: #039BE5; --orange: #FF8F00;
+            --bg: #F4F7F9; --white: #FFFFFF; --text: #263238;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* HEADER PREMIUM */
+        header { 
+            background: var(--blue-dark); color: white; padding: 15px 20px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; border-bottom: 3px solid var(--orange);
+        }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-area b { font-size: 18px; letter-spacing: 1px; text-transform: uppercase; }
+
+        /* NAV DRAWER */
+        .drawer { 
+            position: fixed; top: 0; left: -110%; width: 290px; height: 100%; 
+            background: var(--white); z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 15px 0 40px rgba(0,0,0,0.3);
+        }
+        .drawer.open { left: 0; }
+        .drawer-header { background: var(--blue-dark); padding: 40px 20px; color: white; text-align: center; }
+        .nav-link { 
+            display: flex; align-items: center; gap: 15px; padding: 18px 25px; 
+            text-decoration: none; color: var(--blue-dark); font-weight: 600; border-bottom: 1px solid #f0f0f0;
+        }
+        .nav-link i { color: var(--orange); font-size: 20px; width: 25px; }
+
+        /* MAIN CONTAINER */
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        .view { display: none; animation: slideIn 0.3s ease-out; }
+        .active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* CARDS & FUNNEL */
+        .card { background: var(--white); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03); }
+        .card-title { font-weight: 800; color: var(--blue-dark); border-left: 6px solid var(--orange); padding-left: 12px; margin-bottom: 20px; font-size: 14px; text-transform: uppercase; }
+        
+        input, select { 
+            width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; 
+            border: 2px solid #E1E8EE; font-size: 16px; transition: 0.3s; 
+        }
+        input:focus { border-color: var(--orange); outline: none; }
+        
+        .btn-main { 
+            background: var(--orange); color: white; border: none; padding: 18px; 
+            border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; 
+            text-transform: uppercase; box-shadow: 0 4px 15px rgba(255,143,0,0.3);
+        }
+
+        /* FUNNEL OPTION */
+        .funnel-item { 
+            display: flex; align-items: center; gap: 15px; padding: 15px; 
+            background: #F8FAFC; border: 2px solid #EDF2F7; border-radius: 15px; 
+            margin-bottom: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .funnel-item:active { border-color: var(--orange); background: #FFF8E1; }
+        .funnel-icon { width: 50px; height: 50px; background: var(--blue-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
+
+        /* GAME STAGE */
+        #game-box { background: radial-gradient(circle, #263238, #000); width: 100%; height: 350px; position: relative; overflow: hidden; border-radius: 20px; border: 4px solid var(--blue-dark); }
+        .p-tech { position: absolute; bottom: 15px; font-size: 45px; z-index: 10; transition: 0.1s; }
+        .item-fall { position: absolute; font-size: 30px; z-index: 5; }
+
+        /* DICA BOX */
+        .tip-box { background: #E3F2FD; border-radius: 12px; padding: 15px; display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--blue-dark); margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="drawer" id="sideNav">
+    <div class="drawer-header">
+        <div style="font-size: 26px; font-weight: 900; letter-spacing: 2px;">REFRICENTER</div>
+        <div style="font-size: 11px; opacity: 0.7; margin-top: 5px;">SOLUÇÕES EM CLIMATIZAÇÃO</div>
+    </div>
+    <a href="#" class="nav-link" onclick="navigate('v-home')"><i class="fas fa-home"></i> Início</a>
+    <a href="#" class="nav-link" onclick="navigate('v-calc')"><i class="fas fa-calculator"></i> Calculadora BTU</a>
+    <a href="#" class="nav-link" onclick="navigate('v-serv')"><i class="fas fa-tools"></i> Solicitar Serviço</a>
+    <a href="#" class="nav-item nav-link" onclick="navigate('v-diag')"><i class="fas fa-microchip"></i> Guia de Erros</a>
+    <a href="#" class="nav-link" onclick="navigate('v-game')"><i class="fas fa-gamepad"></i> Refri-Game</a>
+    <a href="#" class="nav-link" onclick="checkAdmin()"><i class="fas fa-user-shield"></i> Painel Admin</a>
+    
+    <div style="padding: 30px; display: flex; justify-content: center; gap: 25px;">
+        <a href="https://instagram.com/refricenter_arcondicionado" target="_blank" style="color: #E1306C; font-size: 30px;"><i class="fab fa-instagram"></i></a>
+        <a href="https://facebook.com/refricenter" target="_blank" style="color: #4267B2; font-size: 30px;"><i class="fab fa-facebook"></i></a>
+    </div>
+</div>
+
+<header>
+    <div class="logo-area">
+        <i class="fas fa-snowflake fa-spin" style="color: var(--orange);"></i>
+        <b>Refricenter Pro</b>
+    </div>
+    <i class="fas fa-bars-staggered" style="font-size: 26px; cursor: pointer;" onclick="toggleMenu()"></i>
+</header>
+
+<div class="content">
+    <div id="v-home" class="view active">
+        <div class="card">
+            <div class="card-title">Seja Bem-Vindo</div>
+            <p style="font-size: 14px; line-height: 1.5;">Olá! Sou o assistente da Refricenter. Vamos começar seu atendimento?</p>
+            <input type="text" id="cli-nome" placeholder="Seu Nome">
+            <input type="tel" id="cli-tel" placeholder="Seu WhatsApp">
+            <select id="cli-local">
+                <option value="0">Plácido de Castro (Urbano)</option>
+                <option value="100">Vila Campinas / Interior (+100)</option>
+            </select>
+            <button class="btn-main" onclick="saveUser()">Acessar Ferramentas</button>
+        </div>
+        <div class="tip-box">
+            <i class="fas fa-lightbulb" style="color: var(--orange); font-size: 20px;"></i>
+            <span id="tip-text">Dica: Limpar os filtros a cada 15 dias economiza até 15% de energia.</span>
+        </div>
+    </div>
+
+    <div id="v-calc" class="view">
+        <div class="card">
+            <div class="card-title">Cálculo de Carga Térmica</div>
+            <label style="font-size:12px; font-weight:bold;">Metragem do Ambiente (m²)</label>
+            <input type="number" id="m2" placeholder="Ex: 12">
+            <label style="font-size:12px; font-weight:bold;">Exposição ao Sol</label>
+            <select id="sol">
+                <option value="600">Sol da Manhã (600 BTU/m²)</option>
+                <option value="800">Sol da Tarde (800 BTU/m²)</option>
+            </select>
+            <button class="btn-main" onclick="calcBTU()">Calcular Agora</button>
+            <div id="res-calc" style="margin-top:20px; text-align:center; color: var(--blue-dark); font-weight:900;"></div>
+        </div>
+    </div>
+
+    <div id="v-serv" class="view">
+        <div class="card">
+            <div class="card-title">Qual o serviço desejado?</div>
+            <div class="funnel-item" onclick="order('Higienização', 150)">
+                <div class="funnel-icon"><i class="fas fa-hand-sparkles"></i></div>
+                <div><b>Higienização</b><br><small>A partir de R$ 150,00</small></div>
+            </div>
+            <div class="funnel-item" onclick="order('Instalação', 250)">
+                <div class="funnel-icon"><i class="fas fa-tools"></i></div>
+                <div><b>Instalação</b><br><small>A partir de R$ 250,00</small></div>
+            </div>
+            <div class="funnel-item" onclick="order('Carga de Gás', 400)">
+                <div class="funnel-icon"><i class="fas fa-snowflake"></i></div>
+                <div><b>Carga de Gás</b><br><small>A partir de R$ 400,00</small></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-diag" class="view">
+        <div class="card">
+            <div class="card-title">Diagnóstico Técnico</div>
+            <select id="marca" onchange="getErro()">
+                <option value="">Escolha a Marca</option>
+                <option value="lg">LG</option>
+                <option value="samsung">Samsung</option>
+                <option value="gree">Gree</option>
+                <option value="midea">Midea/Carrier</option>
+            </select>
+            <div id="erro-desc" style="margin-top: 20px; font-size: 14px; line-height: 1.6; color: #455A64;"></div>
+        </div>
+    </div>
+
+    <div id="v-game" class="view">
+        <div class="card" style="padding: 10px;">
+            <div id="game-box">
+                <div id="score" style="position:absolute; top:10px; width:100%; text-align:center; color:white; font-weight:bold;">PONTOS: 0</div>
+                <div id="tech" class="p-tech">👨‍🔧</div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px;">
+                <button class="btn-main" onmousedown="move(-15)" ontouchstart="move(-15)"><i class="fas fa-arrow-left"></i></button>
+                <button class="btn-main" style="background: #00B0FF" onclick="shoot()"><i class="fas fa-tint"></i></button>
+                <button class="btn-main" onmousedown="move(15)" ontouchstart="move(15)"><i class="fas fa-arrow-right"></i></button>
+            </div>
+            <button class="btn-main" id="start-btn" style="background:#4CAF50; margin-top:10px;" onclick="runGame()">Iniciar Missão</button>
+        </div>
+    </div>
+
+    <div id="v-admin" class="view">
+        <div class="card">
+            <div class="card-title">Pedidos Recebidos</div>
+            <div id="admin-log" style="font-size: 12px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let user = JSON.parse(localStorage.getItem('refri_u')) || null;
+    let history = JSON.parse(localStorage.getItem('refri_h')) || [];
+    let px = 45; let points = 0; let active = false;
+
+    const tips = [
+        "Mantenha as portas fechadas para o ar não fugir.",
+        "O modo Inverter economiza até 60% de energia.",
+        "Instalação sem vácuo reduz a vida do compressor.",
+        "Limpeza química combate fungos e bactérias."
+    ];
+
+    function toggleMenu() { document.getElementById('sideNav').classList.toggle('open'); }
+    
+    function navigate(v) {
+        document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+        document.getElementById(v).classList.add('active');
+        toggleMenu();
+        active = false;
+        if(v === 'v-home') document.getElementById('tip-text').innerText = tips[Math.floor(Math.random()*tips.length)];
+    }
+
+    function saveUser() {
+        const n = document.getElementById('cli-nome').value;
+        if(!n) return alert("Por favor, diga seu nome.");
+        user = { nome: n, tel: document.getElementById('cli-tel').value, taxa: parseInt(document.getElementById('cli-local').value) };
+        localStorage.setItem('refri_u', JSON.stringify(user));
+        navigate('v-serv');
+    }
+
+    function calcBTU() {
+        const m = parseFloat(document.getElementById('m2').value);
+        if(!m) return;
+        const s = parseInt(document.getElementById('sol').value);
+        let res = m * s;
+        let btu = res <= 9000 ? "9.000" : res <= 12000 ? "12.000" : res <= 18000 ? "18.000" : "24.000+";
+        document.getElementById('res-calc').innerHTML = `Sugerimos um aparelho de <br><span style="font-size:24px; color:var(--orange)">${btu} BTUs</span>`;
+    }
+
+    function order(s, p) {
+        if(!user) return navigate('v-home');
+        const total = p + user.taxa;
+        history.push({ cliente: user.nome, serv: s, valor: total, data: new Date().toLocaleDateString() });
+        localStorage.setItem('refri_h', JSON.stringify(history));
+        const link = `https://wa.me/5568992447004?text=Olá Cleiton, meu nome é ${user.nome}. Gostaria de solicitar: ${s}. Valor total com deslocamento: R$ ${total}`;
+        window.open(link);
+    }
+
+    const ERROS = {
+        lg: "<b>CH05:</b> Erro de comunicação.<br><b>CH02:</b> Sensor de entrada UI.<br><b>CH67:</b> Motor BLDC travado.",
+        samsung: "<b>E101:</b> Erro de comunicação externa.<br><b>E121:</b> Sensor de ambiente interno.<br><b>E458:</b> Motor ventilador externo.",
+        gree: "<b>E6:</b> Erro de sinal.<br><b>H6:</b> Motor ventilador interno.<br><b>F0:</b> Vazamento de gás.",
+        midea: "<b>E1:</b> Erro de EEPROM.<br><b>EL:</b> Comunicação interna/externa.<br><b>EC:</b> Vazamento detectado."
+    };
+
+    function getErro() {
+        const m = document.getElementById('marca').value;
+        document.getElementById('erro-desc').innerHTML = ERROS[m] || "Selecione a marca.";
+    }
+
+    function checkAdmin() {
+        if(prompt("Acesso Admin:") === "1234") {
+            navigate('v-admin');
+            document.getElementById('admin-log').innerHTML = history.map(h => 
+                `<div style="padding:10px; border-bottom:1px solid #eee;"><b>${h.cliente}</b> - ${h.serv} (R$ ${h.valor})</div>`
+            ).join('');
+        } else alert("Senha incorreta");
+    }
+
+    /* GAME CORE 100% */
+    function move(v) { px = Math.min(Math.max(5, px + v), 85); document.getElementById('tech').style.left = px + '%'; }
+
+    function runGame() {
+        if(active) return;
+        active = true; points = 0;
+        document.getElementById('start-btn').style.display = 'none';
+        document.getElementById('score').innerText = "PONTOS: 0";
+        
+        const mainLoop = setInterval(() => {
+            if(!active) return clearInterval(mainLoop);
+            dropItem();
+        }, 1200);
+    }
+
+    function dropItem() {
+        const item = document.createElement('div');
+        const bad = Math.random() > 0.4;
+        item.className = 'item-fall';
+        item.innerHTML = bad ? '🔥' : '❄️';
+        item.style.left = Math.random() * 85 + '%';
+        item.style.top = '-40px';
+        document.getElementById('game-box').appendChild(item);
+
+        let t = 0;
+        const fall = setInterval(() => {
+            t += 6; item.style.top = t + 'px';
+            const tr = document.getElementById('tech').getBoundingClientRect();
+            const ir = item.getBoundingClientRect();
+
+            if(ir.bottom > tr.top && ir.left < tr.right && ir.right > tr.left) {
+                if(bad) { alert("Fim de Jogo! Pontos: " + points); active = false; document.getElementById('start-btn').style.display = 'block'; }
+                else { points += 10; document.getElementById('score').innerText = "PONTOS: " + points; }
+                item.remove(); clearInterval(fall);
+            }
+            if(t > 350) { item.remove(); clearInterval(fall); }
+        }, 30);
+    }
+
+    function shoot() {
+        if(!active) return;
+        const w = document.createElement('div');
+        w.innerHTML = '💧'; w.className = 'item-fall';
+        w.style.left = px + '%'; w.style.bottom = '55px';
+        document.getElementById('game-box').appendChild(w);
+        let b = 55;
+        const fly = setInterval(() => {
+            b += 12; w.style.bottom = b + 'px';
+            document.querySelectorAll('.item-fall').forEach(f => {
+                if(f.innerHTML === '🔥') {
+                    const fr = f.getBoundingClientRect(); const wr = w.getBoundingClientRect();
+                    if(wr.top < fr.bottom && wr.left < fr.right && wr.right > fr.left) {
+                        f.remove(); w.remove(); points += 20; 
+                        document.getElementById('score').innerText = "PONTOS: " + points;
+                        clearInterval(fly);
+                    }
+                }
+            });
+            if(b > 350) { w.remove(); clearInterval(fly); }
+        }, 20);
+    }
+
+    window.onload = () => { if(user) navigate('v-serv'); };
+</script>
+</body>
+</html>
