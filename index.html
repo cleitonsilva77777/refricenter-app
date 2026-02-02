@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Pro - Gestão Elite</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --blue-main: #0056b3; --blue-light: #E0F2F7; --orange: #FF8C00;
+            --white: #ffffff; --text: #002244; --shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; background: var(--blue-light); color: var(--text); overflow-x: hidden; height: 100%; }
+        
+        /* HEADER COMPACTO ESTILO IMAGEM */
+        header {
+            background: var(--blue-main); padding: 10px 15px; border-bottom: 3px solid var(--orange);
+            display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 1000;
+        }
+        .logo-area { display: flex; align-items: center; gap: 8px; }
+        .logo-area img { height: 35px; border-radius: 5px; }
+        .logo-text { font-size: 11px; font-weight: bold; line-height: 1; }
+
+        /* NAVEGAÇÃO SPA */
+        .view { display: none; padding: 20px; animation: slideUp 0.3s ease-out; height: calc(100vh - 60px); overflow-y: auto; }
+        .active-view { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS E FORMULÁRIOS */
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: var(--shadow); border-left: 5px solid var(--orange); }
+        .card h3 { margin: 0 0 10px 0; font-size: 16px; color: var(--blue-main); text-transform: uppercase; }
+        
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
+        .btn { background: var(--orange); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; }
+
+        /* SERVIÇOS EM MINIATURA */
+        .svc-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .svc-card { display: flex; align-items: center; gap: 12px; background: white; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
+        .svc-card img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
+        .svc-info { flex: 1; }
+        .svc-info h4 { margin: 0; font-size: 14px; }
+        .svc-price { color: var(--blue-main); font-weight: bold; font-size: 13px; }
+
+        /* GAME ENGINE STYLE */
+        #game-container { width: 100%; height: 400px; background: #000; position: relative; overflow: hidden; border-radius: 15px; touch-action: none; }
+        .game-ui { position: absolute; top: 10px; left: 10px; color: white; z-index: 10; font-weight: bold; }
+        #player { position: absolute; bottom: 20px; left: 50%; font-size: 40px; transform: translateX(-50%); z-index: 5; transition: 0.1s; }
+        .drop { position: absolute; font-size: 25px; }
+        .game-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-game { height: 60px; border: none; border-radius: 10px; background: var(--blue-main); color: white; font-size: 24px; }
+
+        /* DRAWER */
+        .drawer { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: white; z-index: 2000; transition: 0.3s; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
+        .drawer.open { right: 0; }
+        .nav-item { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; text-decoration: none; color: var(--text); font-weight: bold; }
+
+        /* FOOTER CHECKOUT */
+        .footer-cart { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: white; padding: 15px; border-top: 3px solid var(--blue-main); display: none; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell" style="max-width: 500px; margin: 0 auto; background: var(--blue-light); height: 100vh;">
+    <header>
+        <div class="logo-area">
+            <img src="banner.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/950/950244.png'">
+            <div class="logo-text">REFRICENTER<br>SERVIÇOS E VENDAS</div>
+        </div>
+        <i class="fas fa-bars menu-icon" onclick="toggleDrawer(true)" style="font-size: 24px; color: var(--orange)"></i>
+    </header>
+
+    <section id="view-cadastro" class="view active-view">
+        <div class="card">
+            <h3>📝 Meus Dados Profissionais</h3>
+            <p style="font-size: 11px; color: #666;">A limpeza do ar evita doenças respiratórias e reduz consumo de energia.</p>
+            <input type="text" id="user-nome" placeholder="Nome Completo">
+            <input type="tel" id="user-tel" placeholder="WhatsApp (DDD + Número)">
+            <input type="text" id="user-end" placeholder="Endereço de Atendimento">
+            <select id="user-taxa">
+                <option value="0">Localidade: Plácido de Castro (Urbano)</option>
+                <option value="100">Localidade: Vila Campinas</option>
+                <option value="100">Localidade: Acrelândia</option>
+                <option value="100">Localidade: Ramal / Outros</option>
+            </select>
+            <button class="btn" onclick="salvarCadastro()">SALVAR E CONTINUAR</button>
+            <button class="btn" style="background:#ccc; margin-top: 10px;" onclick="confirmarLimpeza()">LIMPAR DADOS</button>
+        </div>
+    </section>
+
+    <section id="view-servicos" class="view">
+        <div class="card">
+            <h3>🛠️ Solicitar Serviços</h3>
+            <div class="svc-grid" id="lista-servicos">
+                </div>
+        </div>
+    </section>
+
+    <section id="view-game" class="view">
+        <div id="game-container">
+            <div class="game-ui">PONTOS: <span id="score">0</span> | ÁGUA: <span id="water-ready">💧</span></div>
+            <div id="player">👨‍🔧</div>
+        </div>
+        <button class="btn" id="btn-shoot" style="margin-top: 10px; height: 60px; font-size: 25px;">LANÇAR 💧</button>
+        <div class="game-controls">
+            <button class="btn-game" id="move-l"><i class="fas fa-arrow-left"></i></button>
+            <button class="btn-game" id="move-r"><i class="fas fa-arrow-right"></i></button>
+        </div>
+        <button class="btn" style="margin-top: 15px; background: var(--blue-main)" onclick="navigate('view-servicos')">VOLTAR AO MENU</button>
+    </section>
+
+    <section id="view-historico" class="view">
+        <div class="card">
+            <h3>📅 Histórico de Serviços</h3>
+            <div id="historico-lista">Nenhum serviço registrado ainda.</div>
+        </div>
+    </section>
+
+    <div class="footer-cart" id="footer-cart">
+        <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom: 5px;">
+            <span>TOTAL:</span><span id="total-final">R$ 0,00</span>
+        </div>
+        <button class="btn" style="background: #25D366" onclick="enviarWhatsApp()"><i class="fab fa-whatsapp"></i> ENVIAR ORÇAMENTO</button>
+    </div>
+</div>
+
+<div class="drawer" id="drawer">
+    <div style="padding: 20px; background: var(--blue-main); color: white; font-weight: bold;">MENU REFRICENTER</div>
+    <a href="#" class="nav-item" onclick="navigate('view-servicos')"><i class="fas fa-tools"></i> Serviços</a>
+    <a href="#" class="nav-item" onclick="navigate('view-historico')"><i class="fas fa-calendar-alt"></i> Meu Histórico</a>
+    <a href="#" class="nav-item" onclick="navigate('view-game')"><i class="fas fa-gamepad"></i> Refri-Game (Cupom)</a>
+    <div style="padding: 20px;">
+        <p>Siga-nos:</p>
+        <a href="https://instagram.com/refricenter" target="_blank" style="font-size: 25px; margin-right: 15px; color: #E1306C"><i class="fab fa-instagram"></i></a>
+        <a href="https://facebook.com/refricenter" target="_blank" style="font-size: 25px; color: #4267B2"><i class="fab fa-facebook"></i></a>
+    </div>
+</div>
+
+<script>
+    // --- DATABASE DE PREÇOS (O CORAÇÃO DO APP) ---
+    const servicos = [
+        { cat: "Instalação", nome: "Instalação 9k-12k (Sem Material)", preco: 200, img: "instalacao.png" },
+        { cat: "Instalação", nome: "Instalação 18k (Sem Material)", preco: 300, img: "instalacao.png" },
+        { cat: "Instalação", nome: "Instalação 9k (Com Material)", preco: 550, img: "instalacao.png" },
+        { cat: "Higienização", nome: "Limpeza Inverter 9k-12k", preco: 200, img: "limpeza.png" },
+        { cat: "Gás", nome: "Carga Gás R410a 9k-12k", preco: 500, img: "gas.png" }
+        // ... (Demais itens seguindo sua lógica)
+    ];
+
+    let cart = [];
+    let user = JSON.parse(localStorage.getItem('refri_user')) || null;
+    let historico = JSON.parse(localStorage.getItem('refri_history')) || [];
+
+    // --- NAVEGAÇÃO SPA ---
+    function navigate(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+        document.getElementById(id).classList.add('active-view');
+        toggleDrawer(false);
+        document.getElementById('footer-cart').style.display = (id === 'view-servicos' && cart.length > 0) ? 'block' : 'none';
+        if(id === 'view-game') initGame();
+    }
+
+    function toggleDrawer(open) { document.getElementById('drawer').classList.toggle('open', open); }
+
+    // --- GESTÃO DE USUÁRIO ---
+    function salvarCadastro() {
+        const nome = document.getElementById('user-nome').value;
+        if(!nome) return alert("Preencha seu nome!");
+        user = {
+            nome, 
+            tel: document.getElementById('user-tel').value,
+            end: document.getElementById('user-end').value,
+            taxa: parseInt(document.getElementById('user-taxa').value)
+        };
+        localStorage.setItem('refri_user', JSON.stringify(user));
+        alert("Cadastro fixado com sucesso!");
+        navigate('view-servicos');
+        renderServicos();
+    }
+
+    function confirmarLimpeza() {
+        if(confirm("Deseja realmente apagar seus dados?")) {
+            localStorage.removeItem('refri_user');
+            location.reload();
+        }
+    }
+
+    // --- RENDERIZAÇÃO DE PREÇOS ---
+    function renderServicos() {
+        const container = document.getElementById('lista-servicos');
+        container.innerHTML = servicos.map((s, idx) => `
+            <div class="svc-card">
+                <img src="${s.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/950/950244.png'">
+                <div class="svc-info">
+                    <h4>${s.nome}</h4>
+                    <span class="svc-price">R$ ${s.preco}</span>
+                </div>
+                <input type="checkbox" style="width: 20px" onchange="toggleCart(${idx}, this.checked)">
+            </div>
+        `).join('');
+    }
+
+    function toggleCart(idx, add) {
+        if(add) cart.push(servicos[idx]);
+        else cart = cart.filter(item => item.nome !== servicos[idx].nome);
+        updateTotal();
+    }
+
+    function updateTotal() {
+        let total = cart.reduce((acc, curr) => acc + curr.preco, 0) + (user ? user.taxa : 0);
+        document.getElementById('total-final').innerText = `R$ ${total.toFixed(2)}`;
+        document.getElementById('footer-cart').style.display = cart.length > 0 ? 'block' : 'none';
+    }
+
+    // --- GAME ENGINE (DIFICULDADE 🔥) ---
+    let gameActive = false;
+    let score = 0;
+    let waterReady = true;
+
+    function initGame() {
+        if(gameActive) return;
+        gameActive = true; score = 0;
+        const container = document.getElementById('game-container');
+        const player = document.getElementById('player');
+        let playerX = 50;
+
+        // Movimento Multitouch
+        document.getElementById('move-l').ontouchstart = () => playerX = Math.max(5, playerX - 10);
+        document.getElementById('move-r').ontouchstart = () => playerX = Math.min(95, playerX + 10);
+        document.getElementById('btn-shoot').onclick = () => {
+            if(waterReady) { spawnDrop('💧'); waterReady = false; 
+            document.getElementById('water-ready').innerText = "⏳";
+            setTimeout(() => { waterReady = true; document.getElementById('water-ready').innerText = "💧"; }, 5000); }
+        };
+
+        function spawnDrop(type) {
+            const d = document.createElement('div');
+            d.className = 'drop'; d.innerText = type || (Math.random() > 0.4 ? '❄️' : '🔥');
+            d.style.left = (type ? playerX : Math.random() * 90) + "%";
+            d.style.top = type ? "80%" : "-10%";
+            container.appendChild(d);
+
+            let fall = setInterval(() => {
+                let top = parseInt(d.style.top);
+                d.style.top = (top + (type ? -5 : 5)) + "%";
+                
+                // Colisão
+                if(!type && top > 85 && Math.abs(parseInt(d.style.left) - playerX) < 10) {
+                    if(d.innerText === '❄️') score += 10;
+                    if(d.innerText === '🔥') { alert("Fogo atingiu você! Fim de jogo."); resetGame(); }
+                    d.remove(); clearInterval(fall);
+                }
+                if(top < 0 || top > 100) { d.remove(); clearInterval(fall); }
+                document.getElementById('score').innerText = score;
+                if(score >= 500) { alert("PARABÉNS! Cupom REFRI10 liberado!"); resetGame(); }
+            }, 50);
+        }
+
+        let spawner = setInterval(() => { if(gameActive) spawnDrop(); else clearInterval(spawner); }, 1000);
+        function resetGame() { gameActive = false; navigate('view-servicos'); }
+    }
+
+    function enviarWhatsApp() {
+        let msg = `*REFRICENTER PRO - PEDIDO*%0A*Cliente:* ${user.nome}%0A*Endereço:* ${user.end}%0A%0A*SERVIÇOS:*%0A`;
+        cart.forEach(i => msg += `- ${i.nome} (R$ ${i.preco})%0A`);
+        msg += `%0A*Taxa Localidade:* R$ ${user.taxa}%0A*TOTAL:* ${document.getElementById('total-final').innerText}`;
+        
+        // Salva no histórico antes de enviar
+        historico.push({ data: new Date().toLocaleDateString(), servicos: [...cart], total: document.getElementById('total-final').innerText });
+        localStorage.setItem('refri_history', JSON.stringify(historico));
+        
+        window.open(`https://wa.me/5568992447004?text=${msg}`);
+    }
+
+    // Inicialização
+    if(user) { 
+        document.getElementById('user-nome').value = user.nome;
+        document.getElementById('user-tel').value = user.tel;
+        document.getElementById('user-end').value = user.end;
+        document.getElementById('user-taxa').value = user.taxa;
+        renderServicos();
+    }
+</script>
+</body>
+</html>
