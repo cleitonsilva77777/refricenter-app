@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Pro - Oficial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { --blue: #0056b3; --light-blue: #E0F2F7; --orange: #FF8C00; --white: #ffffff; --shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--light-blue); overflow-x: hidden; }
+        
+        /* HEADER COMPACTO */
+        header { background: var(--blue); padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--orange); position: sticky; top: 0; z-index: 1000; }
+        .logo-area { display: flex; align-items: center; gap: 8px; color: white; font-weight: bold; font-size: 14px; }
+        .logo-area img { height: 35px; }
+
+        /* CARDS ESTILO IMAGEM */
+        .card { background: var(--white); margin: 15px; padding: 18px; border-radius: 12px; box-shadow: var(--shadow); border-left: 5px solid var(--orange); animation: fadeIn 0.4s; }
+        h2 { color: var(--blue); font-size: 16px; margin-top: 0; text-transform: uppercase; }
+
+        /* FORMULÁRIOS */
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; }
+        .btn-orange { background: var(--orange); color: white; border: none; font-weight: bold; cursor: pointer; }
+
+        /* JOGO BLACK INTERFACE */
+        #game-container { width: 100%; height: 450px; background: #000; position: relative; overflow: hidden; border-radius: 12px; display: none; touch-action: none; }
+        #player { position: absolute; bottom: 20px; font-size: 40px; transition: 0.1s; z-index: 10; }
+        .drop { position: absolute; font-size: 25px; }
+        .reload-bar { height: 5px; background: var(--orange); width: 0%; transition: width 5s linear; }
+
+        /* MENU DRAWER */
+        .drawer { position: fixed; top: 0; left: -100%; width: 80%; height: 100%; background: white; z-index: 2000; transition: 0.4s; padding: 20px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
+        .drawer.active { left: 0; }
+        .nav-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; color: var(--blue); font-weight: bold; text-decoration: none; }
+
+        /* FOOTER CHECKOUT */
+        .checkout { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px; border-top: 3px solid var(--blue); box-shadow: 0 -4px 10px rgba(0,0,0,0.1); display: none; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/950/950244.png'">
+            <span>REFRICENTER<br><small>SERVIÇOS E VENDAS</small></span>
+        </div>
+        <i class="fas fa-bars" style="color: var(--orange); font-size: 24px;" onclick="toggleMenu()"></i>
+    </header>
+
+    <div id="main-content">
+        <div id="view-cad" class="view card">
+            <h2>👤 Cadastro de Cliente</h2>
+            <input type="text" id="c-nome" placeholder="Nome Completo">
+            <input type="tel" id="c-whatsapp" placeholder="WhatsApp">
+            <input type="text" id="c-end" placeholder="Endereço">
+            <select id="c-local">
+                <option value="0">Plácido de Castro (Urbano)</option>
+                <option value="100">Vila Campinas (+ R$100)</option>
+                <option value="100">Acrelândia (+ R$100)</option>
+                <option value="100">Ramal (+ R$100)</option>
+            </select>
+            <button class="btn-orange" onclick="salvarAcesso()">ENTRAR NO APP</button>
+        </div>
+
+        <div id="view-orc" class="view card" style="display:none">
+            <h2>🛠️ Orçamento de Instalação</h2>
+            <select id="p-btu" onchange="calcInstalacao()">
+                <option value="9000">9.000 BTU</option>
+                <option value="12000">12.000 BTU</option>
+                <option value="18000">18.000 BTU</option>
+                <option value="22000">22.000 BTU</option>
+                <option value="24000">24.000 BTU</option>
+                <option value="30000">30.000 BTU</option>
+                <option value="36000">36.000 BTU</option>
+            </select>
+            <select id="p-tipo" onchange="calcInstalacao()">
+                <option value="mao">Só Mão de Obra (Sem material)</option>
+                <option value="completa">Instalação Completa (Com material)</option>
+            </select>
+            <div id="res-orc" style="padding:10px; font-weight:bold; color:var(--blue)">Valor do Serviço: R$ 200,00</div>
+            <button class="btn-orange" onclick="addAoCarrinho()">ADICIONAR SERVIÇO</button>
+        </div>
+
+        <div id="view-game" class="view" style="display:none">
+            <div id="game-container">
+                <div id="game-ui" style="position:absolute; width:100%; padding:10px; color:white; z-index:20">
+                    PONTOS: <span id="score">0</span> | AGUA: <span id="ammo">PRONTO</span>
+                    <div class="reload-bar" id="reload-bar"></div>
+                </div>
+                <div id="player">👨‍🔧</div>
+                <div id="game-start" style="position:absolute; inset:0; background:rgba(0,0,0,0.8); display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; z-index:100">
+                    <h3>REFRI-GAME PRO</h3>
+                    <p>Colete ❄️ e apague o 🔥</p>
+                    <button class="btn-orange" style="width:150px" onclick="startGame()">START</button>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:10px">
+                <button class="btn-orange" id="btn-shoot" style="grid-column: span 2; height:60px">LANÇAR 💧</button>
+                <button class="btn-orange" id="btn-left" style="height:60px">⬅️</button>
+                <button class="btn-orange" id="btn-right" style="height:60px">➡️</button>
+            </div>
+            <button class="btn-orange" style="background:#444" onclick="toggleMenu()">VOLTAR AO MENU</button>
+        </div>
+    </div>
+
+    <div id="drawer" class="drawer">
+        <h2 style="color:var(--orange)">Refricenter Pro</h2>
+        <a href="#" class="nav-item" onclick="showView('view-orc')"><i class="fas fa-tools"></i> Orçamentos</a>
+        <a href="#" class="nav-item" onclick="showView('view-cad')"><i class="fas fa-user"></i> Meus Dados</a>
+        <a href="#" class="nav-item" onclick="showView('view-game')"><i class="fas fa-gamepad"></i> Refri-Game</a>
+        <a href="#" class="nav-item" style="color:red" onclick="window.location.reload()"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    </div>
+
+    <div id="checkout" class="checkout">
+        <div style="display:flex; justify-content:space-between; font-weight:bold">
+            <span>Total com Deslocamento:</span>
+            <span id="total-val">R$ 0,00</span>
+        </div>
+        <input type="text" id="cupom" placeholder="CUPOM DE DESCONTO" style="margin-top:5px">
+        <button class="btn-orange" onclick="enviarWhatsApp()">FINALIZAR NO WHATSAPP</button>
+    </div>
+
+<script>
+    let user = {}; let cart = []; let ammoReady = true; let score = 0; let playing = false;
+    const inputs = { left: false, right: false };
+
+    // TABELA DE PREÇOS (SEU HISTÓRICO)
+    const tabela = {
+        9000: { mao: 200, completa: 600 }, 12000: { mao: 200, completa: 600 },
+        18000: { mao: 350, completa: 850 }, 22000: { mao: 400, completa: 900 },
+        24000: { mao: 450, completa: 950 }, 30000: { mao: 650, completa: 1150 },
+        36000: { mao: 750, completa: 1250 }
+    };
+
+    function toggleMenu() { document.getElementById('drawer').classList.toggle('active'); }
+
+    function showView(id) {
+        document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        document.getElementById('checkout').style.display = (id === 'view-orc') ? 'block' : 'none';
+        document.body.style.overflow = (id === 'view-game') ? 'hidden' : 'auto';
+        toggleMenu();
+    }
+
+    function salvarAcesso() {
+        user = { nome: document.getElementById('c-nome').value, local: parseInt(document.getElementById('c-local').value) };
+        showView('view-orc');
+    }
+
+    function calcInstalacao() {
+        const btu = document.getElementById('p-btu').value;
+        const tipo = document.getElementById('p-tipo').value;
+        const preco = tabela[btu][tipo];
+        document.getElementById('res-orc').innerText = `Valor do Serviço: R$ ${preco},00`;
+        return preco;
+    }
+
+    function addAoCarrinho() {
+        const preco = calcInstalacao();
+        cart = [{ nome: `Instalação ${document.getElementById('p-btu').value} (${document.getElementById('p-tipo').value})`, preco }];
+        const total = preco + user.local;
+        document.getElementById('total-val').innerText = `R$ ${total.toFixed(2)}`;
+    }
+
+    // GAME ENGINE
+    let px = 50;
+    function startGame() {
+        playing = true; score = 0; document.getElementById('game-start').style.display = 'none';
+        gameLoop(); spawnDrops();
+    }
+
+    function gameLoop() {
+        if(!playing) return;
+        if(inputs.left) px = Math.max(0, px - 2);
+        if(inputs.right) px = Math.min(90, px + 2);
+        document.getElementById('player').style.left = px + "%";
+        requestAnimationFrame(gameLoop);
+    }
+
+    function spawnDrops() {
+        if(!playing) return;
+        const d = document.createElement('div');
+        d.className = 'drop';
+        const type = Math.random() > 0.4 ? '❄️' : '🔥';
+        d.innerHTML = type; d.style.left = Math.random() * 90 + "%"; d.style.top = "-30px";
+        document.getElementById('game-container').appendChild(d);
+        
+        let fall = setInterval(() => {
+            let top = parseInt(d.style.top) + (type === '🔥' ? 5 : 3);
+            d.style.top = top + "px";
+            if(top > 450) { d.remove(); clearInterval(fall); }
+            
+            let pRect = document.getElementById('player').getBoundingClientRect();
+            let dRect = d.getBoundingClientRect();
+            if(dRect.bottom > pRect.top && dRect.left < pRect.right && dRect.right > pRect.left) {
+                if(type === '❄️') { score += 10; document.getElementById('score').innerText = score; }
+                else { playing = false; alert('Fogo atingiu o técnico! Fim de jogo.'); document.getElementById('game-start').style.display = 'flex'; }
+                d.remove(); clearInterval(fall);
+            }
+        }, 20);
+        setTimeout(spawnDrops, 1000);
+    }
+
+    document.getElementById('btn-left').ontouchstart = () => inputs.left = true;
+    document.getElementById('btn-left').ontouchend = () => inputs.left = false;
+    document.getElementById('btn-right').ontouchstart = () => inputs.right = true;
+    document.getElementById('btn-right').ontouchend = () => inputs.right = false;
+    document.getElementById('btn-shoot').ontouchstart = () => {
+        if(!ammoReady) return;
+        ammoReady = false; document.getElementById('ammo').innerText = "RECARREGANDO";
+        document.getElementById('reload-bar').style.width = "100%";
+        setTimeout(() => { ammoReady = true; document.getElementById('ammo').innerText = "PRONTO"; document.getElementById('reload-bar').style.width = "0%"; }, 5000);
+        // Lógica de apagar fogo aqui
+    };
+
+    function enviarWhatsApp() {
+        let msg = `*REFRICENTER PRO*%0ACliente: ${user.nome}%0AItem: ${cart[0].nome}%0A*Total c/ Deslocamento: ${document.getElementById('total-val').innerText}*`;
+        window.open(`https://wa.me/5568992447004?text=${msg}`);
+    }
+</script>
+</body>
+</html>
