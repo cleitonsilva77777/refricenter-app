@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Pro - Sistema Elite</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --blue-main: #0056b3; --blue-light: #E0F2F7; --orange: #FF8C00;
+            --white: #ffffff; --text: #002244; --shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--blue-light); overflow: hidden; color: var(--text); }
+
+        /* HEADER ESTILO IMAGEM */
+        header { 
+            background: var(--blue-main); padding: 12px 18px; border-bottom: 4px solid var(--orange);
+            display: flex; align-items: center; justify-content: space-between; color: white; flex-shrink: 0; z-index: 1000;
+        }
+        .header-logo { display: flex; align-items: center; gap: 10px; }
+        .header-logo img { height: 35px; }
+        .header-logo div b { font-size: 14px; display: block; line-height: 1; }
+        .header-logo div span { font-size: 9px; color: var(--blue-light); }
+
+        /* NAVEGAÇÃO / VIEWS */
+        .app-container { max-width: 500px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; position: relative; }
+        .content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 120px; }
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CARDS */
+        .card { background: var(--white); border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05); }
+        .card-title { font-weight: 800; color: var(--blue-main); border-left: 4px solid var(--orange); padding-left: 10px; margin-bottom: 12px; font-size: 13px; text-transform: uppercase; }
+
+        /* INPUTS */
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; background: #fff; }
+        .btn-main { background: var(--orange); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; transition: 0.2s; }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* TABELA DE SERVIÇOS */
+        .svc-row { display: flex; align-items: center; gap: 12px; padding: 10px; border-bottom: 1px solid #eee; }
+        .svc-row img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+        .svc-info { flex: 1; }
+        .svc-info b { font-size: 13px; }
+        .svc-info span { display: block; font-size: 12px; color: var(--blue-main); font-weight: 700; }
+
+        /* CHECKOUT FOOTER */
+        .checkout-bar { position: absolute; bottom: 0; width: 100%; background: white; padding: 15px; border-top: 3px solid var(--blue-main); box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 900; }
+        .total-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .total-val { font-size: 22px; font-weight: 900; color: var(--blue-main); }
+
+        /* MENU DRAWER */
+        .drawer { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: white; z-index: 2000; transition: 0.4s; padding: 20px; box-shadow: -10px 0 20px rgba(0,0,0,0.2); }
+        .drawer.open { right: 0; }
+        .nav-link { padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; font-weight: 700; font-size: 14px; }
+        .nav-link i { color: var(--orange); font-size: 18px; }
+
+        /* GAME ENGINE */
+        #game-area { width: 100%; height: 380px; background: #000; border-radius: 15px; position: relative; overflow: hidden; touch-action: none; }
+        .player { position: absolute; bottom: 15px; font-size: 35px; z-index: 100; transition: left 0.1s linear; }
+        .obj { position: absolute; font-size: 25px; z-index: 50; }
+        .game-ui { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; color: white; font-weight: bold; }
+        .game-ctrls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .g-btn { height: 65px; background: var(--blue-main); color: white; border: none; border-radius: 12px; font-size: 24px; }
+
+        /* ADMIN / HISTORICO */
+        .hist-card { font-size: 12px; padding: 10px; border-bottom: 1px solid #eee; background: #fafafa; margin-bottom: 5px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <div class="header-logo">
+            <img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/950/950244.png'">
+            <div><b>REFRICENTER</b><span>SERVIÇOS E VENDAS DE AR-CONDICIONADOS</span></div>
+        </div>
+        <i class="fas fa-bars" onclick="toggleMenu(true)" style="font-size: 24px; color: var(--orange)"></i>
+    </header>
+
+    <div class="content" id="main-scroll">
+        
+        <div id="view-cad" class="view active">
+            <div class="card">
+                <div class="card-title">Cadastro Profissional</div>
+                <input type="text" id="in-nome" placeholder="Seu Nome Completo">
+                <input type="tel" id="in-tel" placeholder="WhatsApp (DDD)">
+                <input type="text" id="in-end" placeholder="Endereço de Atendimento">
+                <select id="in-local">
+                    <option value="0">Plácido de Castro (Urbano) - R$ 0</option>
+                    <option value="100">Vila Campinas (+ R$ 100)</option>
+                    <option value="100">Acrelândia (+ R$ 100)</option>
+                    <option value="100">Ramal (+ R$ 100)</option>
+                </select>
+                <button class="btn-main" onclick="salvarCadastro()">SALVAR E CONTINUAR</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Dicas Refricenter</div>
+                <div id="dicas-box" style="font-size: 13px; color: #666; line-height: 1.5;"></div>
+            </div>
+        </div>
+
+        <div id="view-svc" class="view">
+            <div class="card">
+                <div class="card-title">Selecione a Categoria</div>
+                <select id="cat-selector" onchange="renderServicos()">
+                    <option value="inst_conv">Instalação Convencional</option>
+                    <option value="inst_inv">Instalação Inverter</option>
+                    <option value="limpeza">Limpeza e Higienização</option>
+                    <option value="desinst">Desinstalação de Ar</option>
+                    <option value="gas">Carga de Gás Refrigerante</option>
+                </select>
+            </div>
+            <div class="card" id="svc-container">
+                </div>
+        </div>
+
+        <div id="view-calc" class="view">
+            <div class="card">
+                <div class="card-title">Dimensionamento de BTUs</div>
+                <div id="calc-flow">
+                    <div class="step" id="s1">
+                        <label>Comprimento do ambiente (m):</label>
+                        <input type="number" id="c-comp" onchange="nextS(2)">
+                    </div>
+                    <div class="step" id="s2" style="display:none">
+                        <label>Largura do ambiente (m):</label>
+                        <input type="number" id="c-larg" onchange="nextS(3)">
+                    </div>
+                    <div class="step" id="s3" style="display:none">
+                        <label>Pessoas e Aparelhos:</label>
+                        <input type="number" id="c-pess" placeholder="Pessoas">
+                        <input type="number" id="c-ele" placeholder="Eletrônicos" style="margin-top:5px">
+                        <select id="c-sol" style="margin-top:5px">
+                            <option value="600">Sombra / Noite</option>
+                            <option value="800">Incidência de Sol</option>
+                        </select>
+                        <button class="btn-main" style="margin-top:10px" onclick="rodarCalc()">CALCULAR AGORA</button>
+                    </div>
+                </div>
+                <div id="calc-res" style="margin-top:15px; text-align:center; font-weight:bold; color:var(--blue-main)"></div>
+            </div>
+        </div>
+
+        <div id="view-diag" class="view">
+            <div class="card">
+                <div class="card-title">Códigos de Erro</div>
+                <select id="d-brand" onchange="showErros()">
+                    <option value="">Selecione a Marca...</option>
+                    <option value="lg">LG</option>
+                    <option value="samsung">SAMSUNG</option>
+                    <option value="midea">MIDEA / CARRIER</option>
+                    <option value="gree">GREE</option>
+                </select>
+                <div id="diag-res" style="margin-top:15px"></div>
+            </div>
+        </div>
+
+        <div id="view-hist" class="view">
+            <div class="card">
+                <div class="card-title">Meu Histórico</div>
+                <div id="user-hist">Nenhum registro encontrado.</div>
+            </div>
+            <div class="card" id="admin-card" style="display:none">
+                <div class="card-title">Log do Administrador</div>
+                <div id="admin-hist"></div>
+            </div>
+        </div>
+
+        <div id="view-game" class="view">
+            <div id="game-area">
+                <div class="game-ui">
+                    <span>Pts: <span id="pts">0</span></span>
+                    <span id="g-status" style="color:#00d4ff">💧 PRONTA</span>
+                </div>
+                <div id="hero" class="player">👨‍🔧</div>
+                <div id="over-screen" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:500; flex-direction:column; align-items:center; justify-content:center; color:white">
+                    <h2>FIM DE JOGO</h2>
+                    <p id="final-pts"></p>
+                    <button class="btn-main" onclick="gameStart()" style="width:200px">REPETIR</button>
+                    <button class="btn-main" onclick="go('view-svc')" style="width:200px; margin-top:10px; background:var(--blue-main)">VOLTAR MENU</button>
+                </div>
+            </div>
+            <div class="game-ctrls">
+                <button class="g-btn" id="ctrl-l"><i class="fas fa-arrow-left"></i></button>
+                <button class="g-btn" id="ctrl-f" style="background:#00d4ff"><i class="fas fa-tint"></i></button>
+                <button class="g-btn" id="ctrl-r"><i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="checkout-bar" id="checkout">
+        <div class="total-box">
+            <div><small>Total Estimado</small><div class="total-val" id="total-txt">R$ 0,00</div></div>
+            <div style="width:40%"><input type="text" id="cupom-in" placeholder="Cupom" style="margin:0"><button onclick="checkCupom()" style="font-size:10px; border:none; background:none; color:var(--orange)">APLICAR</button></div>
+        </div>
+        <button class="btn-main" onclick="enviarZap()" style="background:#25D366"><i class="fab fa-whatsapp"></i> ENVIAR ORÇAMENTO</button>
+    </div>
+</div>
+
+<div class="drawer" id="side-menu">
+    <div style="text-align:center; padding:20px 0; border-bottom:2px solid var(--orange)">
+        <b style="color:var(--blue-main)">REFRICENTER PRO</b>
+    </div>
+    <a href="#" class="nav-link" onclick="go('view-svc')"><i class="fas fa-tools"></i> Solicitar Serviços</a>
+    <a href="#" class="nav-link" onclick="go('view-calc')"><i class="fas fa-calculator"></i> Calculadora de BTUs</a>
+    <a href="#" class="nav-link" onclick="go('view-diag')"><i class="fas fa-bug"></i> Códigos de Erro</a>
+    <a href="#" class="nav-link" onclick="go('view-hist')"><i class="fas fa-history"></i> Histórico</a>
+    <a href="#" class="nav-link" onclick="go('view-game')"><i class="fas fa-gamepad"></i> Refri-Game (Ganhe Cupom)</a>
+    <a href="https://www.instagram.com/refricenter_arcondicionado?igsh=NDMyd215NXJ2MGNm" target="_blank" class="nav-link"><i class="fab fa-instagram"></i> Instagram</a>
+    <a href="https://www.facebook.com/share/14TwqVMpyjc/" target="_blank" class="nav-link"><i class="fab fa-facebook"></i> Facebook</a>
+    <a href="#" class="nav-link" onclick="limparTudo()" style="color:red; margin-top:20px"><i class="fas fa-user-slash"></i> Limpar meus dados</a>
+</div>
+
+<script>
+    // MATRIZ DE PREÇOS (BLINDADA)
+    const PRECOS = {
+        inst_conv: {
+            "Só Mão de Obra": {9000:200, 12000:200, 18000:300, 22000:350, 24000:400},
+            "Completa (Com Material)": {9000:550, 12000:600, 18000:800, 22000:850, 24000:900}
+        },
+        inst_inv: {
+            "Só Mão de Obra": {9000:250, 12000:250, 18000:350, 22000:400, 24000:450},
+            "Completa (Com Material)": {9000:600, 12000:650, 18000:850, 22000:900, 24000:950}
+        },
+        limpeza: {
+            "Convencional": {9000:150, 12000:150, 18000:200, 22000:250, 24000:300},
+            "Inverter": {9000:200, 12000:200, 18000:250, 22000:300, 24000:350}
+        },
+        desinst: {
+            "Convencional": {9000:100, 12000:100, 18000:150, 22000:200, 24000:200},
+            "Inverter": {9000:150, 12000:150, 18000:200, 22000:250, 24000:250}
+        },
+        gas: {
+            "R22": {9000:450, 12000:450, 18000:600, 22000:700, 24000:750, 30000:900, 36000:1100},
+            "R410a": {9000:500, 12000:500, 18000:600, 22000:800, 24000:850, 30000:1000, 36000:1200},
+            "R32": {9000:550, 12000:600, 18000:750, 22000:900, 24000:1000, 30000:1200, 36000:1350}
+        }
+    };
+
+    const DICAS = [
+        "Filtros sujos podem aumentar o consumo de energia em até 15%. Limpe-os mensalmente!",
+        "A higienização química técnica elimina fungos e bactérias que causam doenças respiratórias.",
+        "Mantenha a unidade externa livre de obstáculos para evitar sobrecarga no compressor."
+    ];
+
+    let user = null; let cart = []; let discount = 0;
+    const gKeys = {l:false, r:false}; let canFire = true;
+
+    // CORE APP
+    function go(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('side-menu').classList.remove('open');
+        document.getElementById('checkout').style.display = (id === 'view-svc') ? 'block' : 'none';
+        if(id === 'view-game') gameStart(); else stopGame();
+        if(id === 'view-hist') loadHistory();
+    }
+
+    function toggleMenu(s) { document.getElementById('side-menu').classList.toggle('open', s); }
+
+    function salvarCadastro() {
+        const n = document.getElementById('in-nome').value;
+        if(!n) return alert("Por favor, preencha seu nome.");
+        user = { nome: n, tel: document.getElementById('in-tel').value, end: document.getElementById('in-end').value, taxa: parseInt(document.getElementById('in-local').value) };
+        localStorage.setItem('refri_user', JSON.stringify(user));
+        go('view-svc');
+        renderServicos();
+    }
+
+    function renderServicos() {
+        const cat = document.getElementById('cat-selector').value;
+        const container = document.getElementById('svc-container');
+        container.innerHTML = "";
+        
+        for(let tipo in PRECOS[cat]) {
+            container.innerHTML += `<div class="card-title" style="margin-top:10px">${tipo}</div>`;
+            for(let btu in PRECOS[cat][tipo]) {
+                const preco = PRECOS[cat][tipo][btu];
+                const id = `${cat}_${tipo}_${btu}`;
+                container.innerHTML += `
+                    <div class="svc-row">
+                        <img src="${cat}.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/950/950244.png'">
+                        <div class="svc-info"><b>${btu} BTUs</b><span>R$ ${preco}</span></div>
+                        <input type="checkbox" onchange="upCart('${tipo} ${btu}BTU', ${preco}, this.checked)" style="width:22px; height:22px">
+                    </div>`;
+            }
+        }
+    }
+
+    function upCart(nome, preco, add) {
+        if(add) cart.push({nome, preco});
+        else cart = cart.filter(i => i.nome !== nome);
+        calcTotal();
+    }
+
+    function calcTotal() {
+        let sub = cart.reduce((a, b) => a + b.preco, 0);
+        let total = (sub + user.taxa) * (1 - discount);
+        document.getElementById('total-txt').innerText = "R$ " + total.toFixed(2);
+    }
+
+    function checkCupom() {
+        if(document.getElementById('cupom-in').value.toUpperCase() === 'REFRI10') {
+            discount = 0.10; alert("Cupom 10% aplicado!"); calcTotal();
+        }
+    }
+
+    function enviarZap() {
+        if(cart.length === 0) return alert("Escolha um serviço!");
+        let text = `*ORÇAMENTO REFRICENTER*%0A*Cliente:* ${user.nome}%0A*End:* ${user.end}%0A%0A*ITENS:*%0A`;
+        cart.forEach(i => text += `- ${i.nome}%0A`);
+        text += `%0A*TOTAL:* ${document.getElementById('total-txt').innerText}`;
+        
+        // Histórico
+        let h = JSON.parse(localStorage.getItem('refri_hist') || '[]');
+        h.push({data: new Date().toLocaleDateString(), itens: cart, total: document.getElementById('total-txt').innerText});
+        localStorage.setItem('refri_hist', JSON.stringify(h));
+        
+        window.open(`https://wa.me/5568992447004?text=${text}`);
+    }
+
+    // CALCULADORA
+    function nextS(n) { document.getElementById('s'+n).style.display = 'block'; }
+    function rodarCalc() {
+        const v = document.getElementById('c-comp').value * document.getElementById('c-larg').value * 600;
+        const e = (document.getElementById('c-pess').value * 600) + (document.getElementById('c-ele').value * 600);
+        const total = (v + e) * (document.getElementById('c-sol').value / 600);
+        document.getElementById('calc-res').innerText = "Potência Recomendada: " + Math.ceil(total) + " BTUs";
+    }
+
+    // GAME ENGINE
+    let score = 0; let px = 50; let gameActive = false; let loop;
+    function gameStart() {
+        gameActive = true; score = 0; px = 50; canFire = true;
+        document.getElementById('over-screen').style.display = 'none';
+        document.querySelectorAll('.obj').forEach(o => o.remove());
+        loop = setInterval(gameLoop, 1000/60);
+        spawnObj();
+    }
+    function stopGame() { gameActive = false; clearInterval(loop); }
+
+    function gameLoop() {
+        if(gKeys.l) px = Math.max(0, px - 2);
+        if(gKeys.r) px = Math.min(92, px + 2);
+        document.getElementById('hero').style.left = px + "%";
+        document.getElementById('pts').innerText = score;
+    }
+
+    function spawnObj() {
+        if(!gameActive) return;
+        const o = document.createElement('div'); o.className = 'obj';
+        const r = Math.random();
+        if(r < 0.6) { o.innerHTML = "🔥"; o.dataset.t = "f"; }
+        else { o.innerHTML = "❄️"; o.dataset.t = "i"; }
+        o.style.left = Math.random() * 90 + "%"; o.style.top = "-30px";
+        document.getElementById('game-area').appendChild(o);
+        
+        let fall = setInterval(() => {
+            let t = parseFloat(o.style.top) + 3; o.style.top = t + "px";
+            let hr = document.getElementById('hero').getBoundingClientRect();
+            let or = o.getBoundingClientRect();
+            if(or.bottom > hr.top && or.left < hr.right && or.right > hr.left) {
+                if(o.dataset.t === "f") gameOver();
+                else { score += 10; o.remove(); clearInterval(fall); }
+            }
+            if(t > 380) { o.remove(); clearInterval(fall); }
+        }, 16);
+        setTimeout(spawnObj, Math.max(300, 1000 - score));
+    }
+
+    function shoot() {
+        if(!canFire || !gameActive) return;
+        canFire = false; document.getElementById('g-status').innerText = "⏳ CARREGANDO";
+        const w = document.createElement('div'); w.className = 'obj'; w.innerHTML = "💧";
+        w.style.left = (px + 4) + "%"; w.style.bottom = "60px";
+        document.getElementById('game-area').appendChild(w);
+        let move = setInterval(() => {
+            let b = parseFloat(w.style.bottom) + 8; w.style.bottom = b + "px";
+            document.querySelectorAll('.obj[data-t="f"]').forEach(f => {
+                let fr = f.getBoundingClientRect(); let wr = w.getBoundingClientRect();
+                if(wr.top < fr.bottom && wr.left < fr.right && wr.right > fr.left) {
+                    f.remove(); w.remove(); score += 5; clearInterval(move);
+                }
+            });
+            if(b > 400) { w.remove(); clearInterval(move); }
+        }, 16);
+        setTimeout(() => { canFire = true; document.getElementById('g-status').innerText = "💧 PRONTA"; }, 5000);
+    }
+
+    function gameOver() {
+        gameActive = false; 
+        document.getElementById('over-screen').style.display = 'flex';
+        document.getElementById('final-pts').innerText = "Score: " + score;
+        if(score >= 500) alert("Parabéns! Use o cupom REFRI10 no checkout!");
+    }
+
+    // MULTITOUCH
+    const bl = document.getElementById('ctrl-l'), br = document.getElementById('ctrl-r'), bf = document.getElementById('ctrl-f');
+    bl.ontouchstart = (e) => { e.preventDefault(); gKeys.l = true; }; bl.ontouchend = () => gKeys.l = false;
+    br.ontouchstart = (e) => { e.preventDefault(); gKeys.r = true; }; br.ontouchend = () => gKeys.r = false;
+    bf.ontouchstart = (e) => { e.preventDefault(); shoot(); };
+
+    function loadHistory() {
+        const h = JSON.parse(localStorage.getItem('refri_hist') || '[]');
+        document.getElementById('user-hist').innerHTML = h.map(i => `<div class="hist-card"><b>${i.data}</b> - ${i.total}<br><small>${i.itens.map(s => s.nome).join(', ')}</small></div>`).join('');
+    }
+
+    function limparTudo() { if(confirm("Apagar todos os dados?")) { localStorage.clear(); location.reload(); } }
+
+    window.onload = () => {
+        document.getElementById('dicas-box').innerHTML = DICAS.map(d => `• ${d}<br><br>`).join('');
+        const s = localStorage.getItem('refri_user');
+        if(s) { user = JSON.parse(s); go('view-svc'); renderServicos(); }
+    };
+</script>
+</body>
+</html>
