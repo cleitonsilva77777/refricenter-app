@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter - Titanium v9.5 Ultimate</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root { --blue: #01579B; --orange: #FF8F00; --green: #28a745; --bg: #E0F2F7; --white: #FFFFFF; --danger: #dc3545; --gray: #6c757d; --insta: #E4405F; --fb: #1877F2; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* BANNER DINÂMICO */
+        .promo-banner { background: var(--orange); color: white; padding: 8px; text-align: center; font-size: 0.8rem; font-weight: bold; animation: pulse 2s infinite; z-index: 100; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
+        header { background: var(--blue); color: white; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid var(--orange); z-index: 1000; }
+        .logo-box { background: white; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; }
+        
+        .drawer { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: 0.3s; box-shadow: 10px 0 30px rgba(0,0,0,0.3); }
+        .drawer.open { left: 0; }
+        .drawer-header { background: var(--blue); color: white; padding: 30px 20px; font-weight: 800; border-bottom: 4px solid var(--orange); }
+        .nav-item { display: flex; align-items: center; gap: 15px; padding: 18px 25px; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: var(--blue); font-weight: 600; cursor: pointer; }
+
+        .container { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-title { font-weight: 800; color: var(--blue); border-left: 5px solid var(--orange); padding-left: 10px; margin-bottom: 15px; text-transform: uppercase; font-size: 0.9rem; }
+        
+        select, input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #eee; font-size: 16px; background: #fafafa; outline: none; }
+        label { font-size: 0.8rem; font-weight: bold; color: #666; margin-top: 10px; display: block; }
+
+        .resultado-box { background: #f0f7ff; border: 2px solid var(--blue); border-radius: 15px; padding: 15px; text-align: center; margin-top: 20px; }
+        .v-final { font-size: 2.2rem; font-weight: bold; color: var(--green); display: block; }
+        
+        .btn-zap { background: #25d366; color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; border-radius: 10px; font-weight: bold; margin-top: 15px; }
+        .btn-pdf { background: var(--danger); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-orange { background: var(--orange); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
+
+        footer { background: var(--white); border-top: 2px solid #eee; padding: 10px; display: flex; justify-content: space-around; position: fixed; bottom: 0; width: 100%; z-index: 1000; }
+        .foot-item { text-align: center; text-decoration: none; color: var(--gray); font-size: 0.7rem; font-weight: bold; cursor: pointer; flex: 1; }
+        .foot-item i { display: block; font-size: 1.5rem; margin-bottom: 3px; }
+        .foot-item.active { color: var(--blue); }
+
+        /* GAME */
+        #game-canvas { background: #001f3f; width: 100%; height: 250px; border-radius: 15px; position: relative; overflow: hidden; }
+        .game-obj { position: absolute; font-size: 25px; }
+        .player { position: absolute; bottom: 10px; font-size: 35px; }
+    </style>
+</head>
+<body>
+
+<div id="banner" class="promo-banner">❄️ REFRICENTER: Serviços e Venda de Ar Condicionados ❄️</div>
+
+<div class="drawer" id="sideNav">
+    <div class="drawer-header">REFRICENTER TITANIUM</div>
+    <div class="nav-item" onclick="nav('v-serv')"><i class="fas fa-file-invoice-dollar"></i> Orçamentos</div>
+    <div class="nav-item" onclick="nav('v-calc')"><i class="fas fa-calculator"></i> Cálculo de BTUs</div>
+    <div class="nav-item" onclick="nav('v-game')"><i class="fas fa-gamepad"></i> Refri-Game (Beta)</div>
+    <a href="Https://maps.app.goo.gl/P39J8jTsk4KmZBh28" target="_blank" class="nav-item"><i class="fas fa-map-marker-alt"></i> Localização Loja</a>
+    
+    <div style="padding: 20px; font-size: 0.8rem; color: #999; font-weight: bold; text-align: center;">NOSSAS REDES</div>
+    <div style="display: flex; justify-content: space-around; padding: 10px;">
+        <a href="https://www.instagram.com/refricenter_arcondicionado?igsh=NDMyd215NXJ2MGNm" target="_blank" style="color: var(--insta); font-size: 28px;"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/share/169ZAyYuUy/" target="_blank" style="color: var(--fb); font-size: 28px;"><i class="fab fa-facebook"></i></a>
+        <a href="https://wa.me/5568992447004" style="color: var(--green); font-size: 28px;"><i class="fab fa-whatsapp"></i></a>
+    </div>
+</div>
+
+<header>
+    <div class="logo-box">
+        <img src="https://cdn-icons-png.flaticon.com/512/950/950244.png" height="22">
+        <span style="margin-left:8px; font-weight:900; color:var(--blue); font-size: 0.9rem;">REFRICENTER v9.5</span>
+    </div>
+    <i class="fas fa-bars" style="font-size:24px;" onclick="toggleMenu()"></i>
+</header>
+
+<div class="container">
+    <div id="v-serv" class="view active">
+        <div class="card">
+            <div class="card-title">Orçamento Profissional</div>
+            
+            <label>Tipo de Serviço:</label>
+            <select id="serv" onchange="mudarServico(); calcularPreco();">
+                <option value="inst">🛠️ Instalação Técnica</option>
+                <option value="limp">🧼 Limpeza Completa</option>
+                <option value="gas">🧪 Reposição de Gás</option>
+            </select>
+
+            <div id="box-material">
+                <label>Material:</label>
+                <select id="mat" onchange="calcularPreco();"><option value="com">Sim (Com Material)</option><option value="sem">Não (Só Mão de Obra)</option></select>
+            </div>
+
+            <label>Capacidade do Ar:</label>
+            <select id="tipo" onchange="calcularPreco();"></select>
+
+            <label>Sua Localização:</label>
+            <select id="loc" onchange="calcularPreco();"><option value="c">Na Cidade</option><option value="f">Zona Rural / Interior</option></select>
+
+            <div class="resultado-box">
+                <small id="txt-promo" style="color:var(--blue); font-weight:bold">VALOR ESTIMADO</small>
+                <span id="preco" class="v-final">R$ 0,00</span>
+            </div>
+
+            <a id="link-zap" href="#" target="_blank" class="btn-zap"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</a>
+            <button class="btn-pdf" onclick="gerarPDF()"><i class="fas fa-file-pdf"></i> BAIXAR ORÇAMENTO PDF</button>
+            <button style="border:none; background:none; color:#999; width:100%; margin-top:10px; font-size:0.7rem; cursor:pointer;" onclick="limparTudo()">Limpar dados salvos</button>
+        </div>
+    </div>
+
+    <div id="v-calc" class="view">
+        <div class="card">
+            <div class="card-title">Calculadora de BTU</div>
+            <label>Tamanho do ambiente (m²):</label>
+            <input type="number" id="area" placeholder="Ex: 12">
+            <button class="btn-orange" onclick="calcBTU()">CALCULAR</button>
+            <div id="res-calc" style="margin-top:15px; text-align:center; font-weight:bold; color:var(--blue);"></div>
+        </div>
+    </div>
+
+    <div id="v-game" class="view">
+        <div class="card">
+            <div id="game-canvas"><div id="score" style="color:white; padding:10px;">Pontos: 0</div><div id="p" class="player">👨‍🔧</div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+                <button class="btn-orange" onclick="moveGame(-20)">ESQUERDA</button>
+                <button class="btn-orange" onclick="moveGame(20)">DIREITA</button>
+            </div>
+            <button class="btn-orange" style="background:var(--green); width:100%" onclick="startGame()">INICIAR JOGO</button>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <a href="#" class="foot-item active" onclick="nav('v-serv')"><i class="fas fa-home"></i>Início</a>
+    <a href="https://www.instagram.com/refricenter_arcondicionado?igsh=NDMyd215NXJ2MGNm" target="_blank" class="foot-item"><i class="fab fa-instagram"></i>Insta</a>
+    <a href="https://wa.me/5568992447004" target="_blank" class="foot-item" style="color:var(--green)"><i class="fab fa-whatsapp"></i>Zap</a>
+    <a href="Https://maps.app.goo.gl/P39J8jTsk4KmZBh28" target="_blank" class="foot-item"><i class="fas fa-map-marker-alt"></i>Loja</a>
+</footer>
+
+<script>
+    let valorGlobal = 0, pos = 45, pts = 0, gActive = false;
+    const { jsPDF } = window.jspdf;
+
+    const tabela = {
+        inst: { sem: { "9-12k":{c:200, f:300}, "18k":{c:350, f:450}, "22k":{c:400, f:500}, "30k":{c:650, f:800}, "36k":{c:750, f:900} }, com: { "9-12k":{c:600, f:700}, "18k":{c:850, f:950}, "22k":{c:900, f:1000}, "30k":{c:1150, f:1300}, "36k":{c:1250, f:1400} } },
+        limp: { "9-12k":{c:200, f:280}, "18k":{c:250, f:330}, "22k":{c:300, f:380}, "30k":{c:450, f:550}, "36k":{c:550, f:650} },
+        gas: { "r22":{c:400, f:500}, "r410":{c:450, f:550}, "r32":{c:500, f:600} }
+    };
+
+    function toggleMenu() { document.getElementById('sideNav').classList.toggle('open'); }
+
+    function nav(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.foot-item').forEach(f => f.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'v-serv') document.querySelector('footer a:nth-child(1)').classList.add('active');
+        if(document.getElementById('sideNav').classList.contains('open')) toggleMenu();
+        gActive = false;
+    }
+
+    function mudarServico() {
+        const s = document.getElementById('serv').value, t = document.getElementById('tipo');
+        document.getElementById('box-material').style.display = (s === 'inst') ? 'block' : 'none';
+        t.innerHTML = (s !== 'gas') ? 
+            `<option value="9-12k">9-12.000 BTUs</option><option value="18k">18.000 BTUs</option><option value="22k">22.000 BTUs</option><option value="30k">30.000 BTUs</option><option value="36k">36.000 BTUs</option>` : 
+            `<option value="r22">Gás R22</option><option value="r410">Gás R410</option><option value="r32">Gás Inverter R32</option>`;
+        calcularPreco();
+    }
+
+    function calcularPreco() {
+        const s = document.getElementById('serv').value, tp = document.getElementById('tipo').value, l = document.getElementById('loc').value, m = document.getElementById('mat').value;
+        if(!tp) return;
+        let base = (s === 'inst') ? tabela.inst[m][tp][l] : tabela[s][tp][l];
+        valorGlobal = base;
+        document.getElementById('preco').innerText = "R$ " + valorGlobal.toFixed(2).replace('.',',');
+        const msg = encodeURIComponent(`*REFRICENTER TITANIUM*\nServiço: ${document.getElementById('serv').options[document.getElementById('serv').selectedIndex].text}\nModelo: ${tp}\nTotal: R$ ${valorGlobal.toFixed(2)}`);
+        document.getElementById('link-zap').href = `https://wa.me/5568992447004?text=${msg}`;
+        salvar();
+    }
+
+    function salvar() {
+        const d = { s: document.getElementById('serv').value, t: document.getElementById('tipo').value, l: document.getElementById('loc').value, m: document.getElementById('mat').value };
+        localStorage.setItem('refricenter_ultimate', JSON.stringify(d));
+    }
+
+    function carregar() {
+        const d = JSON.parse(localStorage.getItem('refricenter_ultimate'));
+        if(d) {
+            document.getElementById('serv').value = d.s; mudarServico();
+            document.getElementById('tipo').value = d.t; document.getElementById('loc').value = d.l;
+            document.getElementById('mat').value = d.m; calcularPreco();
+        }
+    }
+
+    function limparTudo() { localStorage.clear(); location.reload(); }
+
+    function gerarPDF() {
+        const doc = new jsPDF();
+        doc.setFontSize(22); doc.setTextColor(1, 87, 155); doc.text("REFRICENTER AR CONDICIONADOS", 20, 20);
+        doc.setFontSize(12); doc.setTextColor(100); doc.text("Orçamento Gerado em: " + new Date().toLocaleDateString(), 20, 30);
+        doc.line(20, 35, 190, 35);
+        doc.setTextColor(0);
+        doc.text(`Serviço: ${document.getElementById('serv').options[document.getElementById('serv').selectedIndex].text}`, 20, 50);
+        doc.text(`Capacidade: ${document.getElementById('tipo').options[document.getElementById('tipo').selectedIndex].text}`, 20, 60);
+        doc.setFontSize(18); doc.setTextColor(40, 167, 69); doc.text(`VALOR TOTAL: R$ ${valorGlobal.toFixed(2)}`, 20, 80);
+        doc.save("Orcamento_Refricenter.pdf");
+    }
+
+    function calcBTU() {
+        const a = document.getElementById('area').value;
+        if(a > 0) document.getElementById('res-calc').innerText = "Recomendado: " + (a * 650) + " BTUs";
+    }
+
+    // GAME LOGIC
+    function moveGame(v) { pos = Math.max(5, Math.min(85, pos + v)); document.getElementById('p').style.left = pos + '%'; }
+    function startGame() { if(gActive) return; gActive = true; pts = 0; setInterval(() => { if(gActive) spawn(); }, 1500); }
+    function spawn() {
+        const o = document.createElement('div'); o.className = 'game-obj'; o.innerHTML = '❄️'; o.style.left = Math.random() * 85 + '%'; o.style.top = '0px';
+        document.getElementById('game-canvas').appendChild(o);
+        let t = 0; const f = setInterval(() => {
+            t += 5; o.style.top = t + 'px';
+            const pr = document.getElementById('p').getBoundingClientRect(), or = o.getBoundingClientRect();
+            if(or.bottom > pr.top && or.left < pr.right && or.right > pr.left) { pts += 10; document.getElementById('score').innerText = "Pontos: " + pts; o.remove(); clearInterval(f); }
+            if(t > 250){ o.remove(); clearInterval(f); }
+        }, 50);
+    }
+
+    window.onload = () => { mudarServico(); carregar(); };
+</script>
+</body>
+</html>
