@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter 2.0 Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root { --blue: #01579B; --orange: #FF8F00; --green: #2e7d32; --light-bg: #f8fafd; }
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background: var(--light-bg); color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Header Premium */
+        header { background: var(--blue); color: white; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 1001; }
+        .logo-area { font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; }
+
+        /* Menu Lateral */
+        .drawer { position: fixed; top: 0; left: -100%; width: 80%; height: 100%; background: white; z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
+        .drawer.open { left: 0; }
+        .drawer-header { background: linear-gradient(135deg, var(--blue), #0277bd); color: white; padding: 40px 20px; text-align: center; border-bottom: 4px solid var(--orange); }
+
+        .container { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        
+        /* Saudação elegante */
+        .welcome-card { background: white; padding: 15px 20px; border-radius: 15px; margin-bottom: 20px; border-left: 5px solid var(--orange); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .welcome-card span { color: var(--blue); font-weight: 700; }
+
+        /* Card de Formulário Reestruturado */
+        .main-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .main-card h2 { margin: 0 0 20px 0; font-size: 1.4rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+        
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; color: #666; }
+        
+        select, input { 
+            width: 100%; padding: 15px; border: 2px solid #edf2f7; border-radius: 12px; 
+            background: #fcfdfe; font-size: 1rem; color: #2d3748; transition: 0.3s; outline: none;
+        }
+        select:focus { border-color: var(--blue); background: white; }
+
+        /* Resultado e Botões */
+        .result-area { 
+            margin-top: 25px; padding: 20px; background: #f0f7ff; border-radius: 15px; 
+            text-align: center; border: 1px solid #d1e3ff; display: none;
+        }
+        .price { font-size: 2.5rem; font-weight: 900; color: var(--green); margin: 10px 0; }
+        
+        .btn-flex { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .btn { 
+            padding: 15px; border-radius: 12px; border: none; font-weight: 700; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
+        }
+        .btn-zap { background: #25d366; color: white; grid-column: span 2; }
+        .btn-pdf { background: var(--blue); color: white; }
+        .btn-share { background: #666; color: white; }
+
+        /* Footer Estilizado */
+        footer { 
+            position: fixed; bottom: 0; width: 100%; background: white; 
+            display: flex; justify-content: space-around; padding: 12px 5px; 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-radius: 20px 20px 0 0;
+        }
+        .nav-item { text-align: center; text-decoration: none; color: #a0aec0; flex: 1; transition: 0.3s; }
+        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+        .nav-item span { font-size: 0.7rem; font-weight: 600; }
+        .nav-item.active { color: var(--blue); }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <i class="fas fa-bars" onclick="toggleMenu()" style="font-size: 1.4rem; cursor: pointer;"></i>
+    <div class="logo-area">REFRICENTER 2.0</div>
+    <i class="fas fa-user-circle" onclick="nav('v-profile')" style="font-size: 1.6rem; cursor: pointer;"></i>
+</header>
+
+<nav class="drawer" id="drawer">
+    <div class="drawer-header">
+        <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 15px;"></i>
+        <div>PAINEL DO CLIENTE</div>
+    </div>
+    <div style="padding: 20px;">
+        <div onclick="nav('v-orc')" style="padding: 15px 0; font-weight: 600; border-bottom: 1px solid #eee;"><i class="fas fa-file-invoice-dollar" style="width: 30px;"></i> Orçamentos</div>
+        <div onclick="nav('v-btu')" style="padding: 15px 0; font-weight: 600; border-bottom: 1px solid #eee;"><i class="fas fa-calculator" style="width: 30px;"></i> Calculadora BTU</div>
+        <div onclick="nav('v-game')" style="padding: 15px 0; font-weight: 600; border-bottom: 1px solid #eee;"><i class="fas fa-gamepad" style="width: 30px;"></i> Refri-Game</div>
+        <div onclick="nav('v-tech')" style="padding: 15px 0; font-weight: 600;"><i class="fas fa-microchip" style="width: 30px;"></i> Guia Técnico</div>
+    </div>
+</nav>
+
+<div class="container">
+    
+    <div class="welcome-card" id="welcome-msg">
+        Olá, <span id="client-name">Visitante</span>! 👋
+    </div>
+
+    <div id="v-orc" class="view active">
+        <div class="main-card">
+            <h2><i class="fas fa-receipt"></i> Gerar Orçamento</h2>
+            
+            <div class="input-group">
+                <label>Onde será o serviço?</label>
+                <select id="sel-end">
+                    <option value="">Selecione o endereço...</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Tipo de Serviço</label>
+                <select id="servico" onchange="updateFlow()">
+                    <option value="">O que você precisa?</option>
+                    <option value="inst">Instalação Técnica</option>
+                    <option value="desinst">Desinstalação</option>
+                    <option value="limp">Limpeza / Higienização</option>
+                    <option value="gas">Carga de Gás</option>
+                </select>
+            </div>
+
+            <div id="extra-fields" style="display: none;">
+                <div class="input-group">
+                    <label id="lbl-tec">Tecnologia</label>
+                    <select id="tecnologia" onchange="calcPrice()"></select>
+                </div>
+
+                <div class="input-group">
+                    <label>Capacidade (BTUs)</label>
+                    <select id="btus" onchange="calcPrice()"></select>
+                </div>
+
+                <div class="input-group" id="mat-group" style="display: none;">
+                    <label>Material de Instalação</label>
+                    <select id="material" onchange="calcPrice()">
+                        <option value="nao">Não (Apenas Mão de Obra)</option>
+                        <option value="sim">Sim (Com Material Incluso)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="result-box" class="result-area">
+                <span style="font-size: 0.8rem; font-weight: bold; color: #666; letter-spacing: 1px;">INVESTIMENTO ESTIMADO</span>
+                <div class="price" id="final-val">R$ 0,00</div>
+                
+                <div class="btn-flex">
+                    <button class="btn btn-zap" onclick="sendAction('zap')"><i class="fab fa-whatsapp"></i> ENVIAR PEDIDO</button>
+                    <button class="btn btn-pdf" onclick="sendAction('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-share" onclick="alert('Link copiado!')"><i class="fas fa-share-alt"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <a href="#" class="nav-item active" onclick="nav('v-orc')"><i class="fas fa-home"></i><span>Início</span></a>
+    <a href="https://wa.me/5568992447004" class="nav-item"><i class="fab fa-whatsapp"></i><span>Zap</span></a>
+    <a href="https://www.facebook.com/share/169ZAyYuUy/" class="nav-item"><i class="fab fa-facebook"></i><span>Facebook</span></a>
+    <a href="https://www.instagram.com/refricenter_arcondicionado" class="nav-item"><i class="fab fa-instagram"></i><span>Insta</span></a>
+</footer>
+
+<script>
+    // Memória e Preços
+    const db = JSON.parse(localStorage.getItem('refri_user')) || { nome: "Cleiton de Oliveira da Silva", enderecos: ["Minha Casa - Centro"] };
+    const PRECOS = {
+        inst: { conv: {"9k":200, "12k":200, "18k":300, "22k":350}, inv: {"9k":250, "12k":250, "18k":350, "22k":400}, mat_conv: {"9k":550, "12k":600}, mat_inv: {"9k":600, "12k":650} },
+        desinst: { conv: {"9k":100, "12k":100, "18k":150}, inv: {"9k":150, "12k":150, "18k":200} },
+        limp: { conv: {"9k":150, "12k":150, "18k":200}, inv: {"9k":200, "12k":200, "18k":250} },
+        gas: { R22: {"9k":450, "12k":450}, R410a: {"9k":500, "12k":500}, R32: {"9k":550, "12k":600} }
+    };
+
+    function toggleMenu() { document.getElementById('drawer').classList.toggle('open'); }
+
+    function updateFlow() {
+        const s = document.getElementById('servico').value;
+        if(!s) { document.getElementById('extra-fields').style.display='none'; return; }
+        
+        document.getElementById('extra-fields').style.display='block';
+        document.getElementById('mat-group').style.display = (s === 'inst') ? 'block' : 'none';
+        
+        const b = document.getElementById('btus');
+        b.innerHTML = '<option value="">Qual a potência?</option>';
+        ["9k","12k","18k","22k"].forEach(cap => b.innerHTML += `<option value="${cap}">${cap} BTUs</option>`);
+
+        const t = document.getElementById('tecnologia');
+        if(s === 'gas') {
+            document.getElementById('lbl-tec').innerText = "Tipo de Gás";
+            t.innerHTML = '<option value="R22">R22</option><option value="R410a">R410a</option><option value="R32">R32</option>';
+        } else {
+            document.getElementById('lbl-tec').innerText = "Tecnologia";
+            t.innerHTML = '<option value="conv">Convencional</option><option value="inv">Inverter</option>';
+        }
+    }
+
+    function calcPrice() {
+        const s = document.getElementById('servico').value;
+        const t = document.getElementById('tecnologia').value;
+        const b = document.getElementById('btus').value;
+        const m = document.getElementById('material').value;
+
+        if(s && t && b) {
+            let p = 0;
+            if(s === 'inst') p = PRECOS.inst[(m === 'sim' ? 'mat_' : '') + t][b] || 0;
+            else if(s === 'gas') p = PRECOS.gas[t][b] || 0;
+            else p = PRECOS[s][t][b] || 0;
+
+            document.getElementById('final-val').innerText = `R$ ${p},00`;
+            document.getElementById('result-box').style.display = 'block';
+        }
+    }
+
+    function sendAction(type) {
+        const res = `*REFRICENTER 2.0*\nCliente: ${db.nome}\nServiço: ${document.getElementById('servico').value}\nTotal: ${document.getElementById('final-val').innerText}`;
+        if(type === 'zap') window.open(`https://wa.me/5568992447004?text=${encodeURIComponent(res)}`);
+        else alert("PDF Gerado com sucesso!");
+    }
+
+    window.onload = () => {
+        document.getElementById('client-name').innerText = db.nome;
+        const sel = document.getElementById('sel-end');
+        db.enderecos.forEach(e => sel.innerHTML += `<option value="${e}">${e}</option>`);
+    };
+</script>
+</body>
+</html>
