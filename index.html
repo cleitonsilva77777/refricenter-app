@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Titanium Gold - Extreme Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --blue: #01579B; --gold: #D4AF37; --dark-gold: #B8860B; --green: #2e7d32; --bg: #f0f2f5; --white: #ffffff; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Header Premium */
+        header { 
+            background: linear-gradient(135deg, var(--blue) 0%, #002f6c 100%);
+            color: white; padding: 15px 20px; display: flex; justify-content: space-between; 
+            align-items: center; border-bottom: 4px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1001; 
+        }
+        .logo-box b { font-size: 1.2rem; letter-spacing: 1px; }
+        .logo-box span { display: block; font-size: 0.55rem; color: var(--gold); font-weight: bold; }
+
+        /* Conteúdo Principal */
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 180px; }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: var(--white); border-radius: 20px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); margin-bottom: 15px; border: 1px solid rgba(212, 175, 55, 0.1); }
+        h3 { color: var(--blue); margin-top: 0; border-left: 5px solid var(--gold); padding-left: 12px; margin-bottom: 15px; font-size: 1rem; }
+
+        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 10px; font-size: 0.95rem; outline: none; }
+        .btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; text-transform: uppercase; }
+        .btn-green { background: var(--green); color: white; }
+        .btn-blue { background: var(--blue); color: white; }
+
+        /* CENTRAL DE JOGOS (REFRI-GAME) */
+        .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .game-card { background: var(--blue); color: white; padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; border-bottom: 4px solid var(--gold); }
+        .game-container { position: relative; background: #000; border-radius: 15px; overflow: hidden; display: none; margin-top: 10px; }
+        canvas { display: block; margin: 0 auto; background: #000; width: 100%; max-width: 300px; height: 300px; }
+        .game-stats { display: flex; justify-content: space-between; padding: 10px; background: #222; color: #fff; font-size: 0.8rem; font-weight: bold; border-bottom: 2px solid var(--gold); }
+
+        /* Jogo da Memória */
+        .mem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .m-card { height: 60px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: transparent; cursor: pointer; transition: 0.3s; }
+        .m-card.open { background: white; color: #333; border: 2px solid var(--gold); transform: rotateY(180deg); }
+        .m-card.found { background: var(--gold); color: white; visibility: visible; }
+
+        /* Footer e Redes Sociais */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; z-index: 1000; }
+        .social-bar { display: flex; justify-content: center; gap: 20px; padding: 8px; background: #f8fafc; border-bottom: 1px solid #eee; }
+        .social-bar a { color: var(--blue); font-size: 1.2rem; transition: 0.3s; }
+        .nav-bar { display: flex; justify-content: space-around; padding: 10px 0 25px; }
+        .nav-item { text-align: center; color: #94a3b8; text-decoration: none; flex: 1; font-size: 0.65rem; font-weight: bold; }
+        .nav-item.active { color: var(--blue); }
+        .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 3px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-box"><b>REFRICENTER</b><span>SOLUÇÕES TITANIUM GOLD</span></div>
+    <i class="fas fa-user-shield" onclick="checkAdmin()" style="color:var(--gold); font-size: 1.3rem;"></i>
+</header>
+
+<div class="main-content">
+    
+    <div id="v-perfil" class="view active">
+        <div class="card">
+            <h3><i class="fas fa-id-card"></i> Cadastro Titanium</h3>
+            <input type="text" id="reg-nome" placeholder="Nome Completo">
+            <input type="text" id="reg-end" placeholder="Endereço de Atendimento">
+            <input type="tel" id="reg-tel" placeholder="WhatsApp">
+            <button class="btn btn-blue" onclick="salvarPerfil()">SALVAR DADOS</button>
+        </div>
+    </div>
+
+    <div id="v-orc" class="view">
+        <div class="card">
+            <h3><i class="fas fa-calculator"></i> Orçamento Rápido</h3>
+            <select id="s-tipo" onchange="atualizarPreco()">
+                <option value="">Selecione o Serviço...</option>
+                <optgroup label="Instalação">
+                    <option value="ic">Convencional</option>
+                    <option value="ii">Inverter</option>
+                    <option value="icm">Convencional + Material</option>
+                    <option value="iim">Inverter + Material</option>
+                </optgroup>
+                <optgroup label="Desinstalação">
+                    <option value="dc">Desinstalação Convencional</option>
+                    <option value="di">Desinstalação Inverter</option>
+                </optgroup>
+                <optgroup label="Carga de Gás">
+                    <option value="g22">Gás R22</option>
+                    <option value="g410">Gás R410a</option>
+                    <option value="g32">Gás R32</option>
+                </optgroup>
+            </select>
+            <select id="s-btu" onchange="atualizarPreco()">
+                <option value="9k">9.000 BTUs</option>
+                <option value="12k">12.000 BTUs</option>
+                <option value="18k">18.000 BTUs</option>
+                <option value="24k">24.000 BTUs</option>
+                <option value="30k">30.000 BTUs</option>
+            </select>
+            <div id="p-box" style="display:none; text-align:center; padding:15px; background:#e8f5e9; border-radius:12px; margin:10px 0;">
+                <small style="color:var(--green); font-weight:bold;">VALOR ESTIMADO</small>
+                <h2 id="p-txt" style="color:#1b5e20; margin:5px 0;">R$ 0,00</h2>
+            </div>
+            <button class="btn btn-green" onclick="enviarWhats()"><i class="fab fa-whatsapp"></i> AGENDAR AGORA</button>
+        </div>
+    </div>
+
+    <div id="v-game" class="view">
+        <div class="card">
+            <h3><i class="fas fa-gamepad"></i> Refri-Game Central</h3>
+            <div class="game-menu" id="game-menu">
+                <div class="game-card" onclick="startMemoria()">
+                    <i class="fas fa-brain"></i><br><small>Memória</small>
+                </div>
+                <div class="game-card" onclick="startSnake()">
+                    <i class="fas fa-vial"></i><br><small>Cobrinha</small>
+                </div>
+            </div>
+
+            <div id="memoria-container" style="display:none;">
+                <div class="game-stats">
+                    <span>Tempo: <span id="mem-time">60</span>s</span>
+                    <span>Recorde: <span id="mem-record">0</span></span>
+                </div>
+                <div class="mem-grid" id="mem-grid"></div>
+                <button class="btn btn-blue" style="margin-top:10px" onclick="startMemoria()">REINICIAR</button>
+            </div>
+
+            <div id="snake-container" class="game-container">
+                <div class="game-stats">
+                    <span>Nível: <span id="snk-lv">1</span></span>
+                    <span>Score: <span id="snk-score">0</span></span>
+                    <span>Recorde: <span id="snk-record">0</span></span>
+                </div>
+                <canvas id="snakeCanvas" width="300" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-tec" class="view">
+        <div class="card">
+            <h3>Calculadora BTU</h3>
+            <input type="number" id="m2" placeholder="Metros Quadrados (m²)">
+            <button class="btn btn-blue" onclick="calcBTU()">CALCULAR</button>
+            <h2 id="res-btu" style="text-align:center; color:var(--blue)"></h2>
+        </div>
+        <div class="card">
+            <h3>Códigos de Erro</h3>
+            <p style="font-size:0.8rem"><b>E1:</b> Sensor Ambiente | <b>P4:</b> Inverter Fail | <b>F3:</b> Comunicação</p>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <div class="social-bar">
+        <a href="https://facebook.com/seulink" target="_blank"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com/seulink" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/5568992447004" target="_blank"><i class="fab fa-whatsapp"></i></a>
+    </div>
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="nav('v-perfil',this)"><i class="fas fa-user"></i>PERFIL</div>
+        <div class="nav-item" onclick="nav('v-orc',this)"><i class="fas fa-tags"></i>PREÇOS</div>
+        <div class="nav-item" onclick="nav('v-tec',this)"><i class="fas fa-tools"></i>TÉCNICO</div>
+        <div class="nav-item" onclick="nav('v-game',this)"><i class="fas fa-dice"></i>JOGOS</div>
+    </div>
+</footer>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('refri_extreme_db')) || { logs: [], user: {}, records: { mem: 0, snk: 0 } };
+
+    const PRECOS = {
+        ic: {"9k":200, "12k":200, "18k":300, "24k":400},
+        ii: {"9k":250, "12k":250, "18k":350, "24k":450},
+        icm: {"9k":550, "12k":600, "18k":800, "24k":900},
+        iim: {"9k":600, "12k":650, "18k":850, "24k":950},
+        dc: {"9k":100, "12k":100, "18k":150, "24k":200},
+        di: {"9k":150, "12k":150, "18k":200, "24k":250},
+        g22: {"9k":450, "12k":450, "18k":600, "24k":750},
+        g410: {"9k":500, "12k":500, "18k":600, "24k":850},
+        g32: {"9k":550, "12k":600, "18k":750, "24k":1000}
+    };
+
+    function nav(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        stopAllGames();
+    }
+
+    function salvarPerfil() {
+        db.user = { n: document.getElementById('reg-nome').value, e: document.getElementById('reg-end').value, t: document.getElementById('reg-tel').value };
+        localStorage.setItem('refri_extreme_db', JSON.stringify(db));
+        alert("Dados Titanium Salvos!");
+        nav('v-orc', document.querySelectorAll('.nav-item')[1]);
+    }
+
+    function atualizarPreco() {
+        const s = document.getElementById('s-tipo').value, b = document.getElementById('s-btu').value;
+        if(s && b && PRECOS[s][b]) {
+            document.getElementById('p-txt').innerText = `R$ ${PRECOS[s][b]},00`;
+            document.getElementById('p-box').style.display = 'block';
+        }
+    }
+
+    function enviarWhats() {
+        const s = document.getElementById('s-tipo').value, b = document.getElementById('s-btu').value;
+        const msg = `*REFRICENTER TITANIUM*\nCliente: ${db.user.n || 'Novo'}\nEnd: ${db.user.e || '-'}\nServiço: ${s} ${b}\nValor: ${document.getElementById('p-txt').innerText}`;
+        window.open(`https://wa.me/5568992447004?text=${encodeURIComponent(msg)}`);
+    }
+
+    function calcBTU() { document.getElementById('res-btu').innerText = (document.getElementById('m2').value * 600) + " BTUs"; }
+
+    // --- LÓGICA DE JOGOS (REFRI-GAME) ---
+    let gameInterval;
+    function stopAllGames() {
+        clearInterval(gameInterval);
+        document.getElementById('memoria-container').style.display = 'none';
+        document.getElementById('snake-container').style.display = 'none';
+        document.getElementById('game-menu').style.display = 'grid';
+    }
+
+    // JOGO DA MEMÓRIA COM TEMPO E RECORDE
+    let memCards = [];
+    function startMemoria() {
+        stopAllGames();
+        document.getElementById('game-menu').style.display = 'none';
+        document.getElementById('memoria-container').style.display = 'block';
+        document.getElementById('mem-record').innerText = db.records.mem;
+        
+        let timeLeft = 60;
+        let pairsFound = 0;
+        document.getElementById('mem-time').innerText = timeLeft;
+        
+        const icons = ['❄️','❄️','🔧','🔧','⚡','⚡','💧','💧','🛠️','🛠️','🔥','🔥','📏','📏','🏠','🏠'].sort(() => 0.5 - Math.random());
+        const grid = document.getElementById('mem-grid'); grid.innerHTML = '';
+        
+        gameInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('mem-time').innerText = timeLeft;
+            if(timeLeft <= 0) { clearInterval(gameInterval); alert("Fim de tempo!"); startMemoria(); }
+        }, 1000);
+
+        icons.forEach(icon => {
+            const card = document.createElement('div'); card.className = 'm-card'; card.dataset.v = icon;
+            card.onclick = function() {
+                if(memCards.length < 2 && !this.classList.contains('open')) {
+                    this.classList.add('open'); this.innerText = icon; memCards.push(this);
+                    if(memCards.length === 2) {
+                        if(memCards[0].dataset.v === memCards[1].dataset.v) {
+                            memCards.forEach(c => c.classList.add('found')); memCards = []; pairsFound++;
+                            if(pairsFound === 8) {
+                                clearInterval(gameInterval);
+                                let score = timeLeft * 10;
+                                if(score > db.records.mem) { db.records.mem = score; localStorage.setItem('refri_extreme_db', JSON.stringify(db)); }
+                                alert("Parabéns! Score: " + score);
+                                stopAllGames();
+                            }
+                        } else {
+                            setTimeout(() => { memCards.forEach(c => { c.classList.remove('open'); c.innerText = ''; }); memCards = []; }, 600);
+                        }
+                    }
+                }
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    // JOGO DA COBRINHA (SNAKE) COM DIFICULDADE
+    function startSnake() {
+        stopAllGames();
+        document.getElementById('game-menu').style.display = 'none';
+        document.getElementById('snake-container').style.display = 'block';
+        document.getElementById('snk-record').innerText = db.records.snk;
+
+        const canvas = document.getElementById('snakeCanvas');
+        const ctx = canvas.getContext('2d');
+        let box = 15, snake = [{x: 9*box, y: 10*box}], food = {x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box};
+        let d, score = 0, level = 1, speed = 150;
+
+        document.addEventListener("keydown", (e) => { 
+            if(e.keyCode==37 && d!="RIGHT") d="LEFT"; else if(e.keyCode==38 && d!="DOWN") d="UP";
+            else if(e.keyCode==39 && d!="LEFT") d="RIGHT"; else if(e.keyCode==40 && d!="UP") d="DOWN";
+        });
+
+        function draw() {
+            ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
+            for(let i=0; i<snake.length; i++){ ctx.fillStyle = (i==0)?"#D4AF37":"white"; ctx.fillRect(snake[i].x, snake[i].y, box, box); }
+            ctx.fillStyle = "red"; ctx.fillRect(food.x, food.y, box, box);
+
+            let snakeX = snake[0].x, snakeY = snake[0].y;
+            if(d=="LEFT") snakeX -= box; if(d=="UP") snakeY -= box; if(d=="RIGHT") snakeX += box; if(d=="DOWN") snakeY += box;
+
+            if(snakeX == food.x && snakeY == food.y){
+                score++; food = {x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box};
+                if(score % 5 == 0) { level++; speed -= 10; restartInterval(); }
+            } else { snake.pop(); }
+
+            let newHead = {x: snakeX, y: snakeY};
+            if(snakeX<0 || snakeY<0 || snakeX>=300 || snakeY>=300 || collision(newHead, snake)){
+                clearInterval(gameInterval);
+                if(score > db.records.snk) { db.records.snk = score; localStorage.setItem('refri_extreme_db', JSON.stringify(db)); }
+                alert("Game Over! Score: " + score); stopAllGames();
+            }
+            snake.unshift(newHead);
+            document.getElementById('snk-score').innerText = score;
+            document.getElementById('snk-lv').innerText = level;
+        }
+
+        function collision(head, array){ for(let i=0; i<array.length; i++){ if(head.x == array[i].x && head.y == array[i].y) return true; } return false; }
+        
+        function restartInterval() { clearInterval(gameInterval); gameInterval = setInterval(draw, speed); }
+        restartInterval();
+    }
+</script>
+</body>
+</html>
