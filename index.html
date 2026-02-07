@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter 2.0 Titanium v18</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --blue: #01579B; --orange: #FF8F00; --green: #2e7d32; --red: #c53030; --gray: #f4f7f9; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--gray); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { background: var(--blue); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--orange); z-index: 1000; }
+        
+        .drawer { position: fixed; top: 0; left: -100%; width: 85%; height: 100%; background: white; z-index: 2000; transition: 0.3s; box-shadow: 10px 0 30px rgba(0,0,0,0.2); }
+        .drawer.open { left: 0; }
+        .drawer-header { background: var(--blue); color: white; padding: 30px 20px; font-weight: bold; }
+        .drawer-item { padding: 18px 25px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; color: var(--blue); font-weight: 600; cursor: pointer; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        
+        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; }
+        .btn-outline { background: transparent; border: 2px solid #ccc; color: #666; }
+        .btn-primary { background: var(--blue); color: white; }
+        .btn-success { background: var(--green); color: white; }
+
+        select, input { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #eee; margin-bottom: 12px; font-size: 1rem; }
+        
+        /* GUIAS */
+        .error-item { padding: 10px; border-bottom: 1px solid #eee; }
+        .error-code { color: var(--red); font-weight: bold; }
+
+        footer { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-tab { text-align: center; text-decoration: none; color: #a0aec0; flex: 1; font-size: 0.7rem; }
+        .nav-tab.active { color: var(--blue); }
+        .nav-tab i { display: block; font-size: 1.4rem; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <i class="fas fa-bars" onclick="toggleMenu()" style="cursor:pointer"></i>
+    <div style="font-weight:900">REFRICENTER 2.0</div>
+    <i class="fas fa-undo-alt" onclick="resetApp()" style="cursor:pointer"></i>
+</header>
+
+<nav class="drawer" id="drawer">
+    <div class="drawer-header">MENU TÉCNICO</div>
+    <div class="drawer-item" onclick="nav('v-orc')"><i class="fas fa-calculator"></i> Orçamentos</div>
+    <div class="drawer-item" onclick="nav('v-btu')"><i class="fas fa-snowflake"></i> Cálculo de BTU</div>
+    <div class="drawer-item" onclick="nav('v-tech')"><i class="fas fa-book-medical"></i> Guia de Erros</div>
+    <div class="drawer-item" onclick="nav('v-game')"><i class="fas fa-gamepad"></i> Refri-Game</div>
+    <div class="drawer-item" onclick="nav('v-profile')"><i class="fas fa-user-cog"></i> Perfil</div>
+    <div class="drawer-item" onclick="toggleMenu()" style="color:red"><i class="fas fa-times"></i> Fechar</div>
+</nav>
+
+<div class="main-content">
+    
+    <div id="v-orc" class="view active">
+        <div class="card">
+            <h3><i class="fas fa-file-invoice-dollar"></i> Orçamento Rápido</h3>
+            <label>Endereço:</label>
+            <select id="orc-end"></select>
+            <label>Serviço:</label>
+            <select id="orc-serv" onchange="fluxoOrc()">
+                <option value="">Selecione...</option>
+                <option value="instalacao">Instalação</option>
+                <option value="limpeza">Limpeza</option>
+                <option value="gas">Carga de Gás</option>
+            </select>
+            <div id="detalhes-orc" style="display:none">
+                <select id="orc-tec" onchange="calcTotal()"></select>
+                <select id="orc-btu" onchange="calcTotal()">
+                    <option value="9k">9.000 BTU</option>
+                    <option value="12k">12.000 BTU</option>
+                    <option value="18k">18.000 BTU</option>
+                    <option value="24k">24.000 BTU</option>
+                </select>
+                <div id="orc-res" class="card" style="background:#e8f5e9; text-align:center;">
+                    <h2 id="total-val">R$ 0,00</h2>
+                    <button class="btn btn-success" onclick="enviarZap()">ENVIAR PEDIDO</button>
+                    <button class="btn btn-outline" onclick="cancelarOrc()">CANCELAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-btu" class="view">
+        <div class="card">
+            <h3><i class="fas fa-snowflake"></i> Calculadora de Carga Térmica</h3>
+            <label>Área do ambiente (m²):</label>
+            <input type="number" id="btu-m2" placeholder="Ex: 20">
+            <label>Nº de Pessoas:</label>
+            <input type="number" id="btu-pep" placeholder="Ex: 2">
+            <label>Exposição ao Sol:</label>
+            <select id="btu-sol">
+                <option value="600">Manhã (Pouco sol)</option>
+                <option value="800">Tarde (Muito sol)</option>
+            </select>
+            <button class="btn btn-primary" onclick="calcularBTU()">CALCULAR POTÊNCIA</button>
+            <div id="btu-res" class="card" style="display:none; text-align:center; background:#e3f2fd">
+                <span>Potência Recomendada:</span>
+                <h2 id="btu-final">--</h2>
+                <button class="btn btn-outline" onclick="nav('v-orc')">FAZER ORÇAMENTO AGORA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-tech" class="view">
+        <div class="card">
+            <h3><i class="fas fa-search"></i> Consulta de Erros</h3>
+            <input type="text" id="search-erro" placeholder="Digite o código (ex: E1)..." onkeyup="searchErro()">
+            <div id="lista-erros">
+                <div class="error-item"><span class="error-code">E1</span>: Falha de comunicação</div>
+                <div class="error-item"><span class="error-code">E2</span>: Sensor de temperatura ambiente</div>
+                <div class="error-item"><span class="error-code">E4</span>: Proteção da unidade externa</div>
+                <div class="error-item"><span class="error-code">P4</span>: Erro de Inverter / Compressor</div>
+            </div>
+            <button class="btn btn-outline" onclick="nav('v-orc')">VOLTAR</button>
+        </div>
+    </div>
+
+    <div id="v-profile" class="view">
+        <div class="card">
+            <h3><i class="fas fa-user"></i> Cadastro</h3>
+            <input type="text" id="in-nome" placeholder="Seu Nome">
+            <button class="btn btn-primary" onclick="saveP()">SALVAR</button>
+            <hr>
+            <h4>Endereços</h4>
+            <input type="text" id="in-loc" placeholder="Apelido (ex: Casa)">
+            <input type="text" id="in-rua" placeholder="Endereço completo">
+            <button class="btn btn-success" onclick="addL()">ADICIONAR LOCAL</button>
+            <div id="lista-l"></div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <a href="#" class="nav-tab active" onclick="nav('v-orc')"><i class="fas fa-home"></i>Início</a>
+    <a href="#" class="nav-tab" onclick="nav('v-btu')"><i class="fas fa-snowflake"></i>BTU</a>
+    <a href="#" class="nav-tab" onclick="nav('v-tech')"><i class="fas fa-wrench"></i>Técnico</a>
+    <a href="#" class="nav-tab" onclick="nav('v-profile')"><i class="fas fa-user"></i>Perfil</a>
+</footer>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('refri_v18')) || { user: "", locais: [] };
+    const PRECOS = {
+        instalacao: { conv: {"9k":200, "12k":250, "18k":350, "24k":450}, inv: {"9k":300, "12k":350, "18k":450, "24k":550} },
+        limpeza: { conv: {"9k":150, "12k":180, "18k":220, "24k":280}, inv: {"9k":180, "12k":200, "18k":250, "24k":300} },
+        gas: { R22: {"9k":400, "12k":450, "18k":550, "24k":700}, R410: {"9k":450, "12k":500, "18k":600, "24k":800} }
+    };
+
+    function nav(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(document.getElementById('drawer').classList.contains('open')) toggleMenu();
+        updateUI();
+    }
+
+    function toggleMenu() { document.getElementById('drawer').classList.toggle('open'); }
+
+    function calcularBTU() {
+        const m2 = document.getElementById('btu-m2').value;
+        const pep = document.getElementById('btu-pep').value;
+        const fator = document.getElementById('btu-sol').value;
+        if(!m2) return alert("Insira a metragem!");
+        
+        let total = (m2 * fator) + (pep > 1 ? (pep - 1) * 600 : 0);
+        document.getElementById('btu-final').innerText = total.toLocaleString() + " BTUs";
+        document.getElementById('btu-res').style.display = 'block';
+    }
+
+    function fluxoOrc() {
+        const s = document.getElementById('orc-serv').value;
+        const det = document.getElementById('detalhes-orc');
+        const tec = document.getElementById('orc-tec');
+        if(!s) return det.style.display='none';
+        det.style.display='block';
+        
+        if(s === 'gas') {
+            tec.innerHTML = '<option value="R22">Gás R22</option><option value="R410">Gás R410a</option>';
+        } else {
+            tec.innerHTML = '<option value="conv">Convencional</option><option value="inv">Inverter</option>';
+        }
+        calcTotal();
+    }
+
+    function calcTotal() {
+        const s = document.getElementById('orc-serv').value;
+        const t = document.getElementById('orc-tec').value;
+        const b = document.getElementById('orc-btu').value;
+        let p = PRECOS[s][t][b];
+        document.getElementById('total-val').innerText = `R$ ${p},00`;
+        document.getElementById('orc-res').style.display = 'block';
+    }
+
+    function searchErro() {
+        let filter = document.getElementById('search-erro').value.toUpperCase();
+        let items = document.querySelectorAll('.error-item');
+        items.forEach(item => {
+            item.style.display = item.innerText.toUpperCase().includes(filter) ? "" : "none";
+        });
+    }
+
+    function saveP() { db.user = document.getElementById('in-nome').value; save(); alert("Salvo!"); }
+    function addL() {
+        const n = document.getElementById('in-loc').value, r = document.getElementById('in-rua').value;
+        if(n && r) { db.locais.push({n, r}); save(); updateUI(); }
+    }
+    function save() { localStorage.setItem('refri_v18', JSON.stringify(db)); }
+    
+    function updateUI() {
+        const sel = document.getElementById('orc-end'), list = document.getElementById('lista-l');
+        sel.innerHTML = ""; list.innerHTML = "";
+        db.locais.forEach((l, i) => {
+            sel.innerHTML += `<option value="${i}">${l.n}</option>`;
+            list.innerHTML += `<div class="card" style="padding:10px; margin-bottom:5px;"><b>${l.n}:</b> ${l.r}</div>`;
+        });
+    }
+
+    function enviarZap() {
+        const txt = `*REFRICENTER PEDIDO*\nCliente: ${db.user}\nServiço: ${document.getElementById('orc-serv').value}\nPreço: ${document.getElementById('total-val').innerText}`;
+        window.open(`https://wa.me/5568992447004?text=${encodeURIComponent(txt)}`);
+    }
+
+    function cancelarOrc() {
+        document.getElementById('orc-serv').value = "";
+        document.getElementById('detalhes-orc').style.display = 'none';
+    }
+
+    function resetApp() { if(confirm("Reiniciar App?")) location.reload(); }
+    window.onload = updateUI;
+</script>
+</body>
+</html>
