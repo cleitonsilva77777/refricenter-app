@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter - Titanium Gold Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --blue: #01579B; --gold: #D4AF37; --dark-gold: #B8860B; --green: #2e7d32; --bg: #f0f2f5; --white: #ffffff; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Header de Luxo */
+        header { 
+            background: linear-gradient(135deg, var(--blue) 0%, #002f6c 100%);
+            color: white; padding: 20px; display: flex; justify-content: space-between; 
+            align-items: center; border-bottom: 4px solid var(--gold);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1001; 
+        }
+        .logo-box b { font-size: 1.4rem; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .logo-box span { display: block; font-size: 0.6rem; color: var(--gold); font-weight: bold; text-transform: uppercase; }
+
+        /* Área de Conteúdo */
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 170px; }
+        .view { display: none; }
+        .view.active { display: block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards Estilizados */
+        .card { 
+            background: var(--white); border-radius: 25px; padding: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 20px; 
+            border: 1px solid rgba(212, 175, 55, 0.2); position: relative;
+        }
+        h3 { color: var(--blue); margin-top: 0; border-left: 6px solid var(--gold); padding-left: 15px; margin-bottom: 20px; }
+
+        /* Formulários Profissionais */
+        .group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: 700; color: #555; font-size: 0.85rem; }
+        input, select { 
+            width: 100%; padding: 16px; border-radius: 15px; border: 2px solid #e2e8f0; 
+            font-size: 1rem; background: #f8fafc; transition: 0.3s; outline: none;
+        }
+        input:focus, select:focus { border-color: var(--blue); background: #fff; box-shadow: 0 0 10px rgba(1, 87, 155, 0.1); }
+
+        /* Display de Preço */
+        .price-panel { 
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px dashed var(--green); border-radius: 20px; padding: 25px; 
+            text-align: center; margin: 20px 0; display: none;
+        }
+        .price-panel small { font-weight: 900; color: var(--green); text-transform: uppercase; }
+        .price-panel h2 { margin: 10px 0 0; color: #1b5e20; font-size: 2.8rem; font-weight: 900; }
+
+        /* Botões */
+        .btn { 
+            width: 100%; padding: 20px; border-radius: 18px; border: none; 
+            font-weight: 900; font-size: 1.1rem; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            transition: 0.3s; text-transform: uppercase;
+        }
+        .btn-green { background: var(--green); color: white; box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3); }
+        .btn-blue { background: var(--blue); color: white; box-shadow: 0 8px 20px rgba(1, 87, 155, 0.3); }
+        .btn:active { transform: scale(0.96); }
+
+        /* Jogo da Memória */
+        .memory-game { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .m-card { 
+            height: 75px; background: var(--blue); border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 1.8rem; color: transparent; cursor: pointer; transition: 0.4s;
+            border-bottom: 4px solid rgba(0,0,0,0.2);
+        }
+        .m-card.open { background: white; color: #333; border: 2px solid var(--gold); transform: rotateY(180deg); }
+        .m-card.found { background: var(--gold); color: white; visibility: visible; }
+
+        /* Footer Moderno */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #e2e8f0; z-index: 1000; }
+        .nav-bar { display: flex; justify-content: space-around; padding: 10px 0 25px; }
+        .nav-item { text-align: center; color: #94a3b8; text-decoration: none; flex: 1; font-size: 0.7rem; font-weight: bold; }
+        .nav-item.active { color: var(--blue); }
+        .nav-item i { display: block; font-size: 1.6rem; margin-bottom: 5px; }
+
+        /* Admin Styles */
+        .admin-stat { background: #1a202c; color: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; }
+        .log-item { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-box">
+        <b>REFRICENTER</b>
+        <span>Soluções Titanium Gold</span>
+    </div>
+    <i class="fas fa-user-shield" onclick="checkAdmin()" style="color: var(--gold); font-size: 1.5rem;"></i>
+</header>
+
+<div class="main-content">
+    
+    <div id="v-perfil" class="view active">
+        <div class="card">
+            <h3><i class="fas fa-id-badge"></i> Identificação</h3>
+            <div class="group">
+                <label>NOME COMPLETO</label>
+                <input type="text" id="reg-nome" placeholder="Ex: Marcos Oliveira">
+            </div>
+            <div class="group">
+                <label>ENDEREÇO COMPLETO</label>
+                <input type="text" id="reg-end" placeholder="Rua, Número, Bairro e Cidade">
+            </div>
+            <div class="group">
+                <label>WHATSAPP / TELEFONE</label>
+                <input type="tel" id="reg-tel" placeholder="(00) 00000-0000">
+            </div>
+            <button class="btn btn-blue" onclick="salvarPerfil()">
+                CONFIRMAR DADOS <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="v-orc" class="view">
+        <div class="card">
+            <h3><i class="fas fa-file-invoice-dollar"></i> Orçamento</h3>
+            
+            <label>SERVIÇO DESEJADO</label>
+            <select id="serv-tipo" onchange="processarOrc()">
+                <option value="">Selecione...</option>
+                <optgroup label="Instalação (Mão de Obra)">
+                    <option value="ic">Convencional</option>
+                    <option value="ii">Inverter</option>
+                </optgroup>
+                <optgroup label="Instalação (Material Incluso)">
+                    <option value="icm">Convencional + Material</option>
+                    <option value="iim">Inverter + Material</option>
+                </optgroup>
+                <optgroup label="Desinstalação">
+                    <option value="dc">Desinstalação Convencional</option>
+                    <option value="di">Desinstalação Inverter</option>
+                </optgroup>
+                <optgroup label="Manutenção e Gás">
+                    <option value="lc">Limpeza Convencional</option>
+                    <option value="li">Limpeza Inverter</option>
+                    <option value="g22">Carga de Gás R22</option>
+                    <option value="g410">Carga de Gás R410a</option>
+                    <option value="g32">Carga de Gás R32</option>
+                </optgroup>
+            </select>
+
+            <label>POTÊNCIA DO APARELHO</label>
+            <select id="serv-btu" onchange="processarOrc()">
+                <option value="9k">9.000 BTUs</option>
+                <option value="12k">12.000 BTUs</option>
+                <option value="18k">18.000 BTUs</option>
+                <option value="22k">22.000 BTUs</option>
+                <option value="24k">24.000 BTUs</option>
+                <option value="30k">30.000 BTUs</option>
+                <option value="36k">36.000 BTUs</option>
+            </select>
+
+            <div id="panel-price" class="price-panel">
+                <small>Investimento Estimado</small>
+                <h2 id="display-preco">R$ 0,00</h2>
+            </div>
+
+            <button class="btn btn-green" onclick="enviarPedido()">
+                <i class="fab fa-whatsapp"></i> AGENDAR SERVIÇO
+            </button>
+        </div>
+    </div>
+
+    <div id="v-tech" class="view">
+        <div class="card">
+            <h3><i class="fas fa-snowflake"></i> Cálculo de Carga Térmica</h3>
+            <label>TAMANHO DO AMBIENTE (m²)</label>
+            <input type="number" id="calc-m2" placeholder="Ex: 25">
+            <button class="btn btn-blue" onclick="calcularCarga()">CALCULAR BTUs</button>
+            <div id="res-btu" style="text-align:center; font-size:1.5rem; font-weight:bold; margin-top:15px; color:var(--blue)"></div>
+        </div>
+        <div class="card">
+            <h3><i class="fas fa-tools"></i> Códigos de Erro Rápidos</h3>
+            <div class="log-item"><b>E1:</b> Sensor de Ambiente</div>
+            <div class="log-item"><b>E2:</b> Sensor de Serpentina</div>
+            <div class="log-item"><b>P4:</b> Proteção de Inversor/Compressor</div>
+        </div>
+    </div>
+
+    <div id="v-game" class="view">
+        <div class="card">
+            <h3><i class="fas fa-gamepad"></i> Desafio Refricenter</h3>
+            <p style="font-size: 0.8rem; margin-bottom: 15px;">Encontre os pares para garantir seu atendimento prioritário!</p>
+            <div class="memory-game" id="mem-grid"></div>
+            <button class="btn btn-blue" style="margin-top:20px" onclick="initGame()">REINICIAR DESAFIO</button>
+        </div>
+    </div>
+
+    <div id="v-adm" class="view">
+        <div class="admin-stat">
+            <h3 style="color:var(--gold); border:none; padding:0;">Faturamento Geral</h3>
+            <h1 id="adm-total" style="color:var(--green); margin:0;">R$ 0,00</h1>
+        </div>
+        <div class="card">
+            <h3>Últimos Orçamentos</h3>
+            <div id="adm-list"></div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <div class="nav-bar">
+        <a href="#" class="nav-item active" onclick="nav('v-perfil', this)"><i class="fas fa-user-circle"></i>PERFIL</a>
+        <a href="#" class="nav-item" onclick="nav('v-orc', this)"><i class="fas fa-tags"></i>PREÇOS</a>
+        <a href="#" class="nav-item" onclick="nav('v-tech', this)"><i class="fas fa-microchip"></i>TÉCNICO</a>
+        <a href="#" class="nav-item" onclick="nav('v-game', this)"><i class="fas fa-dice"></i>DIVERSÃO</a>
+    </div>
+</footer>
+
+<script>
+    // BANCO DE DADOS ACUMULADO
+    let dataStore = JSON.parse(localStorage.getItem('refricenter_gold_db')) || { logs: [], client: {} };
+
+    // TABELA MESTRE DE PREÇOS (TODOS OS DADOS COMBINADOS)
+    const MASTER_PRICES = {
+        ic: {"9k":200, "12k":200, "18k":300, "22k":350, "24k":400},
+        ii: {"9k":250, "12k":250, "18k":350, "22k":400, "24k":450},
+        icm:{"9k":550, "12k":600, "18k":800, "22k":850, "24k":900},
+        iim:{"9k":600, "12k":650, "18k":850, "22k":900, "24k":950},
+        dc: {"9k":100, "12k":100, "18k":150, "22k":200, "24k":200},
+        di: {"9k":150, "12k":150, "18k":200, "22k":250, "24k":250},
+        lc: {"9k":150, "12k":150, "18k":200, "22k":250, "24k":300},
+        li: {"9k":200, "12k":200, "18k":250, "22k":300, "24k":350},
+        g22:{"9k":450, "12k":450, "18k":600, "22k":700, "24k":750, "30k":900, "36k":1100},
+        g410:{"9k":500, "12k":500, "18k":600, "22k":800, "24k":850, "30k":1000, "36k":1200},
+        g32:{"9k":550, "12k":600, "18k":750, "22k":900, "24k":1000, "30k":1200, "36k":1350}
+    };
+
+    function nav(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        if(id === 'v-game') initGame();
+        if(id === 'v-adm') renderAdmin();
+    }
+
+    function salvarPerfil() {
+        dataStore.client = {
+            nome: document.getElementById('reg-nome').value,
+            end: document.getElementById('reg-end').value,
+            tel: document.getElementById('reg-tel').value
+        };
+        localStorage.setItem('refricenter_gold_db', JSON.stringify(dataStore));
+        alert("Perfil Titanium Salvo!");
+        nav('v-orc', document.querySelectorAll('.nav-item')[1]);
+    }
+
+    function processarOrc() {
+        const s = document.getElementById('serv-tipo').value;
+        const b = document.getElementById('serv-btu').value;
+        const panel = document.getElementById('panel-price');
+        
+        if(s && b && MASTER_PRICES[s][b]) {
+            document.getElementById('display-preco').innerText = `R$ ${MASTER_PRICES[s][b]},00`;
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+
+    function enviarPedido() {
+        const s = document.getElementById('serv-tipo').value;
+        const b = document.getElementById('serv-btu').value;
+        if(!s) return alert("Selecione um serviço!");
+        
+        const valor = MASTER_PRICES[s][b];
+        const log = { data: new Date().toLocaleString(), serv: s, btu: b, val: valor };
+        dataStore.logs.unshift(log);
+        localStorage.setItem('refricenter_gold_db', JSON.stringify(dataStore));
+
+        const texto = `*REFRICENTER TITANIUM*\n\n👤 *Cliente:* ${dataStore.client.nome}\n📍 *End:* ${dataStore.client.end}\n📞 *Zap:* ${dataStore.client.tel}\n\n🛠️ *Serviço:* ${s}\n❄️ *BTUs:* ${b}\n💰 *Valor:* R$ ${valor},00`;
+        window.open(`https://wa.me/5568992447004?text=${encodeURIComponent(texto)}`);
+    }
+
+    function calcularCarga() {
+        const m2 = document.getElementById('calc-m2').value;
+        if(m2) document.getElementById('res-btu').innerText = (m2 * 600) + " BTUs";
+    }
+
+    // JOGO DA MEMÓRIA COMPLEXO
+    let cardsAbertos = [];
+    function initGame() {
+        const icons = ['❄️','❄️','🔧','🔧','⚡','⚡','💧','💧','🛠️','🛠️','🔥','🔥','📏','📏','🏠','🏠'];
+        const baralhado = icons.sort(() => Math.random() - 0.5);
+        const grid = document.getElementById('mem-grid');
+        grid.innerHTML = '';
+        baralhado.forEach(icon => {
+            const card = document.createElement('div');
+            card.className = 'm-card';
+            card.dataset.val = icon;
+            card.onclick = function() {
+                if(cardsAbertos.length < 2 && !this.classList.contains('open')) {
+                    this.classList.add('open');
+                    this.innerText = this.dataset.val;
+                    cardsAbertos.push(this);
+                    if(cardsAbertos.length === 2) {
+                        if(cardsAbertos[0].dataset.val === cardsAbertos[1].dataset.val) {
+                            cardsAbertos.forEach(c => c.classList.add('found'));
+                            cardsAbertos = [];
+                        } else {
+                            setTimeout(() => {
+                                cardsAbertos.forEach(c => { c.classList.remove('open'); c.innerText = ''; });
+                                cardsAbertos = [];
+                            }, 800);
+                        }
+                    }
+                }
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    function checkAdmin() {
+        if(prompt("Chave de Segurança Titanium:") === "1234") nav('v-adm', document.body);
+    }
+
+    function renderAdmin() {
+        let total = 0;
+        document.getElementById('adm-list').innerHTML = dataStore.logs.map(l => {
+            total += l.val;
+            return `<div class="log-item"><b>${l.data}</b> - ${l.serv} (${l.btu}): R$ ${l.val}</div>`;
+        }).join('') || "Sem registros.";
+        document.getElementById('adm-total').innerText = `R$ ${total},00`;
+    }
+</script>
+</body>
+</html>
