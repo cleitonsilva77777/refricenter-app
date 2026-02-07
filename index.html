@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter 2.0 - Admin System v20</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --blue: #01579B; --orange: #FF8F00; --green: #2e7d32; --red: #c53030; --gray: #f4f7f9; --gold: #D4AF37; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--gray); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { background: var(--blue); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--orange); z-index: 1000; }
+        
+        .drawer { position: fixed; top: 0; left: -100%; width: 85%; height: 100%; background: white; z-index: 2000; transition: 0.3s; box-shadow: 10px 0 30px rgba(0,0,0,0.2); }
+        .drawer.open { left: 0; }
+        .drawer-header { background: var(--blue); color: white; padding: 30px 20px; font-weight: bold; }
+        .drawer-item { padding: 18px 25px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; color: var(--blue); font-weight: 600; cursor: pointer; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 130px; }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; }
+        .btn-primary { background: var(--blue); color: white; }
+        .btn-success { background: var(--green); color: white; }
+        .btn-admin { background: var(--dark); color: var(--gold); border: 1px solid var(--gold); }
+
+        /* Histórico e Admin */
+        .hist-item { border-left: 5px solid var(--blue); padding: 12px; margin-bottom: 10px; background: #fff; border-radius: 8px; position: relative; }
+        .status-badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; float: right; }
+        .status-pendente { background: #fff3e0; color: #ef6c00; }
+        .status-pago { background: #e8f5e9; color: #2e7d32; }
+
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; z-index: 1000; }
+        .footer-nav { display: flex; justify-content: space-around; padding: 10px 0; }
+        .nav-tab { text-align: center; text-decoration: none; color: #a0aec0; flex: 1; font-size: 0.7rem; }
+        .nav-tab.active { color: var(--blue); }
+        .nav-tab i { display: block; font-size: 1.3rem; margin-bottom: 2px; }
+        
+        .social-bar { background: #f8f9fa; display: flex; justify-content: center; gap: 20px; padding: 6px; font-size: 0.8rem; border-bottom: 1px solid #eee; }
+        .social-bar a { color: #555; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <i class="fas fa-bars" onclick="toggleMenu()" style="cursor:pointer"></i>
+    <div style="font-weight:900">REFRICENTER 2.0</div>
+    <i class="fas fa-user-shield" onclick="acessoAdmin()" style="cursor:pointer; color: var(--gold)"></i>
+</header>
+
+<nav class="drawer" id="drawer">
+    <div class="drawer-header">PAINEL REFRICENTER</div>
+    <div class="drawer-item" onclick="nav('v-orc')"><i class="fas fa-calculator"></i> Orçamentos</div>
+    <div class="drawer-item" onclick="nav('v-hist')"><i class="fas fa-clipboard-list"></i> Meus Pedidos</div>
+    <div class="drawer-item" onclick="nav('v-btu')"><i class="fas fa-snowflake"></i> Cálculo de BTU</div>
+    <div class="drawer-item" onclick="nav('v-tech')"><i class="fas fa-wrench"></i> Guia Técnico</div>
+    <div class="drawer-item" onclick="nav('v-game')"><i class="fas fa-gamepad"></i> Refri-Game</div>
+    <div class="drawer-item" onclick="nav('v-profile')"><i class="fas fa-user-cog"></i> Meu Perfil</div>
+    <div class="drawer-item" onclick="acessoAdmin()" style="background:#fdf2f2; color:var(--gold)"><i class="fas fa-lock"></i> Área do Dono</div>
+    <div class="drawer-item" onclick="toggleMenu()" style="color:red"><i class="fas fa-times"></i> Fechar</div>
+</nav>
+
+<div class="main-content">
+    
+    <div id="v-orc" class="view active">
+        <div class="card">
+            <h3>Novo Orçamento</h3>
+            <select id="orc-end"></select>
+            <select id="orc-serv" onchange="fluxoOrc()">
+                <option value="">Serviço...</option>
+                <option value="instalacao">Instalação</option>
+                <option value="limpeza">Limpeza</option>
+                <option value="gas">Carga de Gás</option>
+            </select>
+            <div id="orc-detalhes" style="display:none">
+                <select id="orc-tec" onchange="calcularPreco()"></select>
+                <select id="orc-btu" onchange="calcularPreco()">
+                    <option value="9k">9.000 BTU</option>
+                    <option value="12k">12.000 BTU</option>
+                    <option value="18k">18.000 BTU</option>
+                    <option value="24k">24.000 BTU</option>
+                </select>
+                <div class="card" style="background:#e8f5e9; text-align:center;">
+                    <h2 id="orc-total" style="color:var(--green)">R$ 0,00</h2>
+                    <button class="btn btn-success" onclick="finalizarPedido()">ENVIAR WHATSAPP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-admin" class="view">
+        <div class="card" style="background: #1a1a1a; color: white;">
+            <h3><i class="fas fa-chart-line" style="color:var(--gold)"></i> Dashboard Admin</h3>
+            <p>Faturamento Total Estimado:</p>
+            <h1 id="adm-faturamento" style="color:var(--green); margin:0">R$ 0,00</h1>
+            <p id="adm-qtd" style="font-size: 0.8rem; color: #aaa;">0 pedidos realizados</p>
+        </div>
+        <div id="adm-lista-pedidos"></div>
+        <button class="btn btn-primary" onclick="nav('v-orc')">VOLTAR AO APP</button>
+    </div>
+
+    <div id="v-hist" class="view">
+        <div class="card">
+            <h3>Meus Pedidos</h3>
+            <div id="lista-historico"></div>
+        </div>
+    </div>
+
+    <div id="v-btu" class="view"><div class="card"><h3>Cálculo BTU</h3><input type="number" id="m2" placeholder="m²"><button class="btn btn-primary" onclick="calcBTU()">CALCULAR</button><h2 id="btu-val"></h2></div></div>
+    <div id="v-tech" class="view"><div class="card"><h3>Guia de Erros</h3><div id="lista-e"></div></div></div>
+    <div id="v-game" class="view"><div class="card"><h3>Game</h3><div id="game-box"><div id="player">👨‍🔧</div></div><button class="btn btn-success" onclick="playG()">PLAY</button></div></div>
+    <div id="v-profile" class="view"><div class="card"><h3>Perfil</h3><input id="user-n" placeholder="Nome"><button class="btn btn-primary" onclick="saveU()">SALVAR</button><hr><input id="end-n" placeholder="Apelido"><input id="end-r" placeholder="Rua..."><button class="btn btn-success" onclick="addE()">ADD</button><div id="lista-end-u"></div></div></div>
+
+</div>
+
+<footer>
+    <div class="social-bar">
+        <a href="https://www.facebook.com/share/169ZAyYuUy/">Facebook</a>
+        <a href="https://www.instagram.com/refricenter_arcondicionado">Instagram</a>
+    </div>
+    <div class="footer-nav">
+        <a href="#" class="nav-tab active" onclick="nav('v-orc')"><i class="fas fa-home"></i>Início</a>
+        <a href="#" class="nav-tab" onclick="nav('v-hist')"><i class="fas fa-history"></i>Pedidos</a>
+        <a href="#" class="nav-tab" onclick="nav('v-tech')"><i class="fas fa-tools"></i>Técnico</a>
+        <a href="#" class="nav-tab" onclick="nav('v-profile')"><i class="fas fa-user"></i>Perfil</a>
+    </div>
+</footer>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('refri_v20')) || { user: "", locais: [], recorde: 0, pedidos: [] };
+    const SENHA_ADMIN = "1234"; 
+
+    const PRECOS = {
+        instalacao: { conv: {"9k":200, "12k":250, "18k":350, "24k":450}, inv: {"9k":300, "12k":350, "18k":450, "24k":550} },
+        limpeza: { conv: {"9k":150, "12k":180, "18k":220, "24k":280}, inv: {"9k":180, "12k":200, "18k":250, "24k":300} },
+        gas: { R22: {"9k":400, "12k":450, "18k":550, "24k":700}, R410: {"9k":450, "12k":500, "18k":600, "24k":800} }
+    };
+
+    function acessoAdmin() {
+        let p = prompt("Digite a senha do Administrador:");
+        if(p === SENHA_ADMIN) { nav('v-admin'); renderAdmin(); } 
+        else { alert("Senha incorreta!"); }
+    }
+
+    function finalizarPedido() {
+        const s = document.getElementById('orc-serv').value, p = document.getElementById('orc-total').innerText;
+        const eIdx = document.getElementById('orc-end').value, end = db.locais[eIdx] ? db.locais[eIdx].n : "Geral";
+        const valorNumerico = parseInt(p.replace(/[^0-9]/g, ""));
+        
+        db.pedidos.unshift({ data: new Date().toLocaleString(), servico: s, valor: p, vNum: valorNumerico, local: end });
+        save();
+        window.open(`https://wa.me/5568992447004?text=Pedido:${s}-${p}`);
+        nav('v-hist');
+    }
+
+    function renderAdmin() {
+        let total = 0;
+        const lista = document.getElementById('adm-lista-pedidos');
+        lista.innerHTML = "<h4>Últimas Vendas:</h4>";
+        db.pedidos.forEach(p => {
+            total += p.vNum;
+            lista.innerHTML += `<div class="hist-item" style="border-left-color:var(--gold)">
+                <b>${p.servico.toUpperCase()}</b> - ${p.valor}<br>
+                <small>${p.data} | Cliente: ${db.user}</small>
+            </div>`;
+        });
+        document.getElementById('adm-faturamento').innerText = `R$ ${total},00`;
+        document.getElementById('adm-qtd').innerText = `${db.pedidos.length} pedidos realizados`;
+    }
+
+    function renderHistorico() {
+        const lista = document.getElementById('lista-historico');
+        lista.innerHTML = db.pedidos.length ? db.pedidos.map(p => `
+            <div class="hist-item">
+                <span class="status-badge status-pendente">Enviado</span>
+                <strong>${p.servico.toUpperCase()}</strong><br>
+                <span>${p.valor}</span><br>
+                <small>${p.data}</small>
+            </div>
+        `).join('') : "<p>Nenhum pedido.</p>";
+    }
+
+    // Funções de base mantidas
+    function nav(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'v-hist') renderHistorico();
+        if(document.getElementById('drawer').classList.contains('open')) toggleMenu();
+    }
+    function toggleMenu() { document.getElementById('drawer').classList.toggle('open'); }
+    function fluxoOrc() { document.getElementById('orc-detalhes').style.display='block'; calcularPreco(); }
+    function calcularPreco() { 
+        const s = document.getElementById('orc-serv').value, t = document.getElementById('orc-tec').value || 'conv', b = document.getElementById('orc-btu').value;
+        document.getElementById('orc-total').innerText = `R$ ${PRECOS[s][t][b]},00`;
+    }
+    function saveU() { db.user = document.getElementById('user-n').value; save(); render(); }
+    function addE() { db.locais.push({n:document.getElementById('end-n').value, r:document.getElementById('end-r').value}); save(); render(); }
+    function save() { localStorage.setItem('refri_v20', JSON.stringify(db)); }
+    function render() {
+        const s = document.getElementById('orc-end'); s.innerHTML = "";
+        db.locais.forEach((l,i) => s.innerHTML += `<option value="${i}">${l.n}</option>`);
+    }
+    window.onload = render;
+</script>
+</body>
+</html>
