@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter 2.0 Titanium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --blue: #01579B; --orange: #FF8F00; --green: #2e7d32; --dark: #1a1a1a; --gray: #f4f7f9; }
+        
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background: var(--gray); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* HEADER PREMIUM */
+        header { background: var(--blue); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--orange); box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 1000; }
+        .logo-text { font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; }
+
+        /* MENU LATERAL */
+        .drawer { position: fixed; top: 0; left: -100%; width: 85%; height: 100%; background: white; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 30px rgba(0,0,0,0.2); }
+        .drawer.open { left: 0; }
+        .drawer-header { background: var(--blue); color: white; padding: 40px 20px; text-align: center; }
+        .drawer-item { padding: 18px 25px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; color: var(--blue); font-weight: 600; cursor: pointer; }
+
+        /* ÁREA DE CONTEÚDO */
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
+        .view { display: none; }
+        .view.active { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* CARDS ESTILO APP */
+        .card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.03); }
+        .card h2 { margin: 0 0 15px 0; font-size: 1.2rem; color: var(--blue); display: flex; align-items: center; gap: 10px; }
+
+        /* INPUTS E BOTÕES */
+        label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 0.85rem; color: #666; }
+        select, input { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #edf2f7; background: #fcfdfe; font-size: 1rem; margin-bottom: 15px; outline: none; transition: 0.3s; }
+        select:focus { border-color: var(--blue); }
+
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        .btn-primary { background: var(--blue); color: white; }
+        .btn-success { background: var(--green); color: white; }
+        .btn-warning { background: var(--orange); color: white; }
+
+        /* GAME STAGE */
+        #game-box { width: 100%; height: 320px; background: #001220; border-radius: 15px; position: relative; overflow: hidden; }
+        #player { position: absolute; bottom: 15px; font-size: 45px; transition: 0.1s; z-index: 10; filter: drop-shadow(0 0 5px white); }
+
+        /* FOOTER NAV */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 5px; border-top: 1px solid #eee; box-shadow: 0 -5px 15px rgba(0,0,0,0.03); }
+        .nav-tab { text-align: center; text-decoration: none; color: #a0aec0; flex: 1; transition: 0.3s; }
+        .nav-tab i { font-size: 1.4rem; display: block; margin-bottom: 3px; }
+        .nav-tab span { font-size: 0.7rem; font-weight: 700; }
+        .nav-tab.active { color: var(--blue); }
+    </style>
+</head>
+<body>
+
+<header>
+    <i class="fas fa-bars" onclick="toggleMenu()" style="font-size: 1.4rem; cursor: pointer;"></i>
+    <div class="logo-text">REFRICENTER 2.0</div>
+    <i class="fas fa-user-circle" onclick="nav('v-profile')" style="font-size: 1.6rem; cursor: pointer;"></i>
+</header>
+
+<nav class="drawer" id="drawer">
+    <div class="drawer-header">
+        <i class="fas fa-tools" style="font-size: 3rem; margin-bottom: 10px;"></i>
+        <div id="welcome-name">Olá, Visitante</div>
+    </div>
+    <div class="drawer-item" onclick="nav('v-orc')"><i class="fas fa-calculator"></i> Orçamentos</div>
+    <div class="drawer-item" onclick="nav('v-profile')"><i class="fas fa-map-marked-alt"></i> Endereços</div>
+    <div class="drawer-item" onclick="nav('v-game')"><i class="fas fa-gamepad"></i> Refri-Game</div>
+    <div class="drawer-item" onclick="toggleMenu()" style="color: #e53e3e; margin-top: 20px;"><i class="fas fa-sign-out-alt"></i> Fechar Menu</div>
+</nav>
+
+<div class="main-content">
+    
+    <div id="v-orc" class="view active">
+        <div class="card">
+            <img src="images/banner.png" style="width: 100%; border-radius: 12px; margin-bottom: 15px;" onerror="this.style.display='none'">
+            <h2><i class="fas fa-receipt"></i> Solicitar Serviço</h2>
+            
+            <label>Selecione o Endereço:</label>
+            <select id="orc-select-end"></select>
+
+            <label>O que você precisa?</label>
+            <select id="orc-servico" onchange="logicOrcamento()">
+                <option value="">Escolher...</option>
+                <option value="instalacao">Instalação Técnica</option>
+                <option value="limpeza">Limpeza / Higienização</option>
+                <option value="gas">Carga de Gás</option>
+                <option value="desinstalacao">Desinstalação</option>
+            </select>
+
+            <div id="orc-fluxo" style="display: none;">
+                <label id="lbl-tecnologia">Tecnologia:</label>
+                <select id="orc-tecnologia" onchange="updatePreco()"></select>
+
+                <label>Potência (BTUs):</label>
+                <select id="orc-btus" onchange="updatePreco()">
+                    <option value="9k">9.000 BTUs</option>
+                    <option value="12k">12.000 BTUs</option>
+                    <option value="18k">18.000 BTUs</option>
+                    <option value="22k">22.000 BTUs</option>
+                    <option value="24k">24.000 BTUs</option>
+                </select>
+
+                <div id="orc-mat-box" style="display: none;">
+                    <label>Material Incluso?</label>
+                    <select id="orc-material" onchange="updatePreco()">
+                        <option value="nao">Não (Apenas Mão de Obra)</option>
+                        <option value="sim">Sim (Completo)</option>
+                    </select>
+                </div>
+
+                <div id="orc-resultado" class="card" style="display:none; background: #f0fff4; border: 2px solid #38a169; text-align: center;">
+                    <small style="font-weight: 800; color: #2f855a;">VALOR ESTIMADO</small>
+                    <div id="orc-total" style="font-size: 2.5rem; font-weight: 900; color: var(--green);">R$ 0,00</div>
+                    <button class="btn btn-success" onclick="gerarPedido()"><i class="fab fa-whatsapp"></i> ENVIAR PEDIDO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-profile" class="view">
+        <div class="card">
+            <h2><i class="fas fa-user-edit"></i> Seus Dados</h2>
+            <input type="text" id="user-nome" placeholder="Seu Nome Completo">
+            <button class="btn btn-primary" onclick="savePerfil()">ATUALIZAR PERFIL</button>
+        </div>
+        <div class="card">
+            <h2><i class="fas fa-home"></i> Adicionar Local</h2>
+            <input type="text" id="loc-apelido" placeholder="Ex: Minha Casa, Trabalho">
+            <input type="text" id="loc-rua" placeholder="Rua, Número e Bairro">
+            <button class="btn btn-warning" onclick="addLocal()">SALVAR ENDEREÇO</button>
+            <div id="loc-lista" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <div id="v-game" class="view">
+        <div class="card" style="text-align: center;">
+            <div style="display:flex; justify-content: space-around; margin-bottom: 10px; font-weight: 900;">
+                <span>PONTOS: <span id="game-pts">0</span></span>
+                <span>RECORDE: <span id="game-max">0</span></span>
+            </div>
+            <div id="game-box"><div id="player" style="left:50%">👨‍🔧</div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-primary" onclick="move(-25)"><i class="fas fa-arrow-left"></i></button>
+                <button class="btn btn-primary" onclick="move(25)"><i class="fas fa-arrow-right"></i></button>
+            </div>
+            <button class="btn btn-success" style="margin-top:10px;" onclick="startGame()">INICIAR DESAFIO</button>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <a href="#" class="nav-tab active" onclick="nav('v-orc')"><i class="fas fa-home"></i><span>Início</span></a>
+    <a href="https://www.facebook.com/share/169ZAyYuUy/" class="nav-tab"><i class="fab fa-facebook"></i><span>Facebook</span></a>
+    <a href="https://www.instagram.com/refricenter_arcondicionado" class="nav-tab"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+    <a href="#" class="nav-tab" onclick="nav('v-profile')"><i class="fas fa-user"></i><span>Perfil</span></a>
+</footer>
+
+<script>
+    // BANCO DE DADOS BLINDADO
+    let db = JSON.parse(localStorage.getItem('refricenter_pro_v16')) || { user: "", locais: [], recorde: 0 };
+
+    const PRECOS = {
+        instalacao: { conv: {"9k":200, "12k":200, "18k":300, "22k":350, "24k":400}, inv: {"9k":250, "12k":250, "18k":350, "22k":400, "24k":450}, mat_conv: {"9k":550, "12k":600, "18k":800, "22k":850, "24k":900}, mat_inv: {"9k":600, "12k":650, "18k":850, "22k":900, "24k":950} },
+        limpeza: { conv: {"9k":150, "12k":150, "18k":200, "22k":250, "24k":300}, inv: {"9k":200, "12k":200, "18k":250, "22k":300, "24k":350} },
+        gas: { R22: {"9k":450, "12k":450, "18k":600, "22k":700, "24k":750}, R410a: {"9k":500, "12k":500, "18k":600, "22k":800, "24k":850}, R32: {"9k":550, "12k":600, "18k":750, "22k":900, "24k":1000} },
+        desinstalacao: { conv: {"9k":100, "12k":100, "18k":150, "22k":200, "24k":200}, inv: {"9k":150, "12k":150, "18k":200, "22k":250, "24k":250} }
+    };
+
+    function toggleMenu() { document.getElementById('drawer').classList.toggle('open'); }
+
+    function nav(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(document.getElementById('drawer').classList.contains('open')) toggleMenu();
+        // Ativar ícone do footer
+        if(id === 'v-orc') document.querySelectorAll('.nav-tab')[0].classList.add('active');
+        if(id === 'v-profile') document.querySelectorAll('.nav-tab')[3].classList.add('active');
+        updateUI();
+    }
+
+    function logicOrcamento() {
+        const s = document.getElementById('orc-servico').value;
+        const fluxo = document.getElementById('orc-fluxo');
+        if(!s) { fluxo.style.display='none'; return; }
+        
+        fluxo.style.display='block';
+        document.getElementById('orc-mat-box').style.display = (s === 'instalacao') ? 'block' : 'none';
+        
+        const tec = document.getElementById('orc-tecnologia');
+        if(s === 'gas') {
+            document.getElementById('lbl-tecnologia').innerText = "Tipo de Gás:";
+            tec.innerHTML = '<option value="R22">R22</option><option value="R410a">R410a</option><option value="R32">R32</option>';
+        } else {
+            document.getElementById('lbl-tecnologia').innerText = "Tecnologia:";
+            tec.innerHTML = '<option value="conv">Convencional</option><option value="inv">Inverter</option>';
+        }
+        updatePreco();
+    }
+
+    function updatePreco() {
+        const s = document.getElementById('orc-servico').value;
+        const t = document.getElementById('orc-tecnologia').value;
+        const b = document.getElementById('orc-btus').value;
+        const m = document.getElementById('orc-material').value;
+        let p = 0;
+        if(s === 'instalacao') p = PRECOS.instalacao[(m === 'sim' ? 'mat_' : '') + t][b];
+        else if(s === 'gas') p = PRECOS.gas[t][b];
+        else p = PRECOS[s][t][b];
+
+        document.getElementById('orc-total').innerText = `R$ ${p},00`;
+        document.getElementById('orc-resultado').style.display = 'block';
+    }
+
+    function savePerfil() { db.user = document.getElementById('user-nome').value; save(); alert("Perfil Atualizado!"); }
+    
+    function addLocal() {
+        const apelido = document.getElementById('loc-apelido').value;
+        const rua = document.getElementById('loc-rua').value;
+        if(apelido && rua) { db.locais.push({apelido, rua}); save(); updateUI(); }
+    }
+
+    function save() { localStorage.setItem('refricenter_pro_v16', JSON.stringify(db)); }
+
+    function updateUI() {
+        document.getElementById('welcome-name').innerText = db.user ? `Olá, ${db.user}` : "Olá, Visitante";
+        const sel = document.getElementById('orc-select-end');
+        const lista = document.getElementById('loc-lista');
+        sel.innerHTML = ""; lista.innerHTML = "";
+        db.locais.forEach((l, i) => {
+            sel.innerHTML += `<option value="${i}">${l.apelido}</option>`;
+            lista.innerHTML += `<div class="card" style="padding:10px; margin-bottom:5px;"><b>${l.apelido}:</b> ${l.rua}</div>`;
+        });
+    }
+
+    function gerarPedido() {
+        const eIdx = document.getElementById('orc-select-end').value;
+        const end = db.locais[eIdx] ? db.locais[eIdx].rua : "Não informado";
+        const texto = `*PEDIDO REFRICENTER*\nCliente: ${db.user}\nServiço: ${document.getElementById('orc-servico').value}\nTotal: ${document.getElementById('orc-total').innerText}\nLocal: ${end}`;
+        window.open(`https://wa.me/5568992447004?text=${encodeURIComponent(texto)}`);
+    }
+
+    // GAME ENGINE
+    let gameLoop, pPos = 50, score = 0;
+    function move(d) { pPos = Math.max(10, Math.min(90, pPos + d)); document.getElementById('player').style.left = pPos + "%"; }
+    function startGame() {
+        score = 0; document.getElementById('game-pts').innerText = 0;
+        clearInterval(gameLoop);
+        gameLoop = setInterval(() => {
+            const isFogo = Math.random() > 0.7;
+            const obj = document.createElement('div');
+            obj.style.position = 'absolute'; obj.style.top = '0px'; obj.style.fontSize = '25px';
+            obj.style.left = Math.random() * 90 + "%";
+            obj.innerHTML = isFogo ? '🔥' : '❄️';
+            document.getElementById('game-box').appendChild(obj);
+            let top = 0;
+            const fall = setInterval(() => {
+                top += isFogo ? 8 : 5; obj.style.top = top + "px";
+                const pB = document.getElementById('player').getBoundingClientRect(), oB = obj.getBoundingClientRect();
+                if(oB.bottom > pB.top && oB.left < pB.right && oB.right > pB.left) {
+                    if(isFogo) { clearInterval(gameLoop); alert("Fim! Score: "+score); if(score > db.recorde) { db.recorde = score; save(); } }
+                    else { score += 10; document.getElementById('game-pts').innerText = score; }
+                    clearInterval(fall); obj.remove();
+                }
+                if(top > 320) { clearInterval(fall); obj.remove(); }
+            }, 30);
+        }, 1000);
+    }
+
+    window.onload = () => {
+        document.getElementById('game-max').innerText = db.recorde;
+        document.getElementById('user-nome').value = db.user;
+        updateUI();
+    };
+</script>
+</body>
+</html>
