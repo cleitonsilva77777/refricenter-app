@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>REFRICENTER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gold: #D4AF37; --bg: #0f172a; --card: #1e293b; --white: #f8fafc; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--white); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        header { background: #000; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); }
+        .logo { font-size: 1.4rem; font-weight: 900; color: var(--gold); letter-spacing: 2px; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        .view { display: none; } .view.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid rgba(212, 175, 55, 0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h3 { color: var(--gold); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+
+        input, select { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #334155; background: #0f172a; color: white; margin-bottom: 15px; font-size: 1rem; outline: none; }
+        input:focus, select:focus { border-color: var(--gold); }
+
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-green { background: #1b5e20; color: white; margin-top: 10px; }
+        .btn-reset { background: transparent; color: var(--gold); border: 1px solid var(--gold); margin-top: 10px; }
+
+        /* Jogos */
+        canvas { background: #000; border: 2px solid var(--gold); border-radius: 10px; width: 100%; max-width: 300px; display: block; margin: 0 auto; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 180px; margin: 15px auto; }
+        .c-btn { background: var(--card); border: 2px solid var(--gold); color: var(--gold); padding: 15px; border-radius: 10px; text-align: center; }
+
+        nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 10px 0 25px; border-top: 2px solid var(--gold); }
+        .nav-item { text-align: center; color: #64748b; font-size: 0.7rem; cursor: pointer; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <i class="fas fa-bars" style="color:var(--gold)"></i>
+    <div class="logo">REFRICENTER</div>
+    <i class="fas fa-user-shield" onclick="checkAdmin()" style="color:var(--gold)"></i>
+</header>
+
+<div class="main-content">
+    <div id="v-perfil" class="view">
+        <div class="card">
+            <h3><i class="fas fa-edit"></i> Seu Cadastro</h3>
+            <input type="text" id="u-nome" placeholder="Nome Completo">
+            <input type="text" id="u-end" placeholder="Endereço">
+            <button class="btn btn-gold" onclick="saveUser()">SALVAR PERFIL</button>
+        </div>
+    </div>
+
+    <div id="v-orc" class="view">
+        <div class="card">
+            <h3>💎 Orçamento Rápido</h3>
+            
+            <label>1. Escolha a Categoria:</label>
+            <select id="f-cat" onchange="updateServs()">
+                <option value="">Selecione...</option>
+                <option value="inst">Instalação</option>
+                <option value="des">Desinstalação</option>
+                <option value="limp">Manutenção e Gás</option>
+            </select>
+
+            <div id="box-serv" style="display:none">
+                <label>2. Escolha o Serviço:</label>
+                <select id="f-serv" onchange="document.getElementById('box-btu').style.display='block'"></select>
+            </div>
+
+            <div id="box-btu" style="display:none">
+                <label>3. Potência (BTUs):</label>
+                <select id="f-btu" onchange="calcFinal()">
+                    <option value="">Selecione a potência...</option>
+                    <option value="9k">9.000 BTUs</option>
+                    <option value="12k">12.000 BTUs</option>
+                    <option value="18k">18.000 BTUs</option>
+                    <option value="24k">24.000 BTUs</option>
+                </select>
+            </div>
+
+            <div id="box-res" style="display:none; text-align:center; margin-top:20px;">
+                <h1 id="f-total" style="color:var(--gold); font-size: 2.5rem; margin-bottom:15px;">R$ 0,00</h1>
+                <button class="btn btn-green" onclick="sendZap()"><i class="fab fa-whatsapp"></i> ENVIAR ORÇAMENTO</button>
+                <button class="btn btn-reset" onclick="resetOrc()">NOVO ORÇAMENTO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-game" class="view">
+        <div class="card">
+            <h3>🎮 Games</h3>
+            <div id="g-menu">
+                <button class="btn btn-gold" onclick="startSnake()" style="margin-bottom:10px">JOGO DA COBRINHA</button>
+            </div>
+            
+            <div id="snake-game" style="display:none">
+                <canvas id="sCanvas" width="300" height="300"></canvas>
+                <div class="controls">
+                    <div class="c-btn" style="grid-column:2" onclick="d='UP'">▲</div>
+                    <div class="c-btn" style="grid-column:1" onclick="d='LEFT'">◀</div>
+                    <div class="c-btn" style="grid-column:3" onclick="d='RIGHT'">▶</div>
+                    <div class="c-btn" style="grid-column:2" onclick="d='DOWN'">▼</div>
+                </div>
+                <button class="btn btn-reset" onclick="location.reload()">SAIR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav>
+    <div class="nav-item" id="n-perfil" onclick="showV('v-perfil')"><i class="fas fa-user"></i>Perfil</div>
+    <div class="nav-item" id="n-orc" onclick="showV('v-orc')"><i class="fas fa-file-invoice-dollar"></i>Orçamento</div>
+    <div class="nav-item" id="n-game" onclick="showV('v-game')"><i class="fas fa-gamepad"></i>Games</div>
+</nav>
+
+<script>
+    // TABELA DE PREÇOS CORRIGIDA (Baseada nos seus prints)
+    const PRICES = {
+        inst: {
+            "Convencional": { "9k": 200, "12k": 250, "18k": 350, "24k": 450 },
+            "Inverter": { "9k": 250, "12k": 300, "18k": 400, "24k": 500 },
+            "Conv + Material": { "9k": 550, "12k": 600, "18k": 800, "24k": 950 }
+        },
+        des: {
+            "Desinstalação Convencional": { "9k": 100, "12k": 120, "18k": 150, "24k": 200 },
+            "Desinstalação Inverter": { "9k": 150, "12k": 180, "18k": 220, "24k": 280 }
+        },
+        limp: {
+            "Limpeza": { "9k": 150, "12k": 150, "18k": 200, "24k": 250 },
+            "Carga Gás R22": { "9k": 350, "12k": 400, "18k": 500, "24k": 650 },
+            "Carga Gás R410": { "9k": 400, "12k": 450, "18k": 550, "24k": 700 }
+        }
+    };
+
+    let currentUser = JSON.parse(localStorage.getItem('refri_user'));
+
+    // Iniciar App
+    window.onload = () => {
+        if(currentUser) {
+            showV('v-orc'); 
+        } else {
+            showV('v-perfil');
+        }
+    };
+
+    function showV(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('n-' + id.split('-')[1]).classList.add('active');
+    }
+
+    function saveUser() {
+        const nome = document.getElementById('u-nome').value;
+        const end = document.getElementById('u-end').value;
+        if(nome && end) {
+            currentUser = { nome, end };
+            localStorage.setItem('refri_user', JSON.stringify(currentUser));
+            showV('v-orc');
+        } else { alert("Preencha tudo!"); }
+    }
+
+    // Lógica Funil Corrigida
+    function updateServs() {
+        const cat = document.getElementById('f-cat').value;
+        const sSelect = document.getElementById('f-serv');
+        sSelect.innerHTML = '<option value="">Selecione o serviço...</option>';
+        
+        if(cat) {
+            Object.keys(PRICES[cat]).forEach(s => {
+                sSelect.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+            document.getElementById('box-serv').style.display = 'block';
+        }
+    }
+
+    function calcFinal() {
+        const cat = document.getElementById('f-cat').value;
+        const serv = document.getElementById('f-serv').value;
+        const btu = document.getElementById('f-btu').value;
+        
+        if(cat && serv && btu) {
+            const valor = PRICES[cat][serv][btu];
+            document.getElementById('f-total').innerText = `R$ ${valor},00`;
+            document.getElementById('box-res').style.display = 'block';
+        }
+    }
+
+    function resetOrc() {
+        document.getElementById('f-cat').value = "";
+        document.getElementById('box-serv').style.display = 'none';
+        document.getElementById('box-btu').style.display = 'none';
+        document.getElementById('box-res').style.display = 'none';
+    }
+
+    function sendZap() {
+        const msg = `Olá! Me chamo ${currentUser.nome}. Orçamento para ${document.getElementById('f-serv').value} de ${document.getElementById('f-btu').value}. Valor: ${document.getElementById('f-total').innerText}`;
+        window.open(`https://wa.me/5568992447004?text=${encodeURIComponent(msg)}`);
+    }
+
+    // Snake Simples
+    let d, canvas = document.getElementById('sCanvas'), ctx = canvas.getContext('2d'), snake, food, sInt;
+    function startSnake() {
+        document.getElementById('g-menu').style.display='none';
+        document.getElementById('snake-game').style.display='block';
+        snake = [{x:150, y:150}]; d = null;
+        food = {x: 150, y: 60};
+        sInt = setInterval(draw, 100);
+    }
+    function draw() {
+        ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
+        ctx.fillStyle = "gold"; snake.forEach(s => ctx.fillRect(s.x, s.y, 15, 15));
+        ctx.fillStyle = "red"; ctx.fillRect(food.x, food.y, 15, 15);
+        let head = {...snake[0]};
+        if(d=='UP') head.y-=15; if(d=='DOWN') head.y+=15; if(d=='LEFT') head.x-=15; if(d=='RIGHT') head.x+=15;
+        if(d) {
+            snake.unshift(head);
+            if(head.x==food.x && head.y==food.y) food = {x:Math.floor(Math.random()*19)*15, y:Math.floor(Math.random()*19)*15};
+            else snake.pop();
+        }
+    }
+</script>
+</body>
+</html>
