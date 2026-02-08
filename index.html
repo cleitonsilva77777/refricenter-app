@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>REFRICENTER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gold: #D4AF37; --blue: #012d4a; --bg: #0f172a; --card: #1e293b; --white: #f8fafc; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--white); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { background: #000; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); }
+        .logo { font-size: 1.5rem; font-weight: 900; color: var(--gold); letter-spacing: 2px; }
+        
+        #sidebar { position: fixed; left: -250px; top: 0; width: 250px; height: 100%; background: #000; z-index: 2000; transition: 0.4s; padding: 20px; border-right: 2px solid var(--gold); }
+        #sidebar.active { left: 0; }
+        .menu-item { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid #333; cursor: pointer; color: var(--gold); text-decoration: none; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        .view { display: none; } .view.active { display: block; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(212, 175, 55, 0.2); }
+
+        .step-box { display: none; } .step-box.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        select, input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #334155; background: #0f172a; color: white; margin-bottom: 15px; font-size: 1rem; }
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-green { background: #1b5e20; color: white; }
+
+        /* Estilo Jogos */
+        canvas { background: #000; border: 2px solid var(--gold); border-radius: 10px; width: 100%; max-width: 300px; display: block; margin: 0 auto; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 210px; margin: 15px auto; }
+        .c-btn { background: var(--card); border: 2px solid var(--gold); color: var(--gold); padding: 18px; border-radius: 10px; text-align: center; font-size: 1.2rem; cursor: pointer; }
+        .c-btn:active { background: var(--gold); color: #000; }
+
+        .mem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .m-card { height: 65px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: transparent; cursor: pointer; }
+        .m-card.open { background: white; color: #333; border: 2px solid var(--gold); color: visible; }
+
+        .badge { background: var(--gold); color: #000; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 0.8rem; }
+
+        nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 10px 0 25px; border-top: 2px solid var(--gold); }
+        .nav-item { text-align: center; color: #64748b; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="logo" style="margin-bottom: 30px;">MENU</div>
+    <div class="menu-item" onclick="showAdmin()"><i class="fas fa-user-shield"></i> Administrador</div>
+    <div class="menu-item" onclick="nav('v-calc')"><i class="fas fa-calculator"></i> Cálculo de BTUs</div>
+    <a href="https://instagram.com" class="menu-item"><i class="fab fa-instagram"></i> Instagram</a>
+    <a href="https://facebook.com" class="menu-item"><i class="fab fa-facebook"></i> Facebook</a>
+    <div class="menu-item" onclick="toggleMenu()" style="margin-top: 50px; color: #ff4444;"><i class="fas fa-times"></i> Fechar Menu</div>
+</div>
+
+<header>
+    <i class="fas fa-bars" onclick="toggleMenu()" style="font-size: 1.5rem; color: var(--gold); cursor: pointer;"></i>
+    <div class="logo">REFRICENTER</div>
+    <div style="width: 24px;"></div>
+</header>
+
+<div class="main-content">
+    <div id="v-perfil" class="view active">
+        <div class="card">
+            <h3>📝 Seu Cadastro</h3>
+            <input type="text" id="u-nome" placeholder="Nome Completo">
+            <input type="text" id="u-end" placeholder="Endereço">
+            <button class="btn btn-gold" onclick="saveU()">Salvar Perfil</button>
+        </div>
+    </div>
+
+    <div id="v-orc" class="view">
+        <div class="card">
+            <h3>💎 Orçamento Rápido</h3>
+            <div id="step1" class="step-box active">
+                <label>1. Escolha a Categoria:</label>
+                <select id="cat" onchange="loadServs()">
+                    <option value="">Selecione...</option>
+                    <option value="inst">Instalação</option>
+                    <option value="des">Desinstalação</option>
+                    <option value="limp">Manutenção e Gás</option>
+                </select>
+            </div>
+            <div id="step2" class="step-box">
+                <label>2. Escolha o Serviço:</label>
+                <select id="serv" onchange="showBTU()"></select>
+            </div>
+            <div id="step3" class="step-box">
+                <label>3. Potência (BTUs):</label>
+                <select id="btu" onchange="finishOrc()">
+                    <option value="9k">9.000 BTUs</option>
+                    <option value="12k">12.000 BTUs</option>
+                    <option value="18k">18.000 BTUs</option>
+                    <option value="24k">24.000 BTUs</option>
+                </select>
+            </div>
+            <div id="res-box" class="step-box" style="text-align:center;">
+                <h2 id="final-p" style="color:var(--gold);">R$ 0,00</h2>
+                <button class="btn btn-green" onclick="goZap()"><i class="fab fa-whatsapp"></i> Enviar Orçamento</button>
+                <button class="btn btn-gold" style="margin-top:10px;" onclick="resetOrc()">Novo Orçamento</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-game" class="view">
+        <div class="card" id="game-selector">
+            <h3>🎮 Refri-Games</h3>
+            <p style="font-size:0.8rem; margin-bottom:15px;">DICA: Chegue a 20 pontos na Cobrinha para ganhar um bônus!</p>
+            <button class="btn btn-gold" onclick="initSnake()" style="margin-bottom:15px;">Jogo da Cobrinha</button>
+            <button class="btn btn-gold" onclick="initMemoria()">Jogo da Memória</button>
+        </div>
+
+        <div id="snake-ui" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span>Score: <b id="s-score">0</b> <span id="lv-badge" class="badge">Lv 1</span></span>
+                <button onclick="backToGames()" style="background:none; border:none; color:#ff4444; font-weight:bold; cursor:pointer;">VOLTAR</button>
+            </div>
+            <canvas id="snakeCanvas" width="300" height="300"></canvas>
+            <button id="start-btn" class="btn btn-gold" style="margin-top:10px;" onclick="startGame()">INICIAR JOGO</button>
+            
+            <div class="controls">
+                <div class="c-btn" style="grid-column:2" onclick="changeD('UP')">▲</div>
+                <div class="c-btn" style="grid-column:1" onclick="changeD('LEFT')">◀</div>
+                <div class="c-btn" style="grid-column:3" onclick="changeD('RIGHT')">▶</div>
+                <div class="c-btn" style="grid-column:2" onclick="changeD('DOWN')">▼</div>
+            </div>
+        </div>
+
+        <div id="memoria-ui" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <span>Pares: <b id="m-pairs">0</b>/8</span>
+                <button onclick="backToGames()" style="background:none; border:none; color:#ff4444; font-weight:bold; cursor:pointer;">VOLTAR</button>
+            </div>
+            <div class="mem-grid" id="memGrid"></div>
+            <button class="btn btn-outline-gold" style="margin-top:15px; border:1px solid var(--gold); color:var(--gold);" onclick="initMemoria()">REINICIAR</button>
+        </div>
+    </div>
+
+    <div id="v-calc" class="view">
+        <div class="card">
+            <h3>Calculadora BTU</h3>
+            <input type="number" id="m2" placeholder="Tamanho do ambiente (m²)">
+            <button class="btn btn-gold" onclick="calcular()">CALCULAR</button>
+            <h1 id="res-calc" style="text-align:center; color:var(--gold); margin-top:20px;"></h1>
+        </div>
+    </div>
+</div>
+
+<nav>
+    <div class="nav-item active" onclick="nav('v-perfil',this)"><i class="fas fa-user"></i>Perfil</div>
+    <div class="nav-item" onclick="nav('v-orc',this)"><i class="fas fa-file-invoice-dollar"></i>Orçamento</div>
+    <div class="nav-item" onclick="nav('v-game',this)"><i class="fas fa-gamepad"></i>Games</div>
+</nav>
+
+<script>
+    const dataPrices = {
+        inst: { "Convencional": 200, "Inverter": 250, "Conv + Material": 550, "Inv + Material": 600 },
+        des: { "Desinstalação Convencional": 100, "Desinstalação Inverter": 150 },
+        limp: { "Limpeza": 150, "Carga Gás R22": 450, "Carga Gás R410": 500, "Carga Gás R32": 550 }
+    };
+
+    function toggleMenu() { document.getElementById('sidebar').classList.toggle('active'); }
+    
+    function nav(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+        if(document.getElementById('sidebar').classList.contains('active')) toggleMenu();
+        backToGames();
+    }
+
+    // Funil logic
+    function loadServs() {
+        const cat = document.getElementById('cat').value;
+        const sSelect = document.getElementById('serv');
+        sSelect.innerHTML = '<option value="">Escolha o serviço...</option>';
+        if(cat) {
+            for(let key in dataPrices[cat]) {
+                sSelect.innerHTML += `<option value="${key}">${key}</option>`;
+            }
+            document.getElementById('step2').classList.add('active');
+        }
+    }
+    function showBTU() { document.getElementById('step3').classList.add('active'); }
+    function finishOrc() {
+        const cat = document.getElementById('cat').value;
+        const serv = document.getElementById('serv').value;
+        document.getElementById('final-p').innerText = `R$ ${dataPrices[cat][serv]},00`;
+        document.getElementById('res-box').classList.add('active');
+    }
+    function resetOrc() {
+        document.querySelectorAll('.step-box').forEach(b => b.classList.remove('active'));
+        document.getElementById('step1').classList.add('active');
+        document.getElementById('cat').value = "";
+    }
+
+    // Snake Game Logic
+    let sCanvas = document.getElementById('snakeCanvas'), sCtx = sCanvas.getContext('2d'), snake, food, d, score, sLoop, speed;
+    function initSnake() {
+        document.getElementById('game-selector').style.display='none';
+        document.getElementById('snake-ui').style.display='block';
+        sCtx.fillStyle = "black"; sCtx.fillRect(0,0,300,300);
+    }
+    function startGame() {
+        clearInterval(sLoop);
+        snake = [{x:150, y:150}]; food = {x:Math.floor(Math.random()*19)*15, y:Math.floor(Math.random()*19)*15}; d = null; score = 0; speed = 120;
+        document.getElementById('start-btn').style.display='none';
+        sLoop = setInterval(drawSnake, speed);
+    }
+    function changeD(dir) { d = dir; }
+    function drawSnake() {
+        sCtx.fillStyle = "black"; sCtx.fillRect(0,0,300,300);
+        sCtx.fillStyle = "gold"; snake.forEach(s => sCtx.fillRect(s.x, s.y, 14, 14));
+        sCtx.fillStyle = "red"; sCtx.fillRect(food.x, food.y, 14, 14);
+        
+        let head = {...snake[0]};
+        if(d=='UP') head.y-=15; if(d=='DOWN') head.y+=15; if(d=='LEFT') head.x-=15; if(d=='RIGHT') head.x+=15;
+        
+        if(head.x==food.x && head.y==food.y) {
+            score++;
+            food={x:Math.floor(Math.random()*19)*15, y:Math.floor(Math.random()*19)*15};
+            if(score == 20) alert("NÍVEL MESTRE! Tire print e ganhe 5% de desconto no próximo serviço!");
+        } else { if(d) snake.pop(); }
+        
+        if(d) {
+            if(head.x<0 || head.x>=300 || head.y<0 || head.y>=300 || snake.some(s => s.x === head.x && s.y === head.y)) {
+                clearInterval(sLoop); alert("Fim de Jogo! Pontuação: " + score); 
+                document.getElementById('start-btn').style.display='block';
+                return;
+            }
+            snake.unshift(head);
+        }
+        document.getElementById('s-score').innerText = score;
+        document.getElementById('lv-badge').innerText = "Lv " + (Math.floor(score/5) + 1);
+    }
+
+    // Memoria Logic
+    let firstCard = null, secondCard = null, lockBoard = false, matchedPairs = 0;
+    function initMemoria() {
+        document.getElementById('game-selector').style.display='none';
+        document.getElementById('memoria-ui').style.display='block';
+        matchedPairs = 0; document.getElementById('m-pairs').innerText = "0";
+        const icons = ['❄️','❄️','🔧','🔧','⚡','⚡','🏠','🏠','🛠️','🛠️','🔥','🔥','💧','💧','📏','📏'];
+        const grid = document.getElementById('memGrid'); grid.innerHTML = '';
+        icons.sort(() => Math.random() - 0.5).forEach(icon => {
+            const div = document.createElement('div'); div.className = 'm-card'; div.dataset.val = icon; div.innerHTML = icon;
+            div.onclick = function() {
+                if(lockBoard || this === firstCard || this.classList.contains('open')) return;
+                this.classList.add('open');
+                if(!firstCard) { firstCard = this; return; }
+                secondCard = this; lockBoard = true;
+                if(firstCard.dataset.val === secondCard.dataset.val) {
+                    matchedPairs++; document.getElementById('m-pairs').innerText = matchedPairs;
+                    firstCard = null; secondCard = null; lockBoard = false;
+                    if(matchedPairs === 8) alert("Parabéns! Você encontrou todos os pares!");
+                } else {
+                    setTimeout(() => { firstCard.classList.remove('open'); secondCard.classList.remove('open'); firstCard = null; secondCard = null; lockBoard = false; }, 800);
+                }
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    function backToGames() { 
+        clearInterval(sLoop);
+        document.getElementById('game-selector').style.display='block';
+        document.getElementById('snake-ui').style.display='none';
+        document.getElementById('memoria-ui').style.display='none';
+    }
+
+    function saveU() { 
+        const n = document.getElementById('u-nome').value;
+        if(n) { alert("Perfil Salvo, " + n + "!"); nav('v-orc'); }
+        else { alert("Digite seu nome!"); }
+    }
+    
+    function goZap() { 
+        const nome = document.getElementById('u-nome').value || "Cliente";
+        const serv = document.getElementById('serv').value;
+        const valor = document.getElementById('final-p').innerText;
+        const msg = `Olá Refricenter! Me chamo ${nome}. Gostaria de agendar: ${serv} por ${valor}.`;
+        window.open(`https://wa.me/5568992447004?text=${encodeURIComponent(msg)}`); 
+    }
+
+    function calcular() {
+        const m = document.getElementById('m2').value;
+        if(m) document.getElementById('res-calc').innerText = (m * 600) + " BTUs";
+    }
+
+    function showAdmin() { if(prompt("Senha:") === "1234") alert("Faturamento: R$ 4.500,00"); }
+</script>
+</body>
+</html>
