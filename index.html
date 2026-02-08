@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refricenter Black Titanium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --blue: #012d4a; --gold: #D4AF37; --green: #1b5e20; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { background: linear-gradient(135deg, #012d4a 0%, #000 100%); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--gold); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .logo b { font-size: 1.3rem; letter-spacing: 2px; color: var(--gold); }
+        .logo span { display: block; font-size: 0.6rem; color: #fff; opacity: 0.8; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 200px; }
+        .view { display: none; } .view.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(212, 175, 55, 0.2); }
+        h3 { color: var(--gold); margin-top: 0; font-size: 1.1rem; text-transform: uppercase; }
+
+        /* Estilo Funil de Vendas */
+        .step { display: none; } .step.active { display: block; animation: fadeIn 0.3s; }
+        input, select { width: 100%; padding: 16px; border-radius: 12px; border: 2px solid #334155; background: #0f172a; color: white; margin-bottom: 10px; font-size: 1rem; }
+        .btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; text-transform: uppercase; }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-green { background: var(--green); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); margin-top: 10px; }
+
+        /* Jogo da Cobrinha e Controles */
+        #snake-container { position: relative; width: 100%; max-width: 300px; margin: 0 auto; }
+        canvas { background: #000; border: 2px solid var(--gold); display: block; border-radius: 10px; width: 100%; height: auto; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 180px; margin: 20px auto; }
+        .c-btn { background: var(--card); border: 2px solid var(--gold); color: var(--gold); padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem; }
+        .up { grid-column: 2; } .left { grid-column: 1; } .right { grid-column: 3; } .down { grid-column: 2; }
+
+        /* Footer */
+        footer { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--gold); z-index: 1000; }
+        .socials { display: flex; justify-content: center; gap: 25px; padding: 10px; background: #012d4a; }
+        .socials a { color: var(--gold); font-size: 1.3rem; }
+        .nav { display: flex; justify-content: space-around; padding: 10px 0 25px; }
+        .nav-item { text-align: center; color: #64748b; font-size: 0.65rem; font-weight: bold; cursor: pointer; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo"><b>REFRICENTER</b><span>PREMIUM BLACK TITANIUM</span></div>
+    <i class="fas fa-shield-alt" onclick="goAdmin()" style="color:var(--gold)"></i>
+</header>
+
+<div class="main-content">
+    <div id="v-perfil" class="view active">
+        <div class="card">
+            <h3><i class="fas fa-user-check"></i> Registro de Cliente</h3>
+            <input type="text" id="fn-nome" placeholder="Nome Completo">
+            <input type="text" id="fn-end" placeholder="Endereço">
+            <input type="tel" id="fn-tel" placeholder="WhatsApp">
+            <button class="btn btn-gold" onclick="savePerfil()">CONTINUAR PARA PREÇOS <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <div id="v-orc" class="view">
+        <div class="card">
+            <h3><i class="fas fa-file-invoice-dollar"></i> Orçamento Inteligente</h3>
+            
+            <div id="step-1" class="step active">
+                <label>O que você precisa?</label>
+                <select id="f-serv" onchange="nextStep(2)">
+                    <option value="">Selecione o Serviço...</option>
+                    <optgroup label="Instalação">
+                        <option value="ic">Convencional</option><option value="ii">Inverter</option>
+                        <option value="icm">Conv + Material</option><option value="iim">Inv + Material</option>
+                    </optgroup>
+                    <optgroup label="Desinstalação">
+                        <option value="dc">Desinstalação Convencional</option>
+                        <option value="di">Desinstalação Inverter</option>
+                    </optgroup>
+                    <optgroup label="Manutenção/Gás">
+                        <option value="lc">Limpeza Convencional</option><option value="li">Limpeza Inverter</option>
+                        <option value="g22">Gás R22</option><option value="g410">Gás R410a</option><option value="g32">Gás R32</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div id="step-2" class="step">
+                <label>Qual a potência (BTUs)?</label>
+                <select id="f-btu" onchange="calculateFunil()">
+                    <option value="9k">9.000 BTUs</option><option value="12k">12.000 BTUs</option>
+                    <option value="18k">18.000 BTUs</option><option value="24k">24.000 BTUs</option>
+                    <option value="30k">30.000 BTUs</option>
+                </select>
+                <button class="btn btn-outline" onclick="nextStep(1)">Voltar</button>
+            </div>
+
+            <div id="step-3" class="step">
+                <div style="text-align:center; padding:20px; border: 2px solid var(--gold); border-radius:15px; background:rgba(212,175,55,0.1);">
+                    <small>VALOR DO INVESTIMENTO</small>
+                    <h1 id="f-res" style="color:var(--gold); margin:10px 0;">R$ 0,00</h1>
+                </div>
+                <button class="btn btn-green" style="margin-top:15px" onclick="zapSend()">SOLICITAR VIA WHATSAPP</button>
+                <button class="btn btn-outline" onclick="nextStep(2)">Mudar Potência</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-game" class="view">
+        <div class="card">
+            <div id="game-menu">
+                <h3><i class="fas fa-headset"></i> Refri-Games</h3>
+                <button class="btn btn-gold" onclick="playSnake()" style="margin-bottom:10px">JOGO DA COBRINHA</button>
+                <button class="btn btn-gold" onclick="playMem()">JOGO DA MEMÓRIA</button>
+            </div>
+
+            <div id="snake-game" style="display:none">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span>Score: <b id="s-score">0</b></span>
+                    <span>Nível: <b id="s-lv">1</b></span>
+                    <span>Recorde: <b id="s-rec">0</b></span>
+                </div>
+                <canvas id="sCanvas" width="300" height="300"></canvas>
+                <div class="controls">
+                    <div class="c-btn up" onclick="changeDir('UP')"><i class="fas fa-arrow-up"></i></div>
+                    <div class="c-btn left" onclick="changeDir('LEFT')"><i class="fas fa-arrow-left"></i></div>
+                    <div class="c-btn right" onclick="changeDir('RIGHT')"><i class="fas fa-arrow-right"></i></div>
+                    <div class="c-btn down" onclick="changeDir('DOWN')"><i class="fas fa-arrow-down"></i></div>
+                </div>
+                <button class="btn btn-outline" onclick="closeGame()">SAIR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="socials">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/5568992447004"><i class="fab fa-whatsapp"></i></a>
+    </div>
+    <div class="nav">
+        <div class="nav-item active" onclick="nav('v-perfil',this)"><i class="fas fa-id-card"></i>PERFIL</div>
+        <div class="nav-item" onclick="nav('v-orc',this)"><i class="fas fa-tools"></i>SERVIÇOS</div>
+        <div class="nav-item" onclick="nav('v-game',this)"><i class="fas fa-gamepad"></i>GAMES</div>
+    </div>
+</footer>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('refri_black_db')) || { user:{}, recordSnake:0 };
+    const PRICES = {
+        ic: {"9k":200, "12k":200, "18k":300, "24k":400},
+        ii: {"9k":250, "12k":250, "18k":350, "24k":450},
+        icm: {"9k":550, "12k":600, "18k":800, "24k":900},
+        iim: {"9k":600, "12k":650, "18k":850, "24k":950},
+        dc: {"9k":100, "12k":100, "18k":150, "24k":200},
+        di: {"9k":150, "12k":150, "18k":200, "24k":250},
+        lc: {"9k":150, "12k":150, "18k":200, "24k":300},
+        li: {"9k":200, "12k":200, "18k":250, "24k":350},
+        g22: {"9k":450, "12k":450, "18k":600, "24k":750},
+        g410: {"9k":500, "12k":500, "18k":600, "24k":850},
+        g32: {"9k":550, "12k":600, "18k":750, "24k":1000}
+    };
+
+    function nav(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        closeGame();
+    }
+
+    function savePerfil() {
+        db.user = { n: document.getElementById('fn-nome').value, e: document.getElementById('fn-end').value, t: document.getElementById('fn-tel').value };
+        localStorage.setItem('refri_black_db', JSON.stringify(db));
+        nav('v-orc', document.querySelectorAll('.nav-item')[1]);
+    }
+
+    // Funil de Vendas
+    function nextStep(s) {
+        document.querySelectorAll('.step').forEach(st => st.classList.remove('active'));
+        document.getElementById('step-'+s).classList.add('active');
+    }
+
+    function calculateFunil() {
+        const s = document.getElementById('f-serv').value, b = document.getElementById('f-btu').value;
+        if(s && b) {
+            document.getElementById('f-res').innerText = `R$ ${PRICES[s][b]},00`;
+            nextStep(3);
+        }
+    }
+
+    function zapSend() {
+        const msg = `*REFRI-BLACK TITANIUM*\nCliente: ${db.user.n}\nEndereço: ${db.user.e}\nServiço: ${document.getElementById('f-serv').value} ${document.getElementById('f-btu').value}\nValor: ${document.getElementById('f-res').innerText}`;
+        window.open(`https://wa.me/5568992447004?text=${encodeURIComponent(msg)}`);
+    }
+
+    // Lógica Snake com Botões
+    let sInt, d, snake, food, score, level, speed;
+    const box = 15;
+    const canvas = document.getElementById('sCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function playSnake() {
+        document.getElementById('game-menu').style.display = 'none';
+        document.getElementById('snake-game').style.display = 'block';
+        document.getElementById('s-rec').innerText = db.recordSnake;
+        resetSnake();
+    }
+
+    function resetSnake() {
+        clearInterval(sInt);
+        snake = [{x: 10*box, y: 10*box}];
+        food = {x: Math.floor(Math.random()*19)*box, y: Math.floor(Math.random()*19)*box};
+        score = 0; level = 1; speed = 150; d = null;
+        updateStats();
+        sInt = setInterval(drawSnake, speed);
+    }
+
+    function changeDir(dir) { d = dir; }
+
+    function drawSnake() {
+        ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
+        for(let i=0; i<snake.length; i++) {
+            ctx.fillStyle = (i==0) ? "#D4AF37" : "white";
+            ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        }
+        ctx.fillStyle = "red"; ctx.fillRect(food.x, food.y, box, box);
+
+        let sX = snake[0].x, sY = snake[0].y;
+        if(d=="LEFT") sX -= box; if(d=="UP") sY -= box; if(d=="RIGHT") sX += box; if(d=="DOWN") sY += box;
+
+        if(sX == food.x && sY == food.y) {
+            score++;
+            if(score % 3 == 0) { level++; speed -= 10; clearInterval(sInt); sInt = setInterval(drawSnake, speed); }
+            food = {x: Math.floor(Math.random()*19)*box, y: Math.floor(Math.random()*19)*box};
+        } else { snake.pop(); }
+
+        let head = {x: sX, y: sY};
+        if(sX<0 || sY<0 || sX>=300 || sY>=300 || snake.some((s,i) => i>0 && s.x==head.x && s.y==head.y)) {
+            if(score > db.recordSnake) { db.recordSnake = score; localStorage.setItem('refri_black_db', JSON.stringify(db)); }
+            alert("Fim de Jogo! Score: " + score);
+            resetSnake();
+        }
+        if(d) snake.unshift(head);
+        updateStats();
+    }
+
+    function updateStats() {
+        document.getElementById('s-score').innerText = score;
+        document.getElementById('s-lv').innerText = level;
+    }
+
+    function closeGame() {
+        clearInterval(sInt);
+        document.getElementById('game-menu').style.display = 'block';
+        document.getElementById('snake-game').style.display = 'none';
+    }
+</script>
+</body>
+</html>
