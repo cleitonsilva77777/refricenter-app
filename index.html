@@ -111,7 +111,38 @@
         </div>
     </div>
 
-    <div id="tela-precos" class="tela">
+    <div id="    <div id="tela-precos" class="tela">
+        <div class="cartao">
+            <h3><i class="fas fa-tools"></i> Solicitar Orçamento</h3>
+            <p>Escolha o serviço desejado:</p>
+
+            <select id="selecao-categoria" onchange="carregarServicos()" style="width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: 1px solid #ddd;">
+                <option value="">Selecione a categoria...</option>
+                <option value="instalacao">Instalação</option>
+                <option value="limpeza">Limpeza e Manutenção</option>
+                <option value="desinstalacao">Desinstalação</option>
+            </select>
+
+            <div id="bloco-btu" style="display:none; margin-top: 15px;">
+                <p>Potência do aparelho:</p>
+                <select id="selecao-btu" onchange="calcularOrcamento()" style="width: 100%; padding: 12px; margin-top: 5px; border-radius: 8px; border: 1px solid #ddd;">
+                    <option value="9000">9.000 BTUs</option>
+                    <option value="12000">12.000 BTUs</option>
+                    <option value="18000">18.000 BTUs</option>
+                    <option value="24000">24.000 BTUs</option>
+                </select>
+            </div>
+
+            <div id="resultado-orcamento" style="display:none; margin-top: 25px; padding: 20px; background: #f0f4f8; border-radius: 10px;">
+                <p style="color: #666; font-size: 0.9rem;">Valor Estimado:</p>
+                <h1 id="preco-final" style="color: var(--azul); font-size: 2.5rem; margin: 5px 0;">R$ 0,00</h1>
+                <button class="botao-principal" onclick="enviarParaWhatsapp()" style="background: #25d366;">
+                    <i class="fab fa-whatsapp"></i> AGENDAR PELO WHATSAPP
+                </button>
+            </div>
+        </div>
+    </div>
+" class="tela">
         <div class="cartao">
             <h3>Tabela de Preços</h3>
             <p>Selecione um serviço abaixo.</p>
@@ -196,7 +227,58 @@
         // Fecha menu
         document.getElementById('menu-lateral').classList.remove('ativo');
     }
-</script>
+<    // 4. TABELA DE PREÇOS (DADOS)
+    const TABELA_PRECOS = {
+        "instalacao": { "9000": 350, "12000": 400, "18000": 550, "24000": 700 },
+        "limpeza": { "9000": 150, "12000": 180, "18000": 220, "24000": 280 },
+        "desinstalacao": { "9000": 120, "12000": 150, "18000": 200, "24000": 250 }
+    };
+
+    function carregarServicos() {
+        const categoria = document.getElementById('selecao-categoria').value;
+        const blocoBtu = document.getElementById('bloco-btu');
+        
+        if (categoria !== "") {
+            blocoBtu.style.display = "block";
+            calcularOrcamento(); // Calcula o valor inicial
+        } else {
+            blocoBtu.style.display = "none";
+            document.getElementById('resultado-orcamento').style.display = "none";
+        }
+    }
+
+    function calcularOrcamento() {
+        const categoria = document.getElementById('selecao-categoria').value;
+        const btu = document.getElementById('selecao-btu').value;
+        const resultado = document.getElementById('resultado-orcamento');
+        
+        if (categoria && btu) {
+            const valor = TABELA_PRECOS[categoria][btu];
+            document.getElementById('preco-final').innerText = "R$ " + valor + ",00";
+            resultado.style.display = "block";
+        }
+    }
+
+    // 5. ENVIAR PARA WHATSAPP
+    function enviarParaWhatsapp() {
+        const nome = localStorage.getItem('refricenter_nome') || "Cliente";
+        const endereco = localStorage.getItem('refricenter_endereco') || "Não informado";
+        const categoria = document.getElementById('selecao-categoria').options[document.getElementById('selecao-categoria').selectedIndex].text;
+        const btu = document.getElementById('selecao-btu').value;
+        const preco = document.getElementById('preco-final').innerText;
+
+        const mensagem = `Olá, me chamo ${nome}.%0A` +
+                         `Gostaria de agendar um serviço!%0A%0A` +
+                         `*Serviço:* ${categoria}%0A` +
+                         `*Aparelho:* ${btu} BTUs%0A` +
+                         `*Valor Estimado:* ${preco}%0A` +
+                         `*Endereço:* ${endereco}`;
+
+        // Substitua pelo seu número real abaixo
+        const linkWhatsapp = `https://wa.me/5568992447004?text=${mensagem}`;
+        window.open(linkWhatsapp, '_blank');
+    }
+>
 
 </body>
 </html>
