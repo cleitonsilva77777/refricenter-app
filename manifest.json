@@ -1,0 +1,16 @@
+{
+  "name": "Refricenter Orçamentos",
+  "short_name": "Refricenter",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#002D4C",
+  "icons": [
+    {
+      "src": "banner.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
