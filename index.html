@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refricenter - Orçamento Inteligente</title>
+    <style>
+        :root { --azul-escuro: #001a2d; --azul-medio: #002D4C; --azul-claro: #004a80; --verde: #25d366; --cinza: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--cinza); color: #333; padding-bottom: 50px; }
+        
+        /* Cabeçalho com Essência de Refrigeração */
+        header { 
+            background: linear-gradient(135deg, var(--azul-escuro), var(--azul-claro));
+            color: white; padding: 40px 20px; text-align: center; border-bottom: 4px solid var(--azul-claro);
+            position: relative; overflow: hidden;
+        }
+        .floco { position: absolute; opacity: 0.15; font-size: 40px; }
+        .f1 { top: 10px; left: 10px; } .f2 { bottom: 10px; right: 20px; font-size: 60px; }
+        .f3 { top: 20px; right: 50px; transform: rotate(20deg); }
+        
+        header h1 { margin: 0; font-size: 32px; letter-spacing: 3px; text-transform: uppercase; font-weight: 900; }
+        header p { margin: 5px 0 0; opacity: 0.8; font-size: 14px; letter-spacing: 1px; }
+
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .card { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        h3 { margin-top: 0; color: var(--azul-medio); border-bottom: 2px solid var(--cinza); padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        
+        label { display: block; margin-top: 12px; font-weight: bold; font-size: 13px; color: #555; }
+        select, input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid #ddd; font-size: 15px; box-sizing: border-box; background: #fafafa; }
+        
+        /* Sistema de Resumo Antes do Zap */
+        .resumo-fixo { background: white; padding: 20px; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); border-top: 4px solid var(--verde); }
+        .total-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .total-label { font-size: 16px; font-weight: bold; color: #666; }
+        .total-valor { font-size: 28px; color: var(--azul-medio); font-weight: 900; }
+        
+        .btn-confirmar { background: var(--azul-medio); color: white; padding: 15px; border: none; border-radius: 12px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-zap-real { background: var(--verde); color: white; padding: 18px; border-radius: 12px; text-align: center; text-decoration: none; display: none; font-weight: bold; font-size: 18px; box-shadow: 0 4px 12px rgba(37,211,102,0.3); }
+        
+        .badge-servico { background: #eef6ff; padding: 10px; border-radius: 8px; font-size: 13px; color: var(--azul-claro); margin-top: 10px; border-left: 4px solid var(--azul-claro); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="floco f1">❄️</div>
+    <div class="floco f2">❄️</div>
+    <div class="floco f3">💨</div>
+    <h1>REFRICENTER</h1>
+    <p>SOLUÇÕES EM REFRIGERAÇÃO E CLIMATIZAÇÃO</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h3>👤 Dados do Cliente</h3>
+        <input type="text" id="nome_cli" placeholder="Nome Completo" oninput="atualizarResumo()">
+        <input type="text" id="end_cli" placeholder="Endereço da Obra" oninput="atualizarResumo()">
+    </div>
+
+    <div class="card">
+        <h3>🔧 Instalação / Limpeza</h3>
+        <label>Tecnologia:</label>
+        <select id="tec" onchange="atualizarResumo()">
+            <option value="conv">Convencional (Split)</option>
+            <option value="inv">Inverter (Econômico)</option>
+        </select>
+        <label>Serviço:</label>
+        <select id="serv" onchange="atualizarResumo()">
+            <option value="nenhum">-- Selecione --</option>
+            <option value="inst_mao">Instalação (Só Mão de Obra)</option>
+            <option value="inst_mat">Instalação (Com Material)</option>
+            <option value="desinst">Desinstalação</option>
+            <option value="limpeza">Limpeza Completa</option>
+        </select>
+        <label>Capacidade (BTUs):</label>
+        <select id="btu" onchange="atualizarResumo()">
+            <option value="9k">9.000 BTUs</option>
+            <option value="12k">12.000 BTUs</option>
+            <option value="18k">18.000 BTUs</option>
+            <option value="22k">22.000 BTUs</option>
+            <option value="24k">24.000 BTUs</option>
+        </select>
+    </div>
+
+    <div class="card">
+        <h3>❄️ Carga de Gás</h3>
+        <label>Tipo de Gás:</label>
+        <select id="gas" onchange="atualizarResumo()">
+            <option value="nenhum">Nenhum</option>
+            <option value="r22">Gás R22</option>
+            <option value="r410">Gás R410a</option>
+            <option value="r32">Gás R32</option>
+        </select>
+        <label>BTUs para Gás:</label>
+        <select id="gas_btu" onchange="atualizarResumo()">
+            <option value="9k">9.000 BTUs</option>
+            <option value="12k">12.000 BTUs</option>
+            <option value="18k">18.000 BTUs</option>
+            <option value="22k">22.000 BTUs</option>
+            <option value="24k">24.000 BTUs</option>
+            <option value="30k">30.000 BTUs</option>
+            <option value="36k">36.000 BTUs</option>
+        </select>
+    </div>
+
+    <div class="card" style="background: #fdfdfd; border: 2px dashed #ddd;">
+        <h3>📋 Resumo do Pedido</h3>
+        <div id="lista_resumo" style="font-size: 14px; color: #666;">Selecione um serviço acima...</div>
+        
+        <div class="total-container" style="margin-top: 20px;">
+            <span class="total-label">Total Estimado:</span>
+            <span class="total-valor" id="v_total">R$ 0,00</span>
+        </div>
+        
+        <button id="btn_conf" class="btn-confirmar" onclick="confirmarPedido()">CONFERIR E CONFIRMAR</button>
+        <a id="btn_zap" href="#" class="btn-zap-real">ENVIAR PARA O WHATSAPP</a>
+        <p id="aviso" style="font-size: 11px; text-align: center; color: #999; margin-top: 10px;">Ao confirmar, você será direcionado para o atendimento técnico.</p>
+    </div>
+</div>
+
+<script>
+    const tabela = {
+        conv: {
+            inst_mao: { "9k": 200, "12k": 200, "18k": 300, "22k": 350, "24k": 400 },
+            inst_mat: { "9k": 550, "12k": 600, "18k": 800, "22k": 850, "24k": 900 },
+            desinst:  { "9k": 100, "12k": 100, "18k": 150, "22k": 200, "24k": 200 },
+            limpeza:  { "9k": 150, "12k": 150, "18k": 200, "22k": 250, "24k": 300 }
+        },
+        inv: {
+            inst_mao: { "9k": 250, "12k": 250, "18k": 350, "22k": 400, "24k": 450 },
+            inst_mat: { "9k": 600, "12k": 650, "18k": 850, "22k": 900, "24k": 950 },
+            desinst:  { "9k": 150, "12k": 150, "18k": 200, "22k": 250, "24k": 250 },
+            limpeza:  { "9k": 200, "12k": 200, "18k": 250, "22k": 300, "24k": 350 }
+        }
+    };
+    const tabelaGas = {
+        r22:  { "9k": 450, "12k": 450, "18k": 600, "22k": 700, "24k": 750, "30k": 900, "36k": 1100 },
+        r410: { "9k": 500, "12k": 500, "18k": 600, "22k": 800, "24k": 850, "30k": 1000, "36k": 1200 },
+        r32:  { "9k": 550, "12k": 600, "18k": 750, "22k": 900, "24k": 1000, "30k": 1200, "36k": 1350 }
+    };
+
+    function atualizarResumo() {
+        // Reset do botão se mudar algo
+        document.getElementById('btn_conf').style.display = 'block';
+        document.getElementById('btn_zap').style.display = 'none';
+
+        let total = 0;
+        let resumoHTML = "";
+        
+        const tec = document.getElementById('tec').value;
+        const serv = document.getElementById('serv').value;
+        const btu = document.getElementById('btu').value;
+        
+        if(serv !== 'nenhum') {
+            const p1 = tabela[tec][serv][btu];
+            total += p1;
+            resumoHTML += `<div class="badge-servico">✅ ${document.getElementById('serv').options[document.getElementById('serv').selectedIndex].text} (${btu})</div>`;
+        }
+
+        const gas = document.getElementById('gas').value;
+        const gasBtu = document.getElementById('gas_btu').value;
+        if(gas !== 'nenhum') {
+            const p2 = tabelaGas[gas][gasBtu];
+            total += p2;
+            resumoHTML += `<div class="badge-servico">✅ Carga de ${gas.toUpperCase()} (${gasBtu})</div>`;
+        }
+
+        document.getElementById('v_total').innerText = "R$ " + total;
+        document.getElementById('lista_resumo').innerHTML = resumoHTML || "Selecione um serviço acima...";
+    }
+
+    function confirmarPedido() {
+        const nome = document.getElementById('nome_cli').value;
+        if(!nome) { alert("Por favor, digite seu nome antes de confirmar."); return; }
+        
+        // Troca o botão para o do WhatsApp
+        document.getElementById('btn_conf').style.display = 'none';
+        const zap = document.getElementById('btn_zap');
+        zap.style.display = 'block';
+        
+        // Monta a mensagem final
+        const total = document.getElementById('v_total').innerText;
+        const end = document.getElementById('end_cli').value || "Não informado";
+        const resumo = document.getElementById('lista_resumo').innerText.replace(/✅ /g, "%0A- ");
+        
+        const msg = `*REFRICENTER - NOVO PEDIDO*%0A*Cliente:* ${nome}%0A*Endereço:* ${end}%0A*Serviços:*${resumo}%0A%0A*TOTAL ESTIMADO: ${total}*`;
+        zap.href = `https://wa.me/5568999999999?text=${msg}`;
+    }
+</script>
+</body>
+</html>
