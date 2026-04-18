@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refricenter - Orçamentos Reais</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#002D4C">
+
+    <style>
+        :root { 
+            --azul-escuro: #001a2d; --azul-medio: #002D4C; --azul-claro: #004a80;
+            --verde: #25d366; --cinza-fundo: #f0f2f5; 
+        }
+
+        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background-color: var(--cinza-fundo); color: #333; }
+        
+        /* Cabeçalho Profissional com Degradê */
+        header { 
+            position: relative;
+            background: linear-gradient(135deg, var(--azul-escuro) 0%, var(--azul-medio) 50%, var(--azul-claro) 100%);
+            color: white; padding: 40px 20px; text-align: center; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-bottom: 4px solid var(--azul-claro);
+            overflow: hidden;
+        }
+        header::after { content: "❄️"; position: absolute; font-size: 70px; opacity: 0.1; right: 10px; bottom: 0; }
+        header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
+
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        
+        /* Cards de Cadastro e Serviços */
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .card h3 { margin: 0 0 15px; font-size: 18px; color: var(--azul-medio); border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+
+        label { display: block; margin-top: 15px; font-weight: 700; font-size: 13px; color: #666; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; background: #fff; box-sizing: border-box; }
+
+        .btn-edit { background: none; border: none; color: var(--azul-claro); font-weight: bold; cursor: pointer; text-decoration: underline; padding: 0; margin-top: 10px; }
+
+        /* Resultado e Botão WhatsApp */
+        .res-box { background: #f0f7ff; padding: 15px; border-radius: 12px; margin-top: 15px; text-align: center; border: 1px solid #d0e3ff; }
+        .total-txt { font-size: 26px; color: var(--azul-medio); font-weight: 800; }
+        
+        .btn-zap { 
+            background: linear-gradient(to bottom, #29e671, #21bc5a);
+            color: white; padding: 18px; text-decoration: none; border-radius: 12px; 
+            font-weight: bold; display: block; margin-top: 15px; text-align: center; 
+            font-size: 18px; box-shadow: 0 5px 15px rgba(37,211,102,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>REFRICENTER</h1>
+    <p>Tecnologia em Climatização</p>
+</header>
+
+<div class="container">
+    
+    <div class="card">
+        <h3>Dados do Cliente</h3>
+        <div id="form_cli">
+            <input type="text" id="nome_cli" placeholder="Nome do Cliente">
+            <input type="text" id="end_cli" placeholder="Endereço Completo">
+            <button class="btn-zap" style="padding:10px; margin-top:10px; font-size: 14px;" onclick="salvarCli()">Confirmar Cliente</button>
+        </div>
+        <div id="dados_cli" style="display:none;">
+            <p style="margin:0;"><strong>Cliente:</strong> <span id="ex_nome"></span></p>
+            <p style="margin:5px 0 0;"><strong>Endereço:</strong> <span id="ex_end"></span></p>
+            <button class="btn-edit" onclick="editarCli()">Editar Nome/Endereço</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Limpeza e Higienização</h3>
+        <select id="sel_limpeza" onchange="calc('limpeza')">
+            <option value="0">Escolha a potência...</option>
+            <option value="150">7.000 a 12.000 BTUs - R$ 150</option>
+            <option value="200">18.000 a 22.000 BTUs - R$ 200</option>
+            <option value="250">24.000 a 30.000 BTUs - R$ 250</option>
+            <option value="350">36.000 a 60.000 BTUs - R$ 350</option>
+        </select>
+        <div id="res_limpeza" class="res-box" style="display:none;">
+            <div class="total-txt" id="tot_limpeza">R$ 0,00</div>
+            <a id="link_limpeza" href="#" onclick="enviarHook('Limpeza')" class="btn-zap">Solicitar Limpeza</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Recarga de Gás</h3>
+        <select id="sel_gas" onchange="calc('gas')">
+            <option value="0">Escolha a potência...</option>
+            <option value="180">7.000 a 12.000 BTUs - R$ 180</option>
+            <option value="250">18.000 a 24.000 BTUs - R$ 250</option>
+            <option value="350">30.000 a 60.000 BTUs - R$ 350</option>
+        </select>
+        <div id="res_gas" class="res-box" style="display:none;">
+            <div class="total-txt" id="tot_gas">R$ 0,00</div>
+            <a id="link_gas" href="#" onclick="enviarHook('Gas')" class="btn-zap">Solicitar Gás</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Instalação</h3>
+        <label>Potência:</label>
+        <select id="sel_inst" onchange="calc('inst')">
+            <option value="0" data-o="0" data-c="0">Selecione...</option>
+            <option value="912" data-o="200" data-c="600">9.000 a 12.000 BTUs</option>
+            <option value="18" data-o="350" data-c="850">18.000 BTUs</option>
+            <option value="22" data-o="400" data-c="900">22.000 BTUs</option>
+            <option value="24" data-o="450" data-c="950">24.000 BTUs</option>
+            <option value="30" data-o="650" data-c="1150">30.000 BTUs</option>
+            <option value="36" data-o="750" data-c="1250">36.000 BTUs</option>
+        </select>
+        <label>Material:</label>
+        <select id="mod_inst" onchange="calc('inst')">
+            <option value="o">Apenas Mão de Obra</option>
+            <option value="c">Completa (Com Material)</option>
+        </select>
+        <div id="res_inst" class="res-box" style="display:none;">
+            <div class="total-txt" id="tot_inst">R$ 0,00</div>
+            <a id="link_inst" href="#" onclick="enviarHook('Instalacao')" class="btn-zap">Finalizar Orçamento</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const HOOK_URL = "https://webhook.site/daecd39b-3d58-45db-b689-bf6d8e16d558";
+    const MEU_WHATS = "5568999999999"; // COLOQUE SEU NÚMERO AQUI
+
+    // --- FUNÇÕES DE CADASTRO ---
+    function salvarCli() {
+        const n = document.getElementById('nome_cli').value;
+        const e = document.getElementById('end_cli').value;
+        if(n && e) {
+            localStorage.setItem('refri_nome', n);
+            localStorage.setItem('refri_end', e);
+            document.getElementById('form_cli').style.display = 'none';
+            document.getElementById('dados_cli').style.display = 'block';
+            document.getElementById('ex_nome').innerText = n;
+            document.getElementById('ex_end').innerText = e;
+        } else { alert("Preencha nome e endereço!"); }
+    }
+
+    function editarCli() {
+        document.getElementById('form_cli').style.display = 'block';
+        document.getElementById('dados_cli').style.display = 'none';
+    }
+
+    window.onload = () => {
+        if(localStorage.getItem('refri_nome')) {
+            document.getElementById('nome_cli').value = localStorage.getItem('refri_nome');
+            document.getElementById('end_cli').value = localStorage.getItem('refri_end');
+            salvarCli();
+        }
+    };
+
+    // --- FUNÇÕES DE CÁLCULO (SUA TABELA) ---
+    function calc(tipo) {
+        if(tipo === 'limpeza') {
+            const v = document.getElementById('sel_limpeza').value;
+            const res = document.getElementById('res_limpeza');
+            if(v > 0) {
+                res.style.display = 'block';
+                document.getElementById('tot_limpeza').innerText = "R$ " + v;
+                prepararZap('link_limpeza', 'Limpeza', document.getElementById('sel_limpeza').options[document.getElementById('sel_limpeza').selectedIndex].text, v);
+            }
+        }
+        if(tipo === 'gas') {
+            const v = document.getElementById('sel_gas').value;
+            const res = document.getElementById('res_gas');
+            if(v > 0) {
+                res.style.display = 'block';
+                document.getElementById('tot_gas').innerText = "R$ " + v;
+                prepararZap('link_gas', 'Gás', document.getElementById('sel_gas').options[document.getElementById('sel_gas').selectedIndex].text, v);
+            }
+        }
+        if(tipo === 'inst') {
+            const s = document.getElementById('sel_inst');
+            const opt = s.options[s.selectedIndex];
+            const mod = document.getElementById('mod_inst').value;
+            const v = (mod === 'o') ? opt.getAttribute('data-o') : opt.getAttribute('data-c');
+            if(v > 0) {
+                document.getElementById('res_inst').style.display = 'block';
+                document.getElementById('tot_inst').innerText = "R$ " + v;
+                const detalhe = `${opt.text} (${mod === 'o' ? 'Mão de Obra' : 'Completa'})`;
+                prepararZap('link_inst', 'Instalação', detalhe, v);
+            }
+        }
+    }
+
+    function prepararZap(id, serv, desc, valor) {
+        const n = localStorage.getItem('refri_nome') || "Não informado";
+        const e = localStorage.getItem('refri_end') || "Não informado";
+        const msg = `*REFRICENTER*%0A*Cliente:* ${n}%0A*Serviço:* ${serv}%0A*Detalhe:* ${desc}%0A*Endereço:* ${e}%0A*VALOR TOTAL: R$ ${valor}*`;
+        document.getElementById(id).href = `https://wa.me/${MEU_WHATS}?text=${msg}`;
+    }
+
+    function enviarHook(tipo) {
+        const dados = {
+            servico: tipo,
+            cliente: localStorage.getItem('refri_nome'),
+            endereco: localStorage.getItem('refri_end'),
+            data: new Date().toLocaleString()
+        };
+        fetch(HOOK_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dados) });
+    }
+</script>
+
+</body>
+</html>
