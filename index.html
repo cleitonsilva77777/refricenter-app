@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refricenter - Sistema Profissional</title>
+    <style>
+        :root { --azul-escuro: #001a2d; --azul-medio: #002D4C; --azul-claro: #004a80; --verde: #25d366; --cinza: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--cinza); padding-bottom: 120px; }
+        
+        /* Cabeçalho com Essência de Refrigeração */
+        header { 
+            background: linear-gradient(135deg, var(--azul-escuro), var(--azul-claro));
+            color: white; padding: 35px 20px; text-align: center; position: relative; overflow: hidden; border-bottom: 4px solid var(--azul-claro);
+        }
+        .floco { position: absolute; opacity: 0.15; font-size: 45px; }
+        .f1 { top: 5px; left: 10px; } .f2 { bottom: 5px; right: 10px; }
+        header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
+        header p { margin: 5px 0 0; font-size: 13px; opacity: 0.9; }
+
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .card { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        h3 { margin-top: 0; color: var(--azul-medio); font-size: 16px; border-bottom: 2px solid var(--cinza); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        
+        label { display: block; margin-top: 10px; font-weight: bold; font-size: 12px; color: #666; }
+        select, input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 8px; border: 1px solid #ddd; font-size: 15px; box-sizing: border-box; background: #fff; }
+        
+        .btn-add { background: var(--azul-claro); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.2s; }
+        .btn-add:active { transform: scale(0.96); }
+
+        /* Lista do Carrinho */
+        .item-carrinho { background: #f9f9f9; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 5px solid var(--azul-claro); display: flex; justify-content: space-between; align-items: center; }
+        .item-carrinho span { font-size: 14px; color: #333; }
+        .btn-remove { color: #ff4444; font-weight: bold; border: 2px solid #ff4444; background: white; border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* Rodapé Fixo de Orçamento */
+        .footer-fixo { position: fixed; bottom: 0; width: 100%; max-width: 500px; left: 50%; transform: translateX(-50%); background: white; padding: 20px; box-shadow: 0 -8px 20px rgba(0,0,0,0.15); border-radius: 25px 25px 0 0; box-sizing: border-box; z-index: 100; }
+        .total-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .v-total { font-size: 26px; font-weight: 900; color: var(--azul-medio); }
+        .btn-zap { background: var(--verde); color: white; padding: 18px; text-decoration: none; border-radius: 12px; display: block; text-align: center; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(37,211,102,0.3); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="floco f1">❄️</div><div class="floco f2">💨</div>
+    <h1>REFRICENTER</h1>
+    <p>Soluções em Climatização</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h3>👤 Dados do Cliente</h3>
+        <input type="text" id="nome_cli" placeholder="Seu Nome" oninput="salvarDados()">
+        <input type="text" id="end_cli" placeholder="Endereço da Obra" oninput="salvarDados()">
+    </div>
+
+    <div class="card">
+        <h3>🛠 Adicionar Instalação / Limpeza</h3>
+        <label>Tecnologia:</label>
+        <select id="tec">
+            <option value="conv">Convencional</option>
+            <option value="inv">Inverter</option>
+        </select>
+        <label>Serviço:</label>
+        <select id="serv">
+            <option value="inst_mao">Instalação (Mão de Obra)</option>
+            <option value="inst_mat">Instalação (Com Material)</option>
+            <option value="desinst">Desinstalação</option>
+            <option value="limpeza">Limpeza e Higienização</option>
+        </select>
+        <label>Potência:</label>
+        <select id="btu">
+            <option value="9k">9.000 BTUs</option>
+            <option value="12k">12.000 BTUs</option>
+            <option value="18k">18.000 BTUs</option>
+            <option value="22k">22.000 BTUs</option>
+            <option value="24k">24.000 BTUs</option>
+        </select>
+        <button class="btn-add" onclick="adicionarAoCarrinho('servico')">➕ ADICIONAR AO ORÇAMENTO</button>
+    </div>
+
+    <div class="card">
+        <h3>❄️ Adicionar Carga de Gás</h3>
+        <label>Gás Refrigerante:</label>
+        <select id="gas_tipo">
+            <option value="r22">Gás R22</option>
+            <option value="r410">Gás R410a</option>
+            <option value="r32">Gás R32</option>
+        </select>
+        <label>Potência:</label>
+        <select id="gas_btu">
+            <option value="9k">9.000 BTUs</option>
+            <option value="12k">12.000 BTUs</option>
+            <option value="18k">18.000 BTUs</option>
+            <option value="22k">22.000 BTUs</option>
+            <option value="24k">24.000 BTUs</option>
+            <option value="30k">30.000 BTUs</option>
+            <option value="36k">36.000 BTUs</option>
+        </select>
+        <button class="btn-add" style="background:var(--azul-medio);" onclick="adicionarAoCarrinho('gas')">➕ ADICIONAR GÁS</button>
+    </div>
+
+    <div class="card">
+        <h3>📋 Resumo dos Itens</h3>
+        <div id="lista_carrinho">
+            <p style="color:#999; font-size:13px; text-align:center;">Seu carrinho está vazio...</p>
+        </div>
+    </div>
+</div>
+
+<div class="footer-fixo">
+    <div class="total-box">
+        <span style="font-weight:bold; color:#666;">Total:</span>
+        <span class="v-total" id="v_total">R$ 0,00</span>
+    </div>
+    <a href="#" class="btn-zap" onclick="enviarWhatsApp()">FINALIZAR NO WHATSAPP</a>
+</div>
+
+<script>
+    // PLUG: SEU WEBHOOK E SEU WHATSAPP
+    const HOOK_URL = "https://webhook.site/daecd39b-3d58-45db-b689-bf6d8e16d558";
+    const SEU_NUMERO = "5568999120612"; // Ajustado para o seu número final
+
+    // PLUG: SUA TABELA DE PREÇOS REAIS
+    const tabela = {
+        conv: {
+            inst_mao: { "9k": 200, "12k": 200, "18k": 300, "22k": 350, "24k": 400 },
+            inst_mat: { "9k": 550, "12k": 600, "18k": 800, "22k": 850, "24k": 900 },
+            desinst:  { "9k": 100, "12k": 100, "18k": 150, "22k": 200, "24k": 200 },
+            limpeza:  { "9k": 150, "12k": 150, "18k": 200, "22k": 250, "24k": 300 }
+        },
+        inv: {
+            inst_mao: { "9k": 250, "12k": 250, "18k": 350, "22k": 400, "24k": 450 },
+            inst_mat: { "9k": 600, "12k": 650, "18k": 850, "22k": 900, "24k": 950 },
+            desinst:  { "9k": 150, "12k": 150, "18k": 200, "22k": 250, "24k": 250 },
+            limpeza:  { "9k": 200, "12k": 200, "18k": 250, "22k": 300, "24k": 350 }
+        }
+    };
+    const tabelaGas = {
+        r22:  { "9k": 450, "12k": 450, "18k": 600, "22k": 700, "24k": 750, "30k": 900, "36k": 1100 },
+        r410: { "9k": 500, "12k": 500, "18k": 600, "22k": 800, "24k": 850, "30k": 1000, "36k": 1200 },
+        r32:  { "9k": 550, "12k": 600, "18k": 750, "22k": 900, "24k": 1000, "30k": 1200, "36k": 1350 }
+    };
+
+    let carrinho = [];
+
+    // PLUG: MEMÓRIA LOCALSTORAGE
+    function salvarDados() {
+        localStorage.setItem('refri_nome', document.getElementById('nome_cli').value);
+        localStorage.setItem('refri_end', document.getElementById('end_cli').value);
+    }
+
+    window.onload = () => {
+        if(localStorage.getItem('refri_nome')) {
+            document.getElementById('nome_cli').value = localStorage.getItem('refri_nome');
+            document.getElementById('end_cli').value = localStorage.getItem('refri_end');
+        }
+    };
+
+    // FUNÇÕES DO CARRINHO
+    function adicionarAoCarrinho(tipo) {
+        let item = {};
+        if(tipo === 'servico') {
+            const tec = document.getElementById('tec').value;
+            const serv = document.getElementById('serv').value;
+            const btu = document.getElementById('btu').value;
+            const nomeServ = document.getElementById('serv').options[document.getElementById('serv').selectedIndex].text;
+            item = { desc: `${nomeServ} ${btu} (${tec})`, preco: tabela[tec][serv][btu] };
+        } else {
+            const gas = document.getElementById('gas_tipo').value;
+            const btu = document.getElementById('gas_btu').value;
+            item = { desc: `Carga de Gás ${gas.toUpperCase()} ${btu}`, preco: tabelaGas[gas][btu] };
+        }
+        carrinho.push(item);
+        atualizarTela();
+    }
+
+    function removerItem(index) {
+        carrinho.splice(index, 1);
+        atualizarTela();
+    }
+
+    function atualizarTela() {
+        const lista = document.getElementById('lista_carrinho');
+        lista.innerHTML = "";
+        let total = 0;
+        
+        carrinho.forEach((item, index) => {
+            total += item.preco;
+            lista.innerHTML += `
+                <div class="item-carrinho">
+                    <span>${item.desc} - <b>R$ ${item.preco}</b></span>
+                    <button class="btn-remove" onclick="removerItem(${index})">✕</button>
+                </div>`;
+        });
+        
+        if(carrinho.length === 0) lista.innerHTML = `<p style="color:#999; font-size:13px; text-align:center;">Seu carrinho está vazio...</p>`;
+        document.getElementById('v_total').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    }
+
+    function enviarWhatsApp() {
+        const nome = document.getElementById('nome_cli').value;
+        const end = document.getElementById('end_cli').value;
+        if(!nome || carrinho.length === 0) { alert("Por favor, informe seu nome e adicione pelo menos um serviço!"); return; }
+        
+        let listaTexto = "";
+        carrinho.forEach(i => listaTexto += `%0A- ${i.desc}: R$ ${i.preco}`);
+        
+        const total = document.getElementById('v_total').innerText;
+        const msg = `*REFRICENTER - NOVO ORÇAMENTO*%0A*Cliente:* ${nome}%0A*Endereço:* ${end}%0A*Serviços:*${listaTexto}%0A%0A*TOTAL: ${total}*`;
+        
+        // PLUG: ENVIO PARA O ADMIN (WEBHOOK)
+        fetch(HOOK_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({cliente: nome, endereco: end, total: total, itens: carrinho})
+        });
+
+        window.open(`https://wa.me/${SEU_NUMERO}?text=${msg}`);
+    }
+</script>
+</body>
+</html>
