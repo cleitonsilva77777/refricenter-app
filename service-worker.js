@@ -1,17 +1,15 @@
-const CACHE_NAME = 'refricenter-v1';
-
-const FILES_TO_CACHE = [
+const cacheName = 'refricenter-v2';
+const assets = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  './images/icon.png'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(FILES_TO_CACHE);
+    caches.open(cacheName).then(cache => {
+      return cache.addAll(assets);
     })
   );
 });
